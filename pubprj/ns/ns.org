@@ -1,0 +1,548 @@
+* todo
+** TODO 促销增加字段：价格名称（新年价、中秋价等）；每个商品应该只有一个商品级的价格促销（除会员价外），应检查
+** TODO 订单有效期：3天
+** TODO 订单号问题：A（A宁尚 01官网，02淘宝，03京东，04拍拍，05卓越 ）01-00000-00000     -后面2次系统随机 (避开O.I.L.N.M.Z英文数字，辨识容易和数字混淆)
+** TODO 库存调拨使用出入库单：大库-》B2C ：生成一张大库出库单，一张B2C入库单
+
+* init
+** svn
+   svn.ningshang.me
+   out:   svn://ningshang01.xicp.net
+
+   shang  456
+** java
+*** eclipse3.6
+**** ws
+     com.biz.webservice
+     创建接口（HelloService.java） 实现类（HelloServiceImpl.java） 访问路径配置（applicationContext-service.xml）
+     测试 com.biz.test Test.java
+**** shortcute
+***** ctrl + F6
+**** svn
+** ror
+*** ruby 1.9.2-p290
+*** rails 3.1
+*** gem
+* doc
+** weekly report
+*** 20111008 - 20111014
+**** 设计并讨论数据库结构：订单服务、库存、促销、在售商品管理
+**** 参考雷永辉搭建的程序框架
+* dev
+** rules
+*** Q
+*** db
+**** rules
+***** id                 int
+***** pid                int
+***** code               varchar(20)
+***** name               varchar(50)
+***** status             varchar(4)
+***** comment        varchar(255)
+***** creator_id         int
+***** created_at         datetime
+***** updated_at         datetime
+*** api
+*** in
+** product
+*** Q
+*** db
+**** command
+rails g scaffold product_websites          product_website_status:integer product_website_id:integer product_website_website_id:integer created_by:integer updated_by:integer product_website_list_price:decimal product_website_shelf_from:timestamp product_website_shelf_to:timestamp product_website_barcode:string product_website_comment:string
+rails g scaffold product_brands            updated_by:integer product_brand_status:integer product_brand_id:integer created_by:integer product_brand_comment:string product_brand_name:string
+rails g scaffold product_pictures          product_picture_status:integer created_by:integer updated_by:integer product_picture_id:integer product_picture_type:string product_picture_product_id:string product_picture_url:string product_picture_comment:string
+rails g scaffold product_basises           product_basis_company_id:integer product_basis_brand_id:integer product_basis_seasonpart_id:integer product_basis_category_id:integer product_basis_sport_id:integer product_basis_function_id:integer product_basis_theme_id:integer product_basis_status:integer created_by:integer updated_by:integer product_basis_market_price:decimal product_basis_full_description:string product_basis_season:string product_basis_id:string product_basis_unit:string product_basis_short_desc:string product_basis_norms_json:string product_basis_comment:string product_basis_year:string product_basis_name:string
+rails g scaffold product_categories        created_by:integer updated_by:integer product_category_id:integer product_category_status:integer product_category_type:string product_category_comment:string product_category_name:string
+rails g scaffold product_logs              product_log_operator_id:integer product_log_source_id:integer product_log_id:integer product_log_status:integer product_log_level:integer product_log_operated_at:timestamp product_log_ip:string product_log_operator:string product_log_comment:string product_log_operation:string
+rails g scaffold product_barcodes          updated_by:integer created_by:integer product_barcode_status:integer product_barcode_product_id:string product_barcode_size:string product_barcode_size_norm_id:integer product_barcode_id:string product_barcode_comment:string
+rails g scaffold product_norm_items        product_norm_item_id:integer product_norm_item_product_id:integer updated_by:integer created_by:integer product_norm_item_norm_id:integer product_norm_item_comment:string
+rails g scaffold product_norms             product_norm_parent_id:integer created_by:integer updated_by:integer product_norm_status:integer product_norm_id:integer product_norm_comment:string product_norm_value:string
+rails g scaffold products                  updated_by:integer product_status:integer created_by:integer product_market_price:decimal product_list_price:decimal product_sale_from:timestamp product_sale_to:timestamp product_id:string product_product_basis_id:string product_color:string product_color_norm_id:integer product_comment:string
+
+*** api
+**** 在架商品信息（特定渠道：不同渠道的价格、库存不同）
+***** /channel/channel_id/products?secret=&page=&pre_page=&shelf_time_from=&shelf_time_to=
+***** /channel/channel_id/product/id?secret=
+**** 渠道、商家、品牌、商品基础分类、商品规格
+**** 在架商品变更（上下架时间、库存、销售价格、促销价格）： 内部系统触发，不可外部直接调用
+*** in
+**** 在架商品信息检查
+** order
+*** Q
+**** TODO 订单号规则是什么; 订单标准重、来源追加说明各是什么意思
+**** DONE 表 处理进度、订单货款确认、内部沟通标签 各是什么，如何融合到订单中：
+     CLOSED: [2011-10-11 二 14:50]
+     进度用状况控制；货款确认是支付系统跟财务系统之间的关系；内部沟通标签即日志
+**** DONE 发票需求：用户是否可自定义明细； 税号、银行帐号等是否需要: 用户只定义大类，税号、银行帐号只对分销商
+     CLOSED: [2011-10-11 二 14:53]
+**** TODO 订单类型、订单来源、订单状态 分类是否合理
+**** DONE 支付详情表是否合理：  不需要，在支付系统记录
+     CLOSED: [2011-10-11 二 14:48]
+**** 特殊流程
+***** 缺货
+***** DONE 部分发货（状态如何设置，是否要拆单）： 有包裹概念，一个订单可有多个包裹
+      CLOSED: [2011-10-11 二 15:03]
+***** DONE 换货 ： 产生换货订单，可与普通订单一起存储
+      CLOSED: [2011-10-11 二 15:02]
+***** DONE 退货 ： 产生退货订单，单独处理，需要自动产生退款请求
+      CLOSED: [2011-10-11 二 15:03]
+***** DONE 部分退货 : 产生退货订单，需要自动产生退款请求
+      CLOSED: [2011-10-11 二 15:03]
+***** 作废： 未发货前可以取消订单，均视为作废；若已付款或已发出付款请求，则自动产生退款请求
+***** TODO 拆单?
+**** TODO 操作日志是否要统一设计，如何设计比较好: 统一共用部分，其它各自增加模块日志
+**** 订单：API接口数据 表的作用：站点类型有哪些，业务上有什么区别； 要做与淘宝的接口？；
+     仓库、库位信息在这里是否必须要用（跟具体业务运营方式有关）？； 一期是否要做淘宝、合作方的功能
+**** 订单 订单明细中是否需要 订单执行状态、订单退换状态
+**** TODO 支付类型是否已有列表，费率如何起作用?：支付类型为COD bank VA GC及其组合,
+**** DONE 到帐确认操作是针对订单还是支付明细 : 属支付系统与财务交互
+     CLOSED: [2011-10-11 二 15:06]
+*** db
+**** command
+rails g scaffold order_payment_item  created_by:integer updated_by:integer order_payment_item_status:string order_payment_item_id:integer order_payment_item_order_id:integer order_payment_item_payment_id:integer order_payment_item_amount:decimal order_payment_item_card_id:string order_payment_item_comment:string
+rails g scaffold order_receive_requirement  receive_requirement_id:integer receive_requirement_status:string receive_requirement_comment:string created_by:integer receive_requirement_name:string receive_requirement_sequence:integer updated_by:integer
+rails g scaffold order_log  order_log_operated_at:timestamp order_log_level:integer order_log_status:string order_log_ip:string order_log_operator:string order_log_id:integer order_log_source_id:integer order_log_operation:string order_log_comment:string order_log_operator_id:integer
+rails g scaffold order_item  order_item_size:decimal order_item_comment:string created_by:integer order_item_status:string order_item_height:decimal order_item_discount:decimal order_item_price:decimal order_item_amount:decimal order_item_id:integer updated_by:integer order_item_product_specific:string order_item_market_price:decimal order_item_product_name:string order_item_order_id:integer order_item_product_barcode:string order_item_count:integer
+rails g scaffold order_type  updated_by:integer order_type_id:integer order_type_name:string created_by:integer order_type_status:string order_type_comment:string order_type_sequnce:integer
+rails g scaffold order  order_code:string order_customer_id:integer order_decrease_amount:decimal order_amount:decimal order_is_split_shipment:integer order_type_id:integer order_cwebsite_id:integer order_resource_code:string order_saler_comment:string order_status:string order_count:integer order_product_amount:decimal order_express_amount:decimal order_other_amount:decimal order_id:integer order_receive_time_type_id:integer order_receive_comment:string order_invoice_type_id:integer order_invoice_title:string order_invoice_comment:string order_invoice_taxcode:string order_invoice_customer_bank:string order_invoice_bank_account:string order_comment:string is_copied:integer created_by:integer updated_by:integer order_buyer_comment:string order_ordered_at:timestamp order_country:string order_province:string order_city:string order_region:string order_address:string order_postcode:string order_mobile:string order_tel:string
+rails g scaffold order_paid order_paid_id:integer order_paid_type:integer order_paid_order_code:string order_paid_amount:decimal order_paid_real_amount:decimal order_paid_status:integer order_paid_comment:string created_by:integer updated_by:integer
+
+rails g scaffold order_inventory_notices order_inv_notice_id:integer order_inv_notice_type:integer order_inv_notice_order_id:integer order_inv_notice_times:integer order_inv_notice_status:integer order_inv_notice_comment:string created_by:integer updated_by:integer
+**** 订单主表
+***** 订单号（??规则）
+***** 下单用户id
+***** 金额
+***** 订单类型（普通订单、换货订单、分销商订单）
+***** 来源（站点、taobao、合作方）
+***** 来源单号
+***** 状态（关键状态点：未下单、已下单、已付款、已备货、已递出（快递单号）、已签收（部分拒收？？ 若拒收？？）、已评价;  已作废）
+***** 收货信息（地址（国家、省份、城市、区县、地址）、邮编、手机、电话、收货时间要求、收货信息备注）
+***** 发票需求（发票类型、抬头、商品大类、税号、开户行、银行账号）
+***** 订单录入类型（普通下单、API接口、csv导入）
+***** 商品数量
+***** 订单金额
+***** 物流费用
+***** 其他费用
+***** 销售折让
+***** 实际支付金额
+***** 赠品说明
+***** 是否部分发货
+***** 买家留言
+***** 来源追加备注(??)
+***** 其它
+***** 下单日期
+***** 备注
+**** 商品明细
+***** 订单id
+***** 商品id
+***** 数量
+***** 单价
+***** 金额
+***** 折扣
+***** 实际金额
+***** 商品名称
+***** 商品规格型号
+***** 已发货数量
+**** 包裹主表
+***** 订单id
+***** 投递单号
+***** 状态（已分拣、已包装、打印、已递出、拒收/退换货跟订单关联）
+***** 打包人
+***** 打包时间
+**** 包裹明细
+***** 包裹id
+***** 订单商品明细id
+***** 入库单明细id
+***** 数量
+**** 订单操作记录（用户修改）
+***** 操作类型表（新建、修改、审核、作废）
+***** 操作对象表（订单）
+***** 操作对象id
+***** 操作人
+***** 操作时间
+***** mac 电脑终端名称-网卡号
+***** ip
+***** 备注
+**** API接口店铺表 (仅针对淘宝？)
+***** 名称
+***** 站点类型
+***** App Key
+***** App Secret
+***** 是否启用API
+***** 支付宝帐号
+***** 店铺概述
+***** 负责人
+***** 电话
+***** 手机
+***** 地址
+***** 邮编
+***** 登录账号
+***** 登录密码
+***** 关联仓库
+***** 关联库位
+***** 合作开始时间
+***** 合作结束时间
+***** 是否自动下载订单
+***** 是否自动更新淘宝库存
+***** 备注
+**** 退款财务应付单
+***** 订单id
+***** 退货金额
+***** 退货情况说明
+***** 退款去向
+***** 状态
+***** 制单人
+***** 制单时间
+**** 支付类型（COD bank VA GC）
+***** 代码
+***** 名称
+***** 费率
+***** 备注
+*** 特殊流程 （Q）
+*** interface
+**** 下单
+**** 批量导入
+**** 订单修改
+**** 订单查询
+**** 订单作废
+*** 内部功能
+**** 接口调用权限检查（API接口控制）
+**** TODO 订单异常检查 异常规则？？
+**** 支付超期检查
+**** 库存检查：
+**** 缺货超期检查
+** purchase
+*** Q
+**** DONE 采购建议单 与 采购单关系： 直接录入 采购单
+     CLOSED: [2011-10-10 一 10:23]
+**** TODO 仓库、库位信息暂不在该设计范围内
+**** TODO 审核状态、单据状态如何设计：是否要分开字段
+**** TODO 与产品的关联：如何关联到具体颜色、规格等的商品
+*** db
+**** 采购单
+***** 单据编号
+***** 采购类型id
+***** 日期
+***** 供应商id
+***** 数量
+***** 金额
+***** 预计到货日期
+***** 状态 (新建、审核中、已审核、已生效)
+***** 审核状态 （新建、部门经理审核、总经理审核）
+***** 关联单据号
+***** 备注
+**** 采购单明细
+***** 采购单id
+***** 产品id（颜色、规格之类是否还要记录？？）
+***** 数量
+***** 标价单价
+***** 折扣
+***** 采购单价
+***** 合计
+***** 实际入库数（采购入库单回写）
+**** 采购类型
+***** 编码
+***** 名称
+***** 备注
+**** 供应商类型
+***** 编码
+***** 名称
+***** 备注
+**** 供应商
+***** id
+***** 类型id
+***** name
+***** 联系人
+***** 电话
+***** 手机
+***** 传真
+***** 地址
+***** 邮编
+***** 法人代表
+***** 税号
+***** 开户银行
+***** 开户账号
+***** QQ
+***** MSN
+***** 旺旺
+***** 备注
+*** flow
+**** 采购员录入采购单
+**** 部门经理审核
+**** 总经理审核
+**** 可流转到采购入库单
+** inventory
+*** Q
+**** 出库单？ 是否要做
+**** 采购入库单的 会员-供应商id 是指什么
+**** 采购入库单的审核流程
+**** 采购入库单的记账状态、结算状态是否要处理
+**** 商品库存数量的处理
+**** 库存占用如何处理？
+     前台订单复制到后台并设置订单关联库存，更新订单已发货数量
+**** 分渠道库存： 库存共享、独占如何解决
+*** api
+**** /suppliers all
+**** /purchases/ index show
+**** /purchases/:id/items
+**** /inventories/ index show
+**** /inventories/:id/items
+**** /inventory_websites/ index show
+**** /inventory_websites/:id/items
+**** /inventory_website_inbounds all
+**** /inventory_website_inbounds/:id/items
+*** db
+**** command
+rails g scaffold purchase_supplier updated_by:integer supply_post_code:string supply_legal_representative:string supply_tax_number:string supply_bank:string supply_bank_account:string supply_qq:string supply_id:integer supply_code:string supply_name:string supply_contactor:string supply_phone:string supply_mobile:string supply_fax:string supply_address:string supply_alitalk:string supply_status:integer supply_comment:string created_by:integer supply_msn:string
+rails g scaffold inventory_website_item inv_website_item_website_id:integer inv_website_item_count:integer inv_website_item_id:integer inv_website_item_inbound_id:integer inv_website_item_inv_item_id:string inv_website_item_barcode:string created_by:integer inv_website_item_status:integer inv_website_item_comment:string updated_by:integer inv_website_item_inv_websiteid:integer
+rails g scaffold inventory_website_inbound inv_website_inbound_id:integer updated_by:integer inv_website_inbound_code:string inv_website_inbound_status:integer inv_website_inbound_comment:string created_by:integer
+rails g scaffold inventory_website created_by:integer updated_by:integer inventory_website_id:integer inventory_website_barcode:string inventory_website_website_id:integer inventory_website_total_count:integer inventory_website_sent_count:integer inventory_website_pend_count:integer inventory_website_shelf_from:timestamp inventory_website_shelf_to:timestamp inventory_website_list_price:decimal inventory_website_status:integer inventory_website_comment:string
+rails g scaffold inventory inventory_status:integer inventory_comment:string inventory_assigned_count:integer inventory_id:integer inventory_product_barcode:string inventory_count:integer created_by:integer updated_by:integer
+rails g scaffold inventory_item inventory_item_assigned_count:integer inventory_item_status:integer inventory_item_count:integer inventory_item_id:integer inventory_item_wms_item_id:string inventory_item_comment:string updated_by:integer created_by:integer inventory_item_barcode:string
+rails g scaffold inventory_log inventory_log_comment:string inventory_log_status:integer inventory_log_operation:string inventory_log_id:integer inventory_log_level:integer inventory_log_operated_at:timestamp inventory_log_ip:string
+rails g scaffold purchase purchase_suggest_id:integer updated_by:integer purchase_code:string purchase_id:integer purchase_amount:decimal purchase_estimated_arrival:timestamp purchase_purchase_type:string purchase_relation_code:string purchase_supplier_id:integer purchase_count:integer purchase_signature:string purchase_status:integer purchase_date_of_signment:timestamp purchase_comment:string created_by:integer
+rails g scaffold purchase_item purchase_item_purchase_id:integer purchase_item_amount:decimal purchase_item_entry_count:integer purchase_item_product_barcode:string purchase_item_count:integer purchase_item_market:decimal purchase_item_discount:decimal purchase_item_price:decimal purchase_item_id:integer created_at:timestamp updated_at:timestamp created_by:integer updated_by:integer
+
+rails g scaffold inv_website_pending_sent inv_website_ps_id:integer inv_website_ps_type:integer inv_website_ps_website_id:integer inv_website_ps_order_code:string inv_website_ps_status:integer inv_website_ps_comment:string created_by:integer updated_by:integer
+rails g scaffold inv_website_pending_sent_item inv_website_ps_item_id:integer inv_website_ps_item_ps_id:integer ps_item_product_barcode:string ps_item_count:integer ps_item_comment:string created_by:integer updated_by:integer
+
+rails g scaffold inventory_notice inv_notice_id:integer inv_notice_code:string inv_notice_type:integer inv_notice_status:integer inv_notice_comment:integer created_by:integer updated_by:integer
+rails g scaffold inventory_notice_item inv_notice_item_id:integer inv_notice_item_notice_id:integer inv_notice_item_name:string inv_notice_item_barcode:string inv_notice_item_count:integer inv_notice_item_status:integer inv_notice_item_actual_count:integer inv_notice_item_comment:string created_by:integer updated_by:integer
+rails g scaffold inventory_to_wms_request inv_to_wms_request_id:integer inv_to_wms_request_source_id:integer inv_to_wms_request_type:integer inv_to_wms_request_status:integer inv_to_wms_request_comment:string inv_to_wms_request_times:integer created_by:integer updated_by:integer
+
+rails g scaffold inv_from_wms_response inv_from_wms_id:integer inv_from_wms_request_id:integer inv_to_wms_comment:string sign_code:string out_in_flag:integer cust_order_code:string wms_order_id:string cust_id:string tms_code:string tms_name:string mail_no:string weight:decimal volume:decimal plan_id:string stock_id:string info_code:string info_content:string reason:string invoice_date:timestamp status_time:timestamp invoice_no:string
+rails g scaffold inv_from_wms_response_item inv_from_wms_response_item_id:integer inv_from_wms_response_id:integer item:integer sku_product_no:string sku_batch_no:string qty:integer sn:string
+
+**** 采购入库单（<采购单  WMS导入）
+***** 单据编号
+***** 采购类型
+***** 入库日期
+***** 关联单据号 （仅作记录，系统不处理其实际意义）
+***** 供应商id
+***** 数量
+***** 金额
+***** 收货人
+***** 审核状态
+***** 记账状态
+***** 结算状态
+***** 备注
+**** 采购入库单明细 （WMS导入）
+***** 入库单id
+***** 采购单明细id
+***** 商品id
+***** 数量
+***** 金额
+***** 采购单价
+***** 实际入库数量
+***** 仓库id
+**** 采购建议单、采购单（WMS导入采购入库单时自动反向生成数据，不需前端页面）
+**** 商品库存 （<采购入库单明细  手工分派库存）
+***** 商品id
+***** 分销商id（若共享则为空）
+***** 是否独占
+***** 数量
+***** 已销售数量
+***** 入库单明细id
+*** flow
+**** 采购入库单录入
+**** 审核 （后台更新可用库存）
+**** 下单后更新库存
+     库存数量从商品库存明细中sum获取
+     独占商品库存中无记录则商品对该分销商未上架
+     ？共享商品是否有只属部分分销商的
+** promotion 促销
+*** Q
+*** api
+*** db
+**** command
+rails g scaffold promotion  promotion_id:integer promotion_code:string promotion_title:string promotion_info:string promotion_promotion_type_id:integer promotion_start_time:timestamp promotion_finish_time:timestamp promotion_level:integer promotion_superpose_level:integer promotion_status:integer promotion_audited_by:integer promotion_audited_at:timestamp promotion_comment:string created_by:integer updated_by:integer
+rails g scaffold promotion_condition  promotion_condition_id:integer promotion_condition_name:string promotion_condition_type:string promotion_condition_condition:decimal promotion_condition_result:decimal promotion_conditio_description:string promotion_condition_status:integer promotion_condition_comment:string created_by:integer updated_by:integer
+rails g scaffold promotion_scope  promotion_scope_id:integer promotion_scope_promotion_id:integer promotion_scope_scope_type:string promotion_scope_scope_id:integer promotion_scope_scope_name:string promotion_scope_comment:string
+rails g scaffold promotion_gift  promotion_gift_id:integer promotion_gift_promotion_id:integer promotion_gift_product_barcode:string promotion_gift_total_count:integer promotion_gift_sent_count:integer promotion_gift_inuse_count:integer promotion_gift_comment:string created_by:integer updated_by:integer
+
+*** flow
+** 商品价格
+*** Q
+**** 上下架时间
+**** 不同分销商的价格可不同，分销商的 购入价格、最终卖出价格是否要管
+**** 订单中的价格分为：市场价格、分销商价格，是否还记录分销商购入价格
+* ror
+** tec
+*** test rspec2 + factory_girl
+**** rspec
+     before(:each) do
+
+     end
+
+     should be_valid
+     should_not be_valid
+     should have(1).erros_on(:username)
+
+
+**** factory_girl
+     build
+     create: build + save
+
+*** primary key with string
+**** no primary key , just set in model and create index
+     :id => false
+
+     add_index
+**** http://iceskysl.1sters.com/?p=349 uuid as primary key：primary key cannot set by post, but can set in controller or model before_create
+create_table :posts, :id => false do |t|
+  t.string :uuid, :limit => 36, :primary => true
+end
+
+#model before create or controller reset uuid with request
+
+class Post < ActiveRecord::Base
+  set_primary_key "uuid"
+
+  before_create do ||
+    uuid = ""
+  end
+end
+
+class PostController < ApplicationController
+
+  def create
+    ...
+    @post.uuid = params[:post][:uuid]
+  end
+end
+**** association with string
+  has_many :proudct_base, :class_name => "ProductBase", :foreign_key => "product_base_name", :primary_key => "product_brand_id"
+
+  belongs_to :product_brand, :class_name => "ProductBrand", :foreign_key => "product_base_name", :primary_key => "product_brand_id"
+
+** ror set
+*** migration
+    :id => false
+
+    t.primary_key   or  add_index
+*** model
+    set_primary_key
+    sociations
+
+    validations
+
+    status default
+
+*** api dev step
+**** model  field_mapping.rb
+  include FieldMapping
+  def self.field_maps
+    {
+:purchase_item_id               =>  :purchase_item_id                       ,
+:created_by                     =>  :created_by                             ,
+:updated_by                     =>  :updated_by                             ,
+:created_at                     =>  :created_at                             ,
+:updated_at                     =>  :updated_at
+    }
+  end
+**** controller
+***** application_controller.rb
+  require 'code_hash'
+  require 'result_packer'
+
+  # 全局异常拦截
+  rescue_from Exception do |exception|
+    logger.debug "==== exception: #{exception.inspect}"
+    exception.backtrace.each do |e|
+      logger.debug "===== #{e}"
+    end
+    render :json => ResultPacker.error("exception: #{exception.message}")
+  end
+***** xx_controller.rb
+  def model_class
+    PurchaseItem
+  end
+
+* tools
+** powerdesign to sql and ror ： excel vba
+*** table column
+Sub Macro_pd_to_sql()
+'
+' Macro1 Macro
+'
+
+    pd_type_col = 4
+    precision_col = 6
+    length_col = 5
+
+    ror_type_col = 15 'O
+    ror_migration_col = 16 'O
+
+    Set Column = Worksheets("column")
+
+
+    Dim pd_type As String
+    Dim pd_type0 As String
+    Dim ror_type As String
+    Dim index1 As Integer
+    Dim ror_migration_str As String
+
+    For i = 1 To Column.UsedRange.Rows.Count
+        pd_type = LCase(Column.Cells(i, pd_type_col))
+        index1 = InStr(pd_type, "(")
+        If index1 > 0 Then
+            pd_type = Left(pd_type, index1 - 1)
+        End If
+
+        ror_type = ""
+        ror_migration_str = ""
+        Select Case pd_type
+            Case "varchar"
+                ror_type = "string"
+                If Column.Cells(i, length_col) > 0 Then
+                    ror_migration_str = ", :limit => " + Column.Cells(i, length_col).Text
+                End If
+            Case "int"
+                ror_type = "integer"
+            Case "integer"
+                ror_type = "integer"
+            Case "timestamp"
+                ror_type = "timestamp"
+            Case "date"
+                ror_type = "timestamp"
+            Case "number"
+                If Column.Cells(i, precision_col) > 0 Then
+                    ror_type = "decimal"
+                    ror_migration_str = ", :precision => " + Column.Cells(i, length_col).Text + ", :scale => " + Column.Cells(i, precision_col).Text
+                Else
+                    ror_type = "integer"
+                End If
+        End Select
+        Column.Cells(i, ror_type_col) = ror_type
+        ror_migration_str = "t." + ror_type + " " + Column.Cells(i, 3) + ror_migration_str
+        Column.Cells(i, ror_migration_col) = ror_migration_str
+
+    Next i
+
+    sql_col = 9 ' I
+    ror_col = 10 ' J
+    Set Table = Worksheets("table")
+    Dim ror_str As String
+    Dim sql_str As String
+
+    For i = 2 To Table.UsedRange.Rows.Count
+        ror_str = ""
+        sql_str = ""
+        For j = 1 To Column.UsedRange.Rows.Count
+            If Table.Cells(i, 1) = Column.Cells(j, 1) Then
+                If Column.Cells(j, 3).Text <> "created_at" And Column.Cells(j, 3).Text <> "updated_at" Then
+                    ror_str = ror_str + " " + Column.Cells(j, 3) + ":" + Column.Cells(j, ror_type_col)
+                End If
+                sql_str = sql_str + ", " + Column.Cells(j, 3) + " " + Column.Cells(j, pd_type_col)
+            End If
+        Next j
+
+        Table.Cells(i, sql_col) = sql_str
+        Table.Cells(i, ror_col) = ror_str
+
+    Next i
+
+
+'
+End Sub
+

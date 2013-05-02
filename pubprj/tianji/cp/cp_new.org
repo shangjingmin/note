@@ -1,0 +1,565 @@
+* cp_new
+git grep -i statu \
+app/views/company/company_page* app/views/company/job_speed_register/ app/views/corp* \
+app/controllers/rest/employers_controller.rb app/controllers/company/ app/controllers/corp* app/controllers/admin/corp* \
+app/models/corp* app/helpers/corp*
+
+** cp1.3
+*** java api test:
+Java::Tools::Jobs.search_people({company: "天际"}).json
+Java::Tools::Jobs.search_people({company: "天际", companyRange: 1}).json
+Java::Tools::Jobs.search_people({company: "天际", companyRange: 1, userId: 4017}).json
+Java::Tools::Jobs.search_people({company: "天际", companyRange: 1, userId: 4017, searchRange: 1}).json
+Java::Tools::Jobs.search_people({company: "天际", companyRange: 1, userId: 4017, searchRange: 2}).json
+Java::Tools::Jobs.search_people({company: "天际", companyRange: 2}).json
+Java::Tools::Jobs.search_people({company: "天际", companyRange: 2, userId: 4017}).json
+Java::Tools::Jobs.search_people({company: "天际", companyRange: 2, userId: 4017, searchRange: 1}).json
+Java::Tools::Jobs.search_people({company: "天际", companyRange: 2, userId: 4017, searchRange: 2}).json
+
+
+Java::Tools::Jobs.search_people({company: "天际", currentCompany: true}).json
+*** java api:
+需要的3个接口返回的数据，在一个模块中显示，因此最好还有一个统计接口来提供3接口组合的数据，以减少网络调用
+**** 雇员接口：
+可区分查询在职/前/全部雇员，
+返回结果：包含好友维度信息，按人际距离排序；需要分页
+排序规则：由产品经理最终确定
+**** 公司雇员数及用户好友信息
+公司雇员总数 及 用户的好友数+前2位好友
+排序规则：由产品经理最终确定
+**** 热门雇员：
+返回结果： 需要分页
+热门雇员的规则：由产品经理最终确定
+
+**** test  search.tianji.com/user/search
+***** a = Java::Tools::Jobs.search_people {company: '天际网', searchRange: 1, rows: 6, userId: 65498}
+a = Java::Tools::Jobs.search_people {company: '天际网', searchRange: 1, rows: 6}
+a = Java::Tools::Jobs.search_people {company: '天际网', searchRange: 1, rows: 6}
+***** 返回值 degree 数据均为0
+irb(main):054:0> a = Java::Tools::Jobs.search_people({company: '天际网', rows: 6, userId:65498, searchRange: -1}).json
+=> {"items"=>[{"id"=>4007, "source"=>99, "degree"=>0}, {"id"=>13635170, "source"=>99, "degree"=>0}, {"id"=>35215263, "source"=>99, "degree"=>0}, {"id"=>6742246, "source"=>99, "degree"=>0}, {"id"=>8185659, "source"=>99, "degree"=>0}, {"id"=>9064770, "source"=>99, "degree"=>0}], "totalItmes"=>447, "tokenizedString"=>nil}
+irb(main):055:0> a = Java::Tools::Jobs.search_people({company: '天际网', rows: 6, userId:65498, searchRange: 1}).json
+=> {"items"=>[{"id"=>4007, "source"=>99, "degree"=>0}, {"id"=>13635170, "source"=>99, "degree"=>0}, {"id"=>6742246, "source"=>99, "degree"=>0}, {"id"=>5406812, "source"=>99, "degree"=>0}, {"id"=>6104343, "source"=>99, "degree"=>0}, {"id"=>6225670, "source"=>99, "degree"=>0}], "totalItmes"=>49, "tokenizedString"=>nil}
+irb(main):056:0> a = Java::Tools::Jobs.search_people({company: '天际网', rows: 6, userId:65498, searchRange: 2}).json
+=> {"items"=>[{"id"=>35215263, "source"=>99, "degree"=>0}, {"id"=>8185659, "source"=>99, "degree"=>0}, {"id"=>9064770, "source"=>99, "degree"=>0}, {"id"=>12006933, "source"=>99, "degree"=>0}, {"id"=>6159621, "source"=>99, "degree"=>0}, {"id"=>21755123, "source"=>99, "degree"=>0}], "totalItmes"=>398, "tokenizedString"=>nil}
+irb(main):057:0> a = Java::Tools::Jobs.search_people({company: '天际网', rows: 6, userId:65498, searchRange: 0}).json
+=> {"items"=>[{"id"=>4007, "source"=>99, "degree"=>0}, {"id"=>13635170, "source"=>99, "degree"=>0}, {"id"=>35215263, "source"=>99, "degree"=>0}, {"id"=>6742246, "source"=>99, "degree"=>0}, {"id"=>8185659, "source"=>99, "degree"=>0}, {"id"=>9064770, "source"=>99, "degree"=>0}], "totalItmes"=>447, "tokenizedString"=>nil}
+
+***** sortType = 1 时无数据
+irb(main):061:0> a = Java::Tools::Jobs.search_people({company: '天际网', rows: 6, userId:65498, sortType:-1}).json
+=> {"items"=>[{"id"=>4007, "source"=>99, "degree"=>0}, {"id"=>13635170, "source"=>99, "degree"=>0}, {"id"=>35215263, "source"=>99, "degree"=>0}, {"id"=>6742246, "source"=>99, "degree"=>0}, {"id"=>8185659, "source"=>99, "degree"=>0}, {"id"=>9064770, "source"=>99, "degree"=>0}], "totalItmes"=>447, "tokenizedString"=>nil}
+irb(main):062:0> a = Java::Tools::Jobs.search_people({company: '天际网', rows: 6, userId:65498, sortType:1}).json
+=> {"items"=>[], "totalItmes"=>0, "tokenizedString"=>nil}
+irb(main):063:0> a = Java::Tools::Jobs.search_people({company: '天际网', rows: 6, userId:65498, sortType:2}).json
+=> {"items"=>[{"id"=>4007, "source"=>99, "degree"=>0}, {"id"=>13635170, "source"=>99, "degree"=>0}, {"id"=>35215263, "source"=>99, "degree"=>0}, {"id"=>6742246, "source"=>99, "degree"=>0}, {"id"=>8185659, "source"=>99, "degree"=>0}, {"id"=>9064770, "source"=>99, "degree"=>0}], "totalItmes"=>447, "tokenizedString"=>nil}
+
+*** event tracking: https://developers.google.com/analytics/devguides/collection/gajs/eventTrackerGuide
+*** fp: http://192.168.2.94/new_companies/companyBack/cp_Homes.php
+http://192.168.2.94/new_companies/companyBack/cp_Homes.php
+** cp 20130115----20130131
+*** server operation
+**** db change:
+20130117080658_add_old_industry_fields_to_corps.rb
+20130122061935_add_abbrev_to_corps.rb
+20130122062046_create_abbrev_counts.rb
+
+**** rake: handle_corp.rake
+rake tianji:update_corp_industry_to_new # 更新原行业为新版行业 lib/tasks/handle_corp.rake
+rake tianji:generate_corp_abbrev # 生成公司的拼音链接,model中调用pretty_abbrev来获得abbrev或id   handle_corp.rake
+
+# 抓取数据对应新行业代码，请先运行update_corp_industry_to_new任务   sync_fetch_industries.rake
+rake tianji:update_dajie_industries                   # update dajie industries
+rake tianji:update_fenzhi_industries                  # update fenzhi industries
+rake tianji:update_zhaopin_industries
+rake tianji:update_job_industries                     # update job industries
+
+
+RAILS_ENV=qa bundle exec rake tianji:update_dajie_industries               > log_industry_dajie.txt   2>&1 &
+RAILS_ENV=qa bundle exec rake tianji:update_fenzhi_industries              > log_industry_fenzhi.txt  2>&1 &
+RAILS_ENV=qa bundle exec rake tianji:update_zhaopin_industries             > log_industry_zhaopin.txt 2>&1 &
+RAILS_ENV=qa bundle exec rake tianji:update_job_industries                 > log_industry_job.txt     2>&1 &
+
+# 性质和规模
+rake tianji:update_corp_size_to_normal
+rake tianji:update_corp_nature_to_normal
+
+RAILS_ENV=qa bundle exec rake tianji:update_corp_size_to_normal            > log_size.txt   2>&1 &
+RAILS_ENV=qa bundle exec rake tianji:update_corp_nature_to_normal          > log_nature.txt 2>&1 &
+
+
+# 行业再次更新
+RAILS_ENV=qa bundle exec rake tianji:update_corp_industries            > log_industries_two.txt   2>&1 &
+# 银行更新
+RAILS_ENV=qa bundle exec rake tianji:update_corp_abbrev_for_yinhang    > log_update_corp_abbrev_for_polyphone 2>&1 &
+# 地区更新 TODO
+RAILS_ENV=qa bundle exec rake tianji:update_corp_region    > log_update_corp_region 2>&1 &
+
+
+*** industry
+ALTER TABLE corps ADD COLUMN industry_old INT, ADD COLUMN primary_industry_old INT;
+
+
+本机: 数据量 566896 
+执行migration: 351.8685s + 368.5353s
+set old: 24.16s change: 88
+update industry:  Query OK, 58 rows affected (3.75 sec)
+                  Rows matched: 566896  Changed: 58  Warnings: 0
+update_primary: Query OK, 52 rows affected (2.20 sec)
+                Rows matched: 86  Changed: 52  Warnings: 0
+
+
+**** industry update
+    update corps set industry_old = industry, primary_industry_old = primary_industry
+
+update corps set industry = case industry when 101 then 101 when 102 then 102 when 103 then 104 when 104 then 104 when 105 then 103 when 106 then 199 when 107 then 102 when 108 then 1099 when 109 then 401 when 110 then 302 when 199 then 1201 when 201 then 703 when 202 then 703 when 299 then 703 when 301 then 801 when 302 then 802 when 303 then 802 when 399 then 802 when 401 then 706 when 402 then 802 when 404 then 701 when 405 then 703 when 499 then 703 when 501 then 803 when 502 then 804 when 503 then 899 when 504 then 803 when 505 then 803 when 599 then 803 when 601 then 803 when 602 then 803 when 603 then 803 when 604 then 803 when 605 then 803 when 606 then 803 when 607 then 1101 when 699 then 803 when 701 then 702 when 799 then 702 when 901 then 502 when 902 then 501 when 903 then 501 when 904 then 501 when 905 then 599 when 906 then 501 when 907 then 703 when 908 then 501 when 999 then 501 when 1001 then 902 when 1002 then 901 when 1003 then 902 when 1004 then 903 when 1005 then 901 when 1006 then 903 when 1099 then 903 when 1101 then 999 when 1102 then 705 when 1103 then 999 when 1104 then 999 when 1199 then 799 when 1201 then 701 when 1202 then 701 when 1203 then 701 when 1204 then 701 when 1205 then 701 when 1206 then 704 when 1299 then 701 when 1301 then 201 when 1302 then 201 when 1303 then 201 when 1304 then 201 when 1305 then 203 when 1306 then 203 when 1307 then 203 when 1308 then 203 when 1309 then 204 when 1310 then 204 when 1311 then 205 when 1312 then 202 when 1313 then 301 when 1399 then 203 when 1401 then 601 when 1402 then 602 when 1403 then 603 when 1404 then 603 when 1499 then 699 when 1502 then 499 when 1503 then 402 when 1504 then 401 when 1505 then 499 when 1506 then 499 when 1507 then 499 when 1599 then 499 when 1601 then 299 when 1602 then 299 when 1603 then 299 when 1604 then 299 when 1605 then 299 when 1606 then 206 when 1699 then 299 when 1701 then 302 when 1702 then 399 when 1703 then 1001 when 1704 then 1003 when 1705 then 1004 when 1706 then 203 when 1707 then 302 when 1708 then 303 when 1709 then 1002 when 1799 then 1099 when 1801 then 1102 when 1802 then 1102 when 1803 then 1102 when 1804 then 1102 when 1899 then 1102 when 1901 then 1101 when 1902 then 1101 when 1999 then 1101 when 2001 then 1199 when 2002 then 1101 when 2003 then 1101 when 2004 then 1101 when 2099 then 1201 else null end;
+
+
+update corps set primary_industry = left(industry, length(industry)-2) where industry is not null
+**** select
+select id, industry, case industry when 101 then 101 when 102 then 102 when 103 then 104 when 104 then 104 when 105 then 103 when 106 then 199 when 107 then 102 when 108 then 1099 when 109 then 401 when 110 then 302 when 199 then 1201 when 201 then 703 when 202 then 703 when 299 then 703 when 301 then 801 when 302 then 802 when 303 then 802 when 399 then 802 when 401 then 706 when 402 then 802 when 404 then 701 when 405 then 703 when 499 then 703 when 501 then 803 when 502 then 804 when 503 then 899 when 504 then 803 when 505 then 803 when 599 then 803 when 601 then 803 when 602 then 803 when 603 then 803 when 604 then 803 when 605 then 803 when 606 then 803 when 607 then 1101 when 699 then 803 when 701 then 702 when 799 then 702 when 901 then 502 when 902 then 501 when 903 then 501 when 904 then 501 when 905 then 599 when 906 then 501 when 907 then 703 when 908 then 501 when 999 then 501 when 1001 then 902 when 1002 then 901 when 1003 then 902 when 1004 then 903 when 1005 then 901 when 1006 then 903 when 1099 then 903 when 1101 then 999 when 1102 then 705 when 1103 then 999 when 1104 then 999 when 1199 then 799 when 1201 then 701 when 1202 then 701 when 1203 then 701 when 1204 then 701 when 1205 then 701 when 1206 then 704 when 1299 then 701 when 1301 then 201 when 1302 then 201 when 1303 then 201 when 1304 then 201 when 1305 then 203 when 1306 then 203 when 1307 then 203 when 1308 then 203 when 1309 then 204 when 1310 then 204 when 1311 then 205 when 1312 then 202 when 1313 then 301 when 1399 then 203 when 1401 then 601 when 1402 then 602 when 1403 then 603 when 1404 then 603 when 1499 then 699 when 1502 then 499 when 1503 then 402 when 1504 then 401 when 1505 then 499 when 1506 then 499 when 1507 then 499 when 1599 then 499 when 1601 then 299 when 1602 then 299 when 1603 then 299 when 1604 then 299 when 1605 then 299 when 1606 then 206 when 1699 then 299 when 1701 then 302 when 1702 then 399 when 1703 then 1001 when 1704 then 1003 when 1705 then 1004 when 1706 then 203 when 1707 then 302 when 1708 then 303 when 1709 then 1002 when 1799 then 1099 when 1801 then 1102 when 1802 then 1102 when 1803 then 1102 when 1804 then 1102 when 1899 then 1102 when 1901 then 1101 when 1902 then 1101 when 1999 then 1101 when 2001 then 1199 when 2002 then 1101 when 2003 then 1101 when 2004 then 1101 when 2099 then 1201 else null end
+from corps limit 100
+
+     select id, industry, left(industry, length(industry)-2) from corps where industry is not null limit 100
+
+** cp_manager 20121219---20130114
+*** 增加 cp_status:
+默认0，任何审核通过都将其设为审核通过6（因公司主页默认都显示）
+status：非招聘注册（目前只公司主页）记录新建时为-1，当招聘注册与此重名时，则使用此条记录（对其它频道的影响，不做考虑），注册信息覆盖原有信息，status=0，user_id=新user.id,category=招聘的来源(因招聘后台取值的问题)
+**** QA
+***** TODO 若已有user_id,是否还要创建新的公司用户？：原user_id保存的是公司主页注册用户的id
+**** 公司主页
+***** 新建： cp_status=0, status=-1, 若重名可走认领流程
+***** 新建审核： cp_status=6/2
+***** 认领：审核后cp_manager_id=user.id，营业执照暂不覆盖
+***** 所有approv改为cp_approv, 所有status改为cp_status; 企业快速注册时是否更新的判断更改
+**** 招聘注册
+***** 可测数据：select name from corps where user_id is null and status = -1 and cp_status=6 order by id desc limit 30
++-----------------------------------------------------------------+
+| name                                                            |
++-----------------------------------------------------------------+
+| 江西中非智能发展有限公司北京航空服务分公司                      |
+| 北京青泊铭远咨询服务有限公司                                    |
+| 上海迪翼电子商务有限公司                                        |
+| 深圳祥腾国际商务服务有限公司                                    |
+| 华龙商旅网                                                      |
+| 东方通航                                                        |
+| 云南航艺                                                        |
+| 埃迪必克（天津）助航技术有限公司                                |
+| 黄金湾                                                          |
+| 大洋汇达公司                                                    |
+| 陕西中科航天农业发展股份有限公司                                |
+| 上海航天电源                                                    |
+| 厦门五航国际货运代理                                            |
+| 国防科技大学                                                    |
+| 卡塔尔航空                                                      |
+| 修理厂                                                          |
+| 东星航空                                                        |
+| 上海普惠飞机发动机维修有限公司                                  |
+| 斯奈克玛航空工业（苏州）有限公司                                |
+| 北京航空制造工程研究所                                          |
+| 新加坡航空                                                      |
+| 中国航空工业集团                                                |
+| 航天科工集团                                                    |
+| 中航信                                                          |
+| 春秋航空                                                        |
+| 吉祥航空                                                        |
+| 中航工业                                                        |
+| 海南航空公司                                                    |
++-----------------------------------------------------------------+
+
+***** 新建： status=0, 若公司已被审核(其它频道添加且审核了该公司)且未启用招聘（status=-1）,则用已有的记录，注册信息提交字段覆盖原记录信息
+***** 审核：status=6/2, 若审核通过，则设置公司主页同时被审核cp_status=6
+**** 数据库变更 20121228015511_add_cp_status_to_corps.rb
+add_column :corps, :cp_status, :integer
+
+同时，corp_mongo.rb中增加了cp_status字段，并修改了索引
+**** 已有数据更新(mysql/mongodb)：
+***** category new_job/job 改为 51job
+update corps set category="51job" where category="new_job" and id > 10000 and user_id is null;
+update corps set category="51job" where category="job" and id > 10000 and user_id is null;
+
+db.corps.find({"category": {$in: ["job", "new_job"]}, "user_id": {$in: ["", null]}}).count();
+db.corps.update({"category": {$in: ["job", "new_job"]}, "user_id": {$in: ["", null]}}, {$set: {"category": "51job"}}, false, true);
+
+***** 已有数据中status=6的： cp_status=6
+update corps set cp_status = 6 where status=6;
+db.corps.update({"status": 6}, {$set: {"cp_status": 6}}, false, true);
+
+***** 抓取数据中 user_id is null 的记录: status = -1
+update corps set status = -1 where user_id is null and category in ("51job", "dajie", "zhaopin", "fenzhi")
+db.corps.update({"category": {$in: ["51job", "dajie", "zhaopin", "fenzhi"]}, "user_id": {$in: ["", null]}}, {$set: {"status": -1}}, false, true)
+*** 套页面
+**** 错误信息 http://192.168.3.42/new_companies/companyBack/cp_NewcompanyPage.php
+<form novalidate="novalidate" method="post" id="new_corp_claimer" enctype="multipart/form-data" data-validate="true" class="simple_form new_corp_claimer" action="/corps/1000/claim_create" accept-charset="UTF-8"><div style="margin:0;padding:0;display:inline"><input type="hidden" value="✓" name="utf8"><input type="hidden" value="S/zxNhXz0d2B7pE+6JZUpdWAef7vveatFPbfm4gIaOs=" name="authenticity_token"></div>
+  <div class="form-inputs">
+    <div class="input string optional"><label for="corp_claimer_corp_name" class="string optional control-label">公司名称</label><input type="text" value="网易" size="20" name="corp_claimer[corp_name]" id="corp_claimer_corp_name" disabled="disabled" class="string optional"></div>
+    <div class="input string required field_with_errors"><label for="corp_claimer_name" class="string required control-label">姓名 <span title="必填" class="required-mark">*</span></label><input type="text" value="" size="20" name="corp_claimer[name]" id="corp_claimer_name" class="string required"><span class="error">公司认领姓名不能为空</span></div>
+    <div class="input email required field_with_errors"><label for="corp_claimer_email" class="email required control-label">公司邮箱 <span title="必填" class="required-mark">*</span></label><input type="text" value="" size="20" name="corp_claimer[email]" id="corp_claimer_email" class="string email required"><span class="error">公司认领公司邮箱不能为空</span></div>
+    <div class="input string required field_with_errors"><label for="corp_claimer_mobile_number" class="string required control-label">手机号 <span title="必填" class="required-mark">*</span></label><input type="text" value="" size="20" name="corp_claimer[mobile_number]" id="corp_claimer_mobile_number" class="string required"><span class="error">公司认领手机号不能为空</span></div>
+    <div class="input boolean optional field_with_errors"><input type="hidden" value="0" name="corp_claimer[official]"><label class="checkbox"><input type="checkbox" value="1" name="corp_claimer[official]" id="corp_claimer_official" data-validate="false" class="boolean optional">我确认我是这家公司的官方代表，有权代表我公司在此创建本公司主页。</label><span class="error">您需要确认为公司的官方代表</span></div>
+  </div>
+  <div class="form-actions">
+    <input type="submit" value="新增公司认领" name="commit" class="btn button_btn">
+  </div>
+</form>
+
+**** 认领xxx图片依然是 认领阿里巴巴 http://192.168.3.42/new_companies/companyBack/cp_Homes1.php
+
+***** 验证邮件链接：http://www.tianji.com/corps/active_claimer_email?token=034c6771fe3afd393920ef0f59b4aa86
+a7670509d736fcdeae32b84e2dc01363
+***** 
+
+**** email 测试
+a = CorpClaimer.last
+b = CorpToken.find_by_refer_id a.id
+CorpMailer.check_claimer_email(b.token).deliver!
+CpApprovedNoticeMailer.approved_notice(a.id).deliver!
+CpUnapprovedNoticeMailer.unapproved_notice(a.id).deliver!
+CpUnapprovedNoticeForOtherApprovedMailer.unapproved_notice_for_other_approved(a.id).deliver!
+
+CorpNewMailer.check_claimer_email(b.token).deliver!
+CpNewApprovedNoticeMailer.approved_notice(a.id).deliver!
+CpNewUnapprovedNoticeMailer.unapproved_notice(a.id).deliver!
+CpNewUnapprovedNoticeForOtherApprovedMailer.unapproved_notice_for_other_approved(a.id).deliver!
+
+a.category = ""; a.save(validate: false)
+a.send_email_to_check_claimer
+a.approved = 0; a.save(validate: false)
+a.approved = 2; a.save(validate: false)
+a.approved = 6; a.save(validate: false)
+a.category = "new_corp"; a.save(validate: false)
+a.send_email_to_check_claimer
+a.approved = 0; a.save(validate: false)
+a.approved = 2; a.save(validate: false)
+a.approved = 6; a.save(validate: false)
+
+a.email="shangjingmin@163.com";a.save(validate: false);a.reload
+a.send_email_to_check_claimer
+
+http%3A//localhost:3000/corps/2930/claim_edit/%3Futm_medium%3Demail%26utm_campaign%3Dcompany_page%26utm_source%3Dtianji
+**** 
+*** 说明
+**** 本次测试目的为认领流程，包括
+***** 认领： 公司主页右侧 认领公司主页 按钮,若公司已被认领且认领审核通过，则右侧不再出现该按钮
+***** 后台审核： www.tianji.com/admin/corp_claimer   登陆用户：test 密码：123456
+后台审核通过或拒绝都会给申请人发送邮件，通过时链接到公司修改页，拒绝时链接到认领修改页
+***** 前台管理页： www.tianji.com/corps/:id/admin  只有认领审核通过的认领人可以进入该页面，否则跳转到公司展示页
+前台管理页包括两个标签页： 基础信息管理 和 logo上传
+**** 注意
+***** 认领邮件需要使用公司邮件，以下域名的邮件认为非公司邮件
+'163\.com', '126\.com', 'yeah\.net', 'sina\.com', 'sohu\.com',
+'sina\.cn', '3g\.sina\.cn', 'vip\.sina\.com', 'yahoo\.com','yahoo\.com\.cn',
+'yahoo\.cn', 'tom\.com', 'gmail\.com', 'hotmail\.com', 'qq\.com',
+'vip\.qq\.com', 'foxmail\.com', '139\.com', '189\.cn', 'wo\.com\.cn',
+'msn\.com', 'live\.cn', 'live\.com', '21cn\.com', '263\.net'
+***** 一个邮件只能认领且被审核通过一个公司
+若认领未审核通过，该邮箱可以被重复使用申请多个公司；
+若认领审核通过，则不能再用该邮箱认领公司
+** seo
+*** 长度分布 12个字最集中
+mysql> select length(name)/3 as l, count(*)  from corps group by length(name);
++----------+----------+
+| l        | count(*) |
++----------+----------+
+|   0.3333 |        9 |
+|   0.6667 |       16 |
+|   1.0000 |       68 |
+|   1.3333 |       48 |
+|   1.6667 |       59 |
+|   2.0000 |      215 |
+|   2.3333 |       84 |
+|   2.6667 |       82 |
+|   3.0000 |      670 |
+|   3.3333 |       99 |
+|   3.6667 |       78 |
+|   4.0000 |     4001 |
+|   4.3333 |       97 |
+|   4.6667 |      100 |
+|   5.0000 |     1820 |
+|   5.3333 |      115 |
+|   5.6667 |      129 |
+|   6.0000 |     4038 |
+|   6.3333 |      123 |
+|   6.6667 |      151 |
+|   7.0000 |     3113 |
+|   7.3333 |      179 |
+|   7.6667 |      157 |
+|   8.0000 |     6828 |
+|   8.3333 |      254 |
+|   8.6667 |      205 |
+|   9.0000 |     5600 |
+|   9.3333 |      150 |
+|   9.6667 |      159 |
+|  10.0000 |    72655 |
+|  10.3333 |      143 |
+|  10.6667 |      820 |
+|  11.0000 |    50942 |
+|  11.3333 |      157 |
+|  11.6667 |      572 |
+|  12.0000 |   144127 |
+|  12.3333 |      161 |
+|  12.6667 |     1211 |
+|  13.0000 |    75758 |
+|  13.3333 |      179 |
+|  13.6667 |      717 |
+|  14.0000 |    81655 |
+|  14.3333 |      151 |
+|  14.6667 |      891 |
+|  15.0000 |    36614 |
+|  15.3333 |      152 |
+|  15.6667 |      393 |
+|  16.0000 |    26184 |
+|  16.3333 |      172 |
+|  16.6667 |      356 |
+|  17.0000 |    14967 |
+|  17.3333 |      154 |
+|  17.6667 |      282 |
+|  18.0000 |     8786 |
+|  18.3333 |      153 |
+|  18.6667 |      203 |
+|  19.0000 |     7025 |
+|  19.3333 |      104 |
+|  19.6667 |      193 |
+|  20.0000 |     4194 |
+|  20.3333 |      105 |
+|  20.6667 |      107 |
+|  21.0000 |     3000 |
+|  21.3333 |       98 |
+|  21.6667 |       84 |
+|  22.0000 |     1597 |
+|  22.3333 |       99 |
+|  22.6667 |       64 |
+|  23.0000 |      945 |
+|  23.3333 |       73 |
+|  23.6667 |       57 |
+|  24.0000 |      476 |
+|  24.3333 |       65 |
+|  24.6667 |       57 |
+|  25.0000 |      277 |
+|  25.3333 |       46 |
+|  25.6667 |       31 |
+|  26.0000 |      174 |
+|  26.3333 |       49 |
+|  26.6667 |       31 |
+|  27.0000 |      116 |
+|  27.3333 |       41 |
+|  27.6667 |       24 |
+|  28.0000 |      107 |
+|  28.3333 |       29 |
+|  28.6667 |       21 |
+|  29.0000 |       64 |
+|  29.3333 |       28 |
+|  29.6667 |       19 |
+|  30.0000 |       41 |
+|  30.3333 |       18 |
+|  30.6667 |       18 |
+|  31.0000 |       21 |
+|  31.3333 |       14 |
+|  31.6667 |       12 |
+|  32.0000 |       30 |
+|  32.3333 |        9 |
+|  32.6667 |        6 |
+|  33.0000 |       15 |
+|  33.3333 |        9 |
+|  33.6667 |        8 |
+|  34.0000 |        8 |
+|  34.3333 |       12 |
+|  34.6667 |        7 |
+|  35.0000 |       10 |
+|  35.3333 |        6 |
+|  35.6667 |        2 |
+|  36.0000 |        8 |
+|  36.3333 |        2 |
+|  36.6667 |        7 |
+|  37.3333 |        2 |
+|  37.6667 |        2 |
+|  38.0000 |        2 |
+|  38.6667 |        1 |
+|  39.0000 |        1 |
+|  39.6667 |        1 |
+|  40.0000 |        3 |
+|  41.6667 |        1 |
+|  42.0000 |        2 |
+|  42.6667 |        3 |
+|  43.0000 |        1 |
+|  43.6667 |        1 |
+|  44.6667 |        1 |
+|  46.0000 |        2 |
+|  50.0000 |        1 |
+|  51.0000 |        1 |
+|  79.0000 |        1 |
+| 180.0000 |        1 |
+| 255.0000 |        4 |
++----------+----------+
+129 rows in set (0.39 sec)
+*** 
+
+** java 接口  http://wiki.tianji.com/job/rest/service
+*** 已提
+**** 公司的招聘职位
+**** 这些人也在天际 在当前公司工作或工作过的好友
+**** 公司的猎头职位： java猎头职位中无公司
+**** 最新发布的职位： 当前公司的职位时间降序
+**** 公司多少雇员，及雇员头像/姓名： 公司名称完全匹配+关系匹配（1维> 2维）
+*** 新版
+**** 有多少雇员在天际网： 先得到一度好友，再请求公司所有在天际网的雇员
+在公司工作过  一度好友>2度好友>用户质量>userid正序
+需分页，每页6个
+
+POST http://search.tianji.com/user/search {"company": "天际网", "searchRange": -1}  start: 从多少条开始 rows：得到多少条
+
+
+**** 你有朋友在该公司/ 他们也关注了： 在该公司工作过的一度好友/ 一度好友中共同关注的公司（按一度好友中对公司关注数逆序）
+公司工作过的一度好友  + 共同关注的公司
+**** ？招聘动态：
+时间 facebook的 xxx 刚刚发布了 xxxx 职位
+时间 facebook的 xxx 查收了简历
+时间 有人得到了 xxxx 的面试机会
+**** 正在招聘的职位： 公司当前开放的职位   ！缺少详细信息
+职位名称/ 职业分类 / 工作地点/ 要求经验/ 职位介绍/ 职位发布人/ 发布时间
+**** 有朋友可以帮你引荐： 当前用户与招聘负责人的共同好友
+** fp
+频道页： http://192.168.3.124/new_companies/companyBack/cp_Companychanel.php
+公司主页 http://192.168.3.124/new_companies/companyBack/cp_Homes.php
+公司主页(未认领) http://192.168.3.124/new_companies/companyBack/cp_Homes1.php
+招聘页 http://192.168.3.124/new_companies/companyBack/cp_requemt.php
+
+** data
+*** 创建冗余字段保存相关数据： nature_back industry_back size_back region_back
+*** 设置该批数据的来源标识： category = cp_robot
+*** 更改状态： 设置 status=6
+*** corp_logs: 审核日志中最好插入标识系统设置为已审核的记录，方便以后审核
+*** corp_descriptions: 描述字段单独存入该表
+*** logo: 公司logo的对照
+*** 数据导入后更新mongo
+*** 删除corps的type字段后，需要删除mongo中的type, _type="CorpMongo"
+*** 确定corps表id递增是否正常，能否写入新记录
+*** 更改字段名称： logo --> logo_file_name, licence --> licence_file_name;   mongo中字段的对应修改
+*** 同名的数据问题
+** 问题
+*** 公司主页对公司的编辑是否写入公司大库： 写入的话修改信息会同时修改招聘频道的公司信息，如果公司描述是富文本，不知公司描述是否可以共用
+*** 性质/行业/规模 地区---地区/地址,  如何跟系统类别值对应
+是否要直接跟 系统类别值对应
+若不对应，地区需要处理为可显示的内容，如 中国 北京，不能是 北京市建国路93号；
+*** 公司介绍：周五（12.07）看了几个不处理问题也不大，不过没有最终确认是否可以不处理
+*** 最近热门公司：排序规则尚不明确（?直接按公司浏览数逆序）
+*** 视频： 是公司自己可管理的，还是放置广告位
+*** 有圈子/有feed，头像尺寸问题
+*** 公司浏览记录： 多次浏览是记多条记录还是只记浏览次数？
+*** 是否需要聚合页
+** 待实现功能
+*** 通知我： 发新职位/有新动态/有新员工加入: ？发新职位/有新动态时的通知是否能实现
+*** o公司浏览记录： 谁 浏览了 什么公司， 浏览了 多少次；多次浏览是记多条记录还是只记浏览次数？
+*** o认领公司主页： corp_id, user_id, licence
+*** o公司雇员：暂时只有招聘负责人，这个不易使用之前的多种团队及成员的复杂设计
+*** 建立公司圈子： 圈子如何创建，是否要审核，重名怎么办
+*** 活动： 如何创建，如何设置什么样的活动才在公司主页显示
+*** feed: 发feed/展示feed
+*** o计算一批人中共同关注的公司
+*** o计算一批人中共同浏览的公司
+*** 问答： 问问招聘经理 提问及回答仅提问者自己可见
+** model
+*** corp_followers 关注
+|---------+---------+------+------|
+| 字段名  | 类型    | 中文 | 备注 |
+|---------+---------+------+------|
+| corp_id | integer |      |      |
+| user_id | integer |      |      |
+
+*** corp_visitors 浏览记录
+|-------------+---------+--------+------+------|
+| 字段名      | 类型    | 默认值 | 中文 | 备注 |
+|-------------+---------+--------+------+------|
+| corp_id     | integer |        |      |      |
+| user_id     | integer |        |      |      |
+| visit_count | integer | 0      |      |      |
+
+*** corp_claimers 认领公司主页
+|----------+---------+--------+----------+----------------------------------------|
+| 字段名   | 类型    | 默认值 | 中文     | 备注                                   |
+|----------+---------+--------+----------+----------------------------------------|
+| corp_id  | integer |        |          |                                        |
+| user_id  | integer |        |          |                                        |
+| licence  | string  |        | 执照     | 批准时，若公司执照为空则复制到公司执照 |
+| approved | boolean |        | 是否批准 |                                        |
+
+*** corp_staffers 公司雇员
+|----------+---------+--------+----------+------|
+| 字段名   | 类型    | 默认值 | 中文     | 备注 |
+|----------+---------+--------+----------+------|
+| corp_id  | integer |        |          |      |
+| user_id  | integer |        |          |      |
+| category | string  |        | 雇员类型 | job  |
+|          |         |        |          |      |
+
+* log
+** login
+*** log
+Started GET "/corps/" for 127.0.0.1 at 2013-03-26 17:47:37 +0800
+Processing by Corps::CorpsController#index as HTML
+  User Load (0.3ms)  SELECT `users`.* FROM `users` WHERE `users`.`id` = 39774645 LIMIT 1
+  Account Load (0.1ms)  SELECT `accounts`.* FROM `accounts` WHERE `accounts`.`id` = 39774645 LIMIT 1
+   (0.1ms)  BEGIN
+  User Exists (0.4ms)  SELECT 1 AS one FROM `users` WHERE (`users`.`id` = BINARY 39774645 AND `users`.`id` != 39774645) LIMIT 1
+   (0.3ms)  UPDATE `users` SET `last_login_at` = '2013-03-26 17:47:45', `updated_at` = '2013-03-26 17:47:45' WHERE `users`.`id` = 39774645
+   (77.1ms)  COMMIT
+  Rendered corps/corps/index.html.erb within layouts/application (43.9ms)
+  Rendered layouts/_header.html.erb (1382.2ms)
+  Rendered shared/_scroll_to_top.html.erb (0.0ms)
+  Rendered shared/_mini_profile.html.erb (0.1ms)
+  Background Load (0.1ms)  SELECT function_lvl2_code, position FROM `backgrounds` WHERE `backgrounds`.`account_id` = 39774645 ORDER BY id desc LIMIT 5
+  Rendered shared/_analytics.html.erb (0.2ms)
+  Rendered layouts/_footer.html.erb (32.9ms)
+Completed 200 OK in 4553ms (Views: 1774.1 ms | Mysql: 85.1 ms | Mongo: 21.1 ms | Redis: 0.4 ms | Api: 0.0 ms | Search: 0.0 ms)
+
+
+Started GET "/ajax/home/notices" for 127.0.0.1 at 2013-03-26 17:47:51 +0800
+Processing by Ajax::HomeController#notices as JSON
+  User Load (0.4ms)  SELECT `users`.* FROM `users` WHERE `users`.`id` = 39774645 LIMIT 1
+Completed 200 OK in 36ms (Views: 0.6 ms | Mysql: 0.4 ms | Mongo: 2.8 ms | Redis: 0.0 ms | Api: 24.4 ms | Search: 0.0 ms)
+[2013-03-26 17:47:51] WARN  Could not determine content-length of response body. Set content-length of the response or set Response#chunked = true
+^C[2013-03-26 17:47:58] INFO  going to shutdown ...
+[2013-03-26 17:47:58] INFO  WEBrick::HTTPServer#start done.
+Exiting
+
+*** mongo
+
+  MOPED: 127.0.0.1:27017 COMMAND      database=admin command={:ismaster=>1} (0.8190ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=users selector={"_id"=>39774645} flags=[:slave_ok] limit=0 skip=0 batch_size=nil fields=nil (0.6273ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=users selector={"$query"=>{"_id"=>39774645}, "$orderby"=>{:_id=>1}} flags=[:slave_ok] limit=-1 skip=0 batch_size=nil fields=nil (0.7648ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=counters selector={"$query"=>{"user_id"=>39774645}, "$orderby"=>{:_id=>1}} flags=[:slave_ok] limit=-1 skip=0 batch_size=nil fields=nil (0.6669ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=sides selector={"$query"=>{"user_id"=>39774645}, "$orderby"=>{:_id=>1}} flags=[:slave_ok] limit=-1 skip=0 batch_size=nil fields=nil (6.8059ms)
+  MOPED: 127.0.0.1:27017 UPDATE       database=tianji collection=users selector={"_id"=>39774645} update={"$set"=>{"last_login_at"=>2013-03-26 09:47:45 UTC, "updated_at"=>2013-03-26 09:47:45 UTC}} flags=[] (0.4356ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=corps selector={"$query"=>{"cp_logo_file_name"=>{"$ne"=>nil}, "cp_status"=>6}, "$orderby"=>{"staffers_count"=>-1}} flags=[:slave_ok] limit=9 skip=0 batch_size=nil fields=nil (1.5447ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=corps selector={"cp_manager_id"=>39774645} flags=[:slave_ok] limit=0 skip=0 batch_size=nil fields=nil (0.9320ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=corps selector={"$query"=>{"cp_logo_file_name"=>nil, "cp_status"=>6}, "$orderby"=>{"staffers_count"=>-1}} flags=[:slave_ok] limit=1 skip=0 batch_size=nil fields={:_id=>1} (1.6968ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=corps selector={"$query"=>{"cp_logo_file_name"=>nil, "cp_status"=>6}, "$orderby"=>{"staffers_count"=>-1}} flags=[:slave_ok] limit=9 skip=0 batch_size=nil fields=nil (5.0130ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=corps selector={"$query"=>{"cp_logo_file_name"=>nil, "cp_status"=>6}, "$orderby"=>{"staffers_count"=>-1}} flags=[:slave_ok] limit=9 skip=0 batch_size=nil fields=nil (3.4747ms)
+  MOPED: 127.0.0.1:27017 COMMAND      database=admin command={:ismaster=>1} (1.3473ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=users selector={"_id"=>39774645} flags=[:slave_ok] limit=0 skip=0 batch_size=nil fields=nil (0.7863ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=counters selector={"$query"=>{"user_id"=>39774645}, "$orderby"=>{:_id=>1}} flags=[:slave_ok] limit=-1 skip=0 batch_size=nil fields=nil (1.4408ms)
+  MOPED: 127.0.0.1:27017 COMMAND      database=tianji command={:count=>"visited_users", :query=>{"visitable_id"=>39774645, "visitable_type"=>"UserMongo"}} (0.5045ms)
+
+** unlogin
+*** log
+Started GET "/corps" for 127.0.0.1 at 2013-03-26 17:53:00 +0800
+Processing by Corps::CorpsController#index as HTML
+Returning from CAS gateway without authentication.
+This CAS client is configured to use gatewaying, so we will permit the user to continue without authentication.
+  Rendered corps/corps/index.html.erb within layouts/application (27.0ms)
+Guessed service url: "http://localhost:3000/corps"
+Generated login url: https://login.tianji.com/cas/login?service=http%3A%2F%2Flocalhost%3A3000%2Fcorps
+  Rendered layouts/_header.html.erb (0.6ms)
+  Rendered shared/_scroll_to_top.html.erb (0.0ms)
+  Rendered shared/_analytics.html.erb (0.1ms)
+  Rendered layouts/_footer.html.erb (0.7ms)
+Completed 200 OK in 57ms (Views: 42.2 ms | Mysql: 0.0 ms | Mongo: 12.0 ms | Redis: 0.0 ms | Api: 0.0 ms | Search: 0.0 ms)
+
+*** mongo
+  MOPED: 127.0.0.1:27017 COMMAND      database=admin command={:ismaster=>1} (0.9351ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=corps selector={"$query"=>{"cp_logo_file_name"=>{"$ne"=>nil}, "cp_status"=>6}, "$orderby"=>{"staffers_count"=>-1}} flags=[:slave_ok] limit=9 skip=0 batch_size=nil fields=nil (1.5028ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=corps selector={"$query"=>{"cp_logo_file_name"=>nil, "cp_status"=>6}, "$orderby"=>{"staffers_count"=>-1}} flags=[:slave_ok] limit=1 skip=0 batch_size=nil fields={:_id=>1} (2.4135ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=corps selector={"$query"=>{"cp_logo_file_name"=>nil, "cp_status"=>6}, "$orderby"=>{"staffers_count"=>-1}} flags=[:slave_ok] limit=9 skip=0 batch_size=nil fields=nil (3.0818ms)
+  MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=corps selector={"$query"=>{"cp_logo_file_name"=>nil, "cp_status"=>6}, "$orderby"=>{"staffers_count"=>-1}} flags=[:slave_ok] limit=9 skip=0 batch_size=nil fields=nil (4.8103ms)
+
+

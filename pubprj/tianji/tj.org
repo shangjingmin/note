@@ -1,0 +1,1286 @@
+* tmp
+** 2012.4 --- 2012.12
+*** 2012年4月
+企云注册
+*** 2012年5月
+分享功能
+龙虎榜：站外邀请、受邀用户跟踪及排行榜
+圈子/活动邀请：站内邀请通知、站外邮件邀请及受邀用户跟踪
+*** 2012年6月
+管理后台：后台管理菜单及规范功能
+网站部分功能维护
+*** 2012年7月
+ga统计：页面及邮件链接的跟踪参数
+用户昵称生成及公开资料页链接使用昵称
+*** 2012年8月
+维护广告代码
+敏感词过滤：检测敏感词并发送提醒邮件
+*** 2012年9月
+用户昵称生成及公开资料页链接使用昵称
+*** 2012年10月
+规范后台查询功能
+公司基础信息API实现
+*** 2012年11月
+公司主页简版
+企业快速注册
+公司主页专业版基础功能
+*** 2012年12月
+新版公司主页（包括抓取数据入库）
+新版公司主页（认领流程）
+** nickname http://blog.xdite.net/  http://blog.xdite.net/posts/2012/08/22/rails-with-massive-data/
+   User.select([:id, :name, :locale, :en_name]).where("id in (36712,16486, 19010, 26538)").find_in_batches(:batch_size => 2) do |users|
+
+   306---2731
+
+    mysqldump -uroot -proot  tianji user_nicknames  -d > user_nicknames_sche.sql ; mysqldump -uroot -proot  tianji user_nickname_counts  -d > user_nickname_counts_sche.sql ;
+    mysqldump -uroot -proot  tianji user_nicknames  -t > user_nicknames_data.sql ; mysqldump -uroot -proot  tianji user_nickname_counts  -t > user_nickname_counts_data.sql ;
+
+*** 数据处理
+**** 数字开头的数据除去
+select *
+  from user_nickname_counts where nickname in (
+    select distinct base from user_nicknames where base REGEXP '^[0-9]+$')
+
+
+delete from user_nickname_counts where nickname in (
+select * from (select distinct base from user_nicknames where base REGEXP '^[0-9]+$') t
+)
+delete from user_nicknames where  base REGEXP '^[0-9]+$'
+**** 数字结尾的除去结尾数字再顺序
+
+select *
+  from user_nicknames where base REGEXP '^[0-9]'
+
+**** count 对照
+     "UserNickname count:#{UserNickname.count}; UserNicknameCount count sum: #{UserNicknameCount.sum(count)}"
+
+select sum(count) from user_nickname_counts
+union
+select count(1) from user_nicknames
+**** count中为0数据删除
+*** summary
+**** import size: 2w
+     20k: 130'
+     15k: 99'
+     3 k: 28'
+     2 k: 21'
+     1 k: 15'
+**** 索引要在数据插入前确定，以方便验证数据： 但没有测试索引对数据插入的影响
+**** 首先确定异常数据类型，以及处理方法，多数时间都是被无用的异常数据消耗的
+*** check
+**** UserNickname.count - UserNicknameCount.sum(:count)
+**** a1 = Ung.all; a2 = UserNicknameCount.all; "#{a1.length - a2.length}"; b1={};b2={}; a1.each{|r| b1[r.base] = r}; a2.each{|r| b2[r.nickname] = r}; m = []; b1.each{|k, v| m << ["#{v.base} #{v.count}", b2[k]] if b2[k].blank? || !v.count.eql?(b2[k].count)}
+     class Ung < ActiveRecord::Base; self.table_name='ung' end
+     a1 = UserNickname.select('base, count(1) count').group('base')
+***** class Ung < ActiveRecord::Base; self.table_name='ung' end; a1 = Ung.all; a2 = UserNicknameCount.all; "#{a1.length - a2.length}"; b1={};b2={}; a1.each{|r| b1[r.base] = r}; a2.each{|r| b2[r.nickname] = r}; m = []; b1.each{|k, v| m << ["#{v.base} #{v.count}", b2[k]] if b2[k].blank? || !v.count.eql?(b2[k].count)}
+*** Q
+**** User#name 大小写 Apple apple
+**** #<User id: 15637, email: nil, locale: "zh-CN", name: "李檬　"  strip无效 : 全角空格，替换掉
+     #<User id: 21058, email: nil, locale: "zh-CN", name: "王军　　"
+**** '  "  引号 : 使用数组式查询，使非法字符自动转义
+*** debug
+#    User.select([:id, :name, :locale, :en_name]).where("id in (19797, 15336, 8925, 6863)").find_in_batches(:batch_size => 2) do |users|
+#    User.select([:id, :name, :locale, :en_name]).where("id >= 1414329 and id <= 1499019").find_in_batches(:batch_size => 1000) do |users|
+#     User.select([:id, :name, :locale, :en_name]).where("id <= 1499019").find_in_batches(:batch_size => 5000) do |users|
+#    User.select([:id, :name, :locale, :en_name]).where("id >= 1414329 and id <= 1499019").order('id').find_in_batches(:batch_size => 100) do |users|
+#     User.select([:id, :name, :locale, :en_name]).where("id < 1414329").order('id').find_in_batches(:batch_size => 5000) do |users|
+#     User.select([:id, :name, :locale, :en_name]).where(" id > 1979885 and id <= 2085322").order('id').find_in_batches(:batch_size => 1000) do |users|
+
+** surl
+# -*- coding: utf-8 -*-
+class SUrl
+  @@chars = {"a" , "b" , "c" , "d" , "e" , "f" , "g" , "h" ,
+    "i" , "j" , "k" , "l" , "m" , "n" , "o" , "p" , "q" , "r" , "s" , "t" ,
+    "u" , "v" , "w" , "x" , "y" , "z" , "0" , "1" , "2" , "3" , "4" , "5" ,
+    "6" , "7" , "8" , "9" , "A" , "B" , "C" , "D" , "E" , "F" , "G" , "H" ,
+    "I" , "J" , "K" , "L" , "M" , "N" , "O" , "P" , "Q" , "R" , "S" , "T" ,
+    "U" , "V" , "W" , "X" , "Y" , "Z"}
+
+  def self.to_surl(url)
+    str_md5 = Digest::MD5.hexdigest(url)
+    # 将32位md5串分为4部分，每份8位
+    ret = []
+    4.times do |i|
+      num30 = str_md4[8*i, 8*i-1] & 0x3FFFFFFF
+      ret[i] = []
+      6.times do |j|
+        num62 = 0x0000003D & num30
+        ret[i] << @@chars[num62]
+      end
+    end
+  end
+end
+
+** backbonejs
+http://freewind.me/blog/20111020/446.html
+** jira问题
+*** DONE TNEW-13896 	一度好友列表页,没有选择一度,点"写私信"应该提示至少选择一个好友,而不是直接发送,见图 ： 若未选择好友，则 alert("请选择好友")
+*** TODO TNEW-13876 	footer:缺少hd315图标，见图 	Lisa Wu 	王长明 	Critical 	导航
+*** DONE TNEW-13874 	IE7/Chrome，群发私信,好友控件中,选更多分组功能无法使用  :  设置z-index:9998以使select接收click事件
+    <li class="select_item" style="z-index:9998;">
+      <select id="more_group" onchange="group_friends();" style="z-index:9998;">
+*** DONE TNEW-13873 	IE7/Chrome，群发私信,好友控件中,按字母查询功能无效,见图 :  未重现
+*** TODO TNEW-13872 	群发私信,从好友控件中选择多个好友,在发送页只显示出一行,见图 	Lisa Wu 	王长明 	Critical 	Rubby-私信/站内信/招呼/POKE
+*** DONE TNEW-13871 	我的一度好友页,没按字母分组,见图 ： 未重现
+*** TODO TNEW-13870 	私信列表中,2012.4.8以前收到的私信显示的时间与单个私信对话框页显示不符 	Lisa Wu 	王长明 	Critical 	Rubby-私信/站内信/招呼/POKE
+*** TODO TNEW-13869 	收到新的直邮时,导航消息中没显示,见图 	Lisa Wu 	王长明 	Critical 	导航
+*** TODO TNEW-13868 	活动首页,今日的活动搜索中,只显示了今天开始的活动,缺少显示前几天已经开始但今天未过期的活动 	Lisa Wu 	王长明 	Major 	Rubby-活动
+*** TODO TNEW-13864 	隐私设置功能无效,见图 	Lisa Wu 	王长明 	Critical 	Rubby-设置
+*** TODO TNEW-13863 	设置模块中,屏蔽设置功能,无屏蔽入口http://www.tianji.com/setting/block 	Lisa Wu 	王长明 	Critical 	Rubby-设置
+*** TODO TNEW-13277 	参加活动功能无效,则feed没推送 	Lisa Wu 	王长明 	Major 	Rubby-登后首页feed
+*** TODO TNEW-14054 	外网：新闻，部分新闻图片不显示，点击显示详细内容页就有图片显示 	张丽杰 	王长明 	Major 	　
+*** TODO TNEW-14039 	IE9：登前首页，点击刷新出现白屏 	张丽杰 	王长明 	Major 	Rubby-登前首页
+*** TODO TNEW-13782 	首页评论不合法时：不应部分情况全部提示操作失败 	张丽杰 	王长明 	Major 	Rubby-登后首页
+*** TODO TNEW-13759 	名片：老用户原编辑的名片数据丢失 	张丽杰 	王长明 	Major 	　
+*** TODO TNEW-13757 	发布微博：当图片较长时，点击图片，放大后，显示图片过小，看不清 	张丽杰 	王长明 	Major 	Rubby-微博
+*** TODO TNEW-13755 	首页日志发布：标题无字数限制 	张丽杰 	王长明 	Major 	Ruby-日志
+*** TODO TNEW-13726 	微博发布图片后，再次点击发布图片，发布框保留上次发布的图片，未清除 	张丽杰 	王长明 	Major 	Rubby-登后首页
+*** TODO TNEW-13619 	文件上传：上传文件超过5M，提示信息为英文，需要调整 	张丽杰 	王长明 	Critical 	Ruby-人脉圈
+*** TODO TNEW-14097 	【Chrome】日志：查看日志的页面里天际认证的图标背景色不透明 	钟维 	王长明 	Minor 	Ruby-日志
+*** TODO TNEW-13954 	Feed：当用户分享或点击喜欢对方已删除的日志时，没有相关信息提示，而只会提示操作失败 	钟维 	王长明 	Minor 	Rubby-登后首页feed
+*** TODO TNEW-13942 	分享：当用户分享自己转发的Feed后，分享弹出框无法消失
+*** TODO TNEW-13941 	分享：当用户分享好友转发的Feed后，分享计数器不能实时更新，需刷新才能更新 	钟维 	王长明 	Minor 	Rubby-登后首页feed
+*** TODO TNEW-13909 	可能认识的人：该页面可以刷出已经成为好友的用户 	钟维 	王长明 	Major 	Ruby-可能认识的人
+
+* tianji
+** DONE MBA管理 --- 学习卡管理 ---- 详细 调整样式
+** DONE 后台：角色管理 增加角色菜单察看功能， 点击后列出 可用菜单
+** DONE 增加关键字过滤，并向运营发送提醒邮件，邮件包含敏感词明细
+*** add lib: sensitive_word.rb
+
+*** done models
+测试功能： 对相应字段检查是否含有关键字。若含有，则以*替换，并发送提醒到指定的邮箱。
+                  当前测试环境下发到邮箱： tianjitest@tianji.com  密码：1qaaq1
+
+测试范围： 微博、讨论、观点、日志、评论、人脉圈、活动、分享
+
+关键词列表请参考附件内容
+
+**** status :content  微博
+**** topic :title 讨论
+**** post :content  观点
+**** article :title, "article_content.content" 日志及日志内容
+**** comment :content 评论       ？？url如何确定
+**** group :name, :description 人脉圈
+**** event :title, :full_content  活动
+**** share :comment 分享
+*** undo models
+**** user
+**** wall ：content  留言
+**** friend_request :content 好友请求
+**** message ：content 私信   ？？ 链接，如何察看
+**** news??
+**** company :name, :description 公共主页
+**** company_ad :title 公共主页广告
+**** course :name, :contact, :address, :description, :demand  课程
+**** consult :user_name, :content
+**** all
+
+app/models/admin/role.rb:1:class Admin::Role < ActiveRecord::Base
+app/models/admin/staffer.rb:1:class Admin::Staffer < ActiveRecord::Base
+app/models/answer.rb:1:class Answer < ActiveRecord::Base
+app/models/article.rb:1:class Article < ActiveRecord::Base
+app/models/article_category.rb:1:class ArticleCategory < ActiveRecord::Base
+app/models/article_content.rb:1:class ArticleContent < ActiveRecord::Base
+app/models/author.rb:1:class Author < ActiveRecord::Base
+app/models/authorization.rb:1:class Authorization < ActiveRecord::Base
+app/models/barrier.rb:1:class Barrier < ActiveRecord::Base
+app/models/bcard.rb:1:class Bcard < ActiveRecord::Base
+app/models/block_feed.rb:1:class BlockFeed < ActiveRecord::Base
+app/models/block_feeder.rb:1:class BlockFeeder < ActiveRecord::Base
+app/models/card.rb:1:class Card < ActiveRecord::Base
+app/models/card_apply.rb:1:class CardApply < ActiveRecord::Base
+app/models/cic_form.rb:2:class CicForm < ActiveRecord::Base
+app/models/city.rb:1:class City < ActiveRecord::Base
+app/models/cloud/asset.rb:1:class Cloud::Asset < ActiveRecord::Base
+app/models/comment.rb:1:class Comment < ActiveRecord::Base
+app/models/company.rb:1:class Company < ActiveRecord::Base
+app/models/company_ad.rb:1:class CompanyAd < ActiveRecord::Base
+app/models/company_category.rb:1:class CompanyCategory < ActiveRecord::Base
+app/models/company_follower.rb:1:class CompanyFollower < ActiveRecord::Base
+app/models/company_info.rb:1:class CompanyInfo < ActiveRecord::Base
+app/models/company_member.rb:1:class CompanyMember < ActiveRecord::Base
+app/models/company_photo.rb:1:class CompanyPhoto < ActiveRecord::Base
+app/models/company_schoolmate.rb:1:class CompanySchoolmate < ActiveRecord::Base
+app/models/consult.rb:1:class Consult < ActiveRecord::Base
+app/models/coupon.rb:1:class Coupon < ActiveRecord::Base
+app/models/course.rb:1:class Course < ActiveRecord::Base
+app/models/course_category.rb:1:class CourseCategory < ActiveRecord::Base
+app/models/event.rb:1:class Event < ActiveRecord::Base
+app/models/event_category.rb:1:class EventCategory < ActiveRecord::Base
+app/models/event_invitation.rb:2:class EventInvitation < ActiveRecord::Base
+app/models/event_tianji.rb:1:class EventTianji < ActiveRecord::Base
+app/models/event_tianji_group.rb:1:class EventTianjiGroup < ActiveRecord::Base
+app/models/event_tianji_group_log.rb:1:class EventTianjiGroupLog < ActiveRecord::Base
+app/models/event_user.rb:2:class EventUser < ActiveRecord::Base
+app/models/feed.rb:1:class Feed < ActiveRecord::Base
+app/models/feedback.rb:1:class Feedback < ActiveRecord::Base
+app/models/follow.rb:1:class Follow < ActiveRecord::Base
+app/models/friend_group.rb:1:class FriendGroup < ActiveRecord::Base
+app/models/friend_request.rb:1:class FriendRequest < ActiveRecord::Base
+app/models/friendship.rb:1:class Friendship < ActiveRecord::Base
+app/models/friendship_group.rb:1:class FriendshipGroup < ActiveRecord::Base
+app/models/global_city.rb:1:class GlobalCity < ActiveRecord::Base
+app/models/global_province.rb:1:class GlobalProvince < ActiveRecord::Base
+app/models/group.rb:2:class Group < ActiveRecord::Base
+app/models/group_category.rb:1:class GroupCategory < ActiveRecord::Base
+app/models/group_member.rb:2:class GroupMember < ActiveRecord::Base
+app/models/ibm_cloud.rb:2:class IbmCloud < ActiveRecord::Base
+app/models/import_article_comment.rb:1:class ImportArticleComment < ActiveRecord::Base
+app/models/import_club_post.rb:1:class ImportClubPost < ActiveRecord::Base
+app/models/import_club_topic.rb:1:class ImportClubTopic < ActiveRecord::Base
+app/models/import_event_comment.rb:1:class ImportEventComment < ActiveRecord::Base
+app/models/import_follow.rb:1:class ImportFollow < ActiveRecord::Base
+app/models/import_news_comment.rb:1:class ImportNewsComment < ActiveRecord::Base
+app/models/import_post_comment.rb:1:class ImportPostComment < ActiveRecord::Base
+app/models/industry.rb:1:class Industry < ActiveRecord::Base
+app/models/industry_user_profile.rb:1:class IndustryUserProfile < ActiveRecord::Base
+app/models/internal_group_invitation.rb:2:class InternalGroupInvitation < ActiveRecord::Base
+app/models/invitation.rb:2:class Invitation < ActiveRecord::Base
+app/models/job.rb:1:class Job < ActiveRecord::Base
+app/models/like.rb:1:class Like < ActiveRecord::Base
+app/models/like.rb:14:  rescue ActiveRecord::RecordInvalid
+app/models/market_sap.rb:1:class MarketSap < ActiveRecord::Base
+app/models/mba_company_recommand.rb:1:class MbaCompanyRecommand < ActiveRecord::Base
+app/models/mba_event_recommand.rb:1:class MbaEventRecommand < ActiveRecord::Base
+app/models/mba_hot.rb:1:class MbaHot < ActiveRecord::Base
+app/models/mba_news_recommand.rb:1:class MbaNewsRecommand < ActiveRecord::Base
+app/models/mba_recommand.rb:1:class MbaRecommand < ActiveRecord::Base
+app/models/message.rb:1:class Message < ActiveRecord::Base
+app/models/news.rb:1:class News < ActiveRecord::Base
+app/models/news.rb:56:      ActiveRecord::Base.transaction do
+app/models/news_category.rb:1:class NewsCategory < ActiveRecord::Base
+app/models/news_channel.rb:3:class NewsChannel < ActiveRecord::Base
+app/models/news_favorite.rb:1:class NewsFavorite < ActiveRecord::Base
+app/models/news_subscription.rb:1:class NewsSubscription < ActiveRecord::Base
+app/models/outer_link.rb:1:class OuterLink < ActiveRecord::Base
+app/models/post.rb:1:class Post < ActiveRecord::Base
+app/models/post_vote.rb:1:class PostVote < ActiveRecord::Base
+app/models/profile.rb:1:class Profile < ActiveRecord::Base
+app/models/profile_setting.rb:1:class ProfileSetting < ActiveRecord::Base
+app/models/qiyun_company.rb:1:class QiyunCompany < ActiveRecord::Base
+app/models/qiyun_department.rb:1:class QiyunDepartment < ActiveRecord::Base
+app/models/qiyun_dp_company.rb:2:class QiyunDpCompany < ActiveRecord::Base
+app/models/qiyun_dp_department.rb:1:class QiyunDpDepartment < ActiveRecord::Base
+app/models/qiyun_dp_page.rb:1:class QiyunDpPage < ActiveRecord::Base
+app/models/qiyun_dp_user.rb:2:class QiyunDpUser < ActiveRecord::Base
+app/models/qiyun_dp_user_department.rb:1:class QiyunDpUserDepartment < ActiveRecord::Base
+app/models/qiyun_user.rb:2:class QiyunUser < ActiveRecord::Base
+app/models/qiyun_user_department.rb:1:class QiyunUserDepartment < ActiveRecord::Base
+app/models/question.rb:1:class Question < ActiveRecord::Base
+app/models/recommand_company.rb:1:class RecommandCompany < ActiveRecord::Base
+app/models/result.rb:1:class Result < ActiveRecord::Base
+app/models/section.rb:1:class Section < ActiveRecord::Base
+app/models/share.rb:1:class Share < ActiveRecord::Base
+app/models/share.rb:19:  rescue ActiveRecord::RecordInvalid
+app/models/site_url.rb:1:class SiteUrl < ActiveRecord::Base
+app/models/software.rb:1:class Software < ActiveRecord::Base
+app/models/status.rb:1:class Status < ActiveRecord::Base
+app/models/status.rb:32:      ActiveRecord::Base.transaction do
+app/models/status.rb:47:      ActiveRecord::Base.transaction do
+app/models/subject.rb:1:class Subject < ActiveRecord::Base
+app/models/subject_category.rb:1:class SubjectCategory < ActiveRecord::Base
+app/models/subject_favorite.rb:1:class SubjectFavorite < ActiveRecord::Base
+app/models/subjects_topic.rb:1:class SubjectsTopic < ActiveRecord::Base
+app/models/survey.rb:1:class Survey < ActiveRecord::Base
+app/models/survey_response.rb:1:class SurveyResponse < ActiveRecord::Base
+app/models/survey_simple.rb:1:class SurveySimple < ActiveRecord::Base
+app/models/topic.rb:1:class Topic < ActiveRecord::Base
+app/models/topic_favorite.rb:1:class TopicFavorite < ActiveRecord::Base
+app/models/ueditor_image.rb:1:class UeditorImage < ActiveRecord::Base
+app/models/upload/asset.rb:1:class Upload::Asset < ActiveRecord::Base
+app/models/user.rb:2:class User < ActiveRecord::Base
+app/models/user_setting.rb:1:class UserSetting < ActiveRecord::Base
+app/models/visited_user.rb:1:class VisitedUser < ActiveRecord::Base
+app/models/wall.rb:1:class Wall < ActiveRecord::Base
+
+** DONE 后台内容管理的增删改功能是否正常，如不正常，记录并修改
+*** 人脉圈频道---批量导入人脉圈---直接报错---未解决  : 删除
+*** 讨论频道---推荐直接报错---没有常量---未解决 : 删除
+*** 讨论频道---观点---直接报错---未解决 ： 加观点列表页（参考讨论频道--讨论，增加所属讨论列）和观点评论页；评论数列链接到观点评论列表（参考新闻留言页）页
+*** 数据统计---登陆用户---清空时间不起作用-----未解决
+
+
+*** 1. 数据统计---登陆用户---按照时间检索不起作用-----解决
+*** 2. 数据统计---登陆用户---按照时间检索当天用户显示不出来---解决
+*** 5. 数据统计---评论管理---feeder为company的同样出现错误4---暂时解决
+*** 7. 用户认证---行业管理---没有对名称和排序为空以及重复进行判断---解决
+*** 8. 推荐管理---首页右侧推荐---未对url格式进行控制---解决 ??不能全部控制url为链接格式
+*** 11.人脉圈频道---人脉圈分类和人脉圈---点击管理的返回列表都报错----解决
+*** 12.人脉圈频道---人脉圈分类和人脉圈---管理更新人脉圈没有判断是否为空---解决
+*** 14.活动频道---活动管理---检索同一天日期不起作用---解决
+*** 17. 新闻频道---新闻留言---报错的原因很多---暂时解决（修改的地方很多）
+*** 18. 新闻频道---历史新闻---上面的筛选不起作用---解决 : 头部分类没有设置当前为活动分类样式
+*** 20. 讨论频道---分类---下面的添加专题分类没有控制名称和对应行业是否为空或者是否重复---解决
+*** 25. MBA管理---课程管理 添加课程，直接报错 : 没有设置课程分类的课程，修改操作保存时报错
+*** 26. MBA管理---外部链接管理，创建链接所有选项都未控制
+*** 4. 数据统计---微博管理---feeder为company的话查看报错-----暂时解决(好友一
+*** 览中没有显示)
+*** 16.日志频道---日志管理---点击报错，企业发布的日至不能查看---暂时解决
+***  ---没有修改的----
+**** 3. 数据统计---登陆用户---清空时间不起作用----------------未解决
+**** 6. 数据统计---评论管理---如果评论的是新闻，直接报错---未解决(线上是好的)
+**** 9. 推荐管理---活动推荐---没有判断活动ID是否存在---未解决
+**** 10.人脉圈频道---批量导入人脉圈---直接报错---未解决
+**** 13.人脉圈频道---没有找到创建人脉圈分类-----------未解决
+**** 15.活动频道---活动留言---没有view页面-------未解决
+**** 19. 讨论频道---专题---没有分页--未解决
+**** 21. 讨论频道---推荐直接报错---没有常量---未解决
+**** 22. 讨论频道---观点---直接报错---未解决
+**** 23. 调查问卷---调查问卷---模块管理直接报错---未解决
+**** 24. MBA管理---热门课程推荐 全部为空也能提交
+
+article 176
+
+user
+
+** 关键字过滤
+   lib/sensitive_word.rb
+** DONE 后台菜单(yaml)
+role: 增加abbrev（短链接），以使role与yaml关联
+/data/admin_menus/admin.yml .. : 增加yaml文件配置每个角色的菜单；仅提供菜单，权限设置仍在Ability中设置
+
+Roles表添加字段 abbrev 表示缩写
+
+是否超级管理员通过staffers.admin 来判断， 其余通过roles.abbrev
+
+各个权限对应的yml:
+超级管理员  admin.yml
+Ruby团队  ruby.yml
+市场部     market.yml
+MBA销售 mba_sales.yml
+广告销售 ad_sales.yml
+产品经理 pm.yml
+高级编辑 senior_editor.yml
+网站编辑 editor.yml
+手机团队 mobile.yml
+
+id 角色名称
+--+-------------
+1 高级编辑
+2 网站编辑
+3 市场部
+4 MBA销售
+5 广告销售
+6 手机团队
+7 ruby团队
+** home
+*** Q
+**** TODO 图片上传的提示： 可根据语言切换不同图片或换为文本
+**** TODO 右侧“可能认识的人”： "加好友"为图片，需可根据语言切换不同图片或换为文本
+** ga setCustomVar
+*** java接口
+服务已提供，以下服务将会包含新字段subReferer：
+
+{host}/cdata/user/{userId}/@basic
+{host}/cdata/user/{userId}/@profile
+{host}/cdata/user/{userId}/@full
+
+Jeff
+**** http://core.data.tianji.com/cdata/user/39774645/@full
+**** http://core.data.tianji.com/cdata/user/39774645/@basic
+*** 未登录
+    _gaq.push(['_setCustomVar', 1, 'M-type', 'Anonymous', 2]);
+_gaq.push(['_setCustomVar', 2, 'M-orig', 'Anonymous', 2]);
+_gaq.push(['_setCustomVar', 3, 'M-idrange', 'Anonymous', 2]);
+_gaq.push(['_setCustomVar', 4, 'M-oldness', 'Anonymous', 2]);
+_gaq.push(['_setCustomVar', 5, 'M-NetworkSize', 'Anonymous', 2]);
+*** 已登录
+_gaq.push(['_setCustomVar', 1, 'M-type', 'Normal', 2]);
+_gaq.push(['_setCustomVar', 2, 'M-orig', 'http://localhost:8080/', 2]);
+_gaq.push(['_setCustomVar', 3, 'M-idrange', '3.9774645', 2]);
+_gaq.push(['_setCustomVar', 4, 'M-oldness', 'n', 2]);
+_gaq.push(['_setCustomVar', 5, 'M-NetworkSize', 'n', 2]);
+*** Q
+**** DONE public profile page need GA too; all pages check:  admin/mobile加GA，企云加GA，下方“关于天际”等静态页面暂时加上Anonymous
+**** DONE ruby: var1 is Recent but Normal: bug: case when range use 0..30, not [0..30]
+**** TODO index/index.html: remove GA customer var if logout callback: user referer check logout callback(request.referer.blank? || !request.referer[0..27].eql?('http://www.tianji.com/Logout'))
+**** DONE var4/5 set as range, not the a/b/c
+**** TODO email template: add GA ?如何处理@current_user问题
+***** template
+****** friend_request 好友请求
+****** group_invite 圈子邀请
+****** QiyunUserMailer#verify_email 企云用户激活邮件
+****** test_email 邮件测试
+****** messages_count_email 每天1点30统计私信数据
+****** friend_requests_count_email 每天1点30统计好友请求数据
+**** TODO baidu: add customer var too
+** 未登录页
+*** Q
+**** DONE 他们也在天际： 静态
+**** DONE <meta name="msapplication-task" content="name=天际网_您的人际网络比您想象的更强大; action-uri=http://my.tianji.com/dashboard/home; icon-uri=http://image.tianji.com/ideal/common/img/tianji.ico" /> 用
+**** DONE 广告位 不需要，就用当前静态图片
+     <div class="adcol">
+               <!-- 广告位 -->
+               <script type="text/javascript">//<![CDATA[
+         ac_as_id = 69839;
+         ac_format = 0;
+         ac_mode = 1;
+         ac_group_id = 1;
+         ac_server_base_url = "afp.csbew.com/";
+         //]]></script>
+         <script type="text/javascript" src="http://static.csbew.com/k.js"></script>
+             </div>
+**** DONE 媒体看天际 对应链接
+**** DONE comscore/ga/hm.baidu 需要
+
+ !-- Begin comScore Tag -->
+ script>
+   var _comscore = _comscore || [];
+   _comscore.push({ c1: "2", c2: "10136995" });
+   (function() {
+      var s = document.createElement("script"), el =
+      document.getElementsByTagName("script")[0]; s.async = true;
+      s.src = (document.location.protocol == "https:" ? "https://sb" :
+      "http://b") + ".scorecardresearch.com/beacon.js";
+      el.parentNode.insertBefore(s, el);
+   })();
+ </script>
+ <noscript>
+   <img src="http://b.scorecardresearch.com/p?c1=2&c2=10136995&cv=2.0&cj=1" />
+ </noscript>
+ <!-- End comScore Tag -->
+ <script type="text/javascript">
+ var _gaq = _gaq || [];
+   _gaq.push(['_setAccount', 'UA-4345674-2']);
+   _gaq.push(['_setDomainName', 'tianji.com']);
+   _gaq.push(['_setCampaignCookieTimeout', 0]);
+   _gaq.push(['_addIgnoredRef', 'tianji']);
+   _gaq.push(['_addOrganic', 'soso', 'w']);
+   _gaq.push(['_addOrganic', 'sogou', 'query']);
+   _gaq.push(['_addOrganic', 'youdao', 'q']);
+   _gaq.push(['_trackPageview']);
+
+   (function() {
+     var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+     ga.src = ('https:' == document.location.protocol ? 'https://ssl' :
+ 'http://www') + '.google-analytics.com/ga.js';
+     var s = document.getElementsByTagName('script')[0];
+ s.parentNode.insertBefore(ga, s);
+   })();
+
+
+ var _bdhmProtocol = (("https:" == document.location.protocol) ? "https://" : " http://");
+ document.write(unescape("%3Cscript src='" + _bdhmProtocol +"hm.baidu.com/h.js%3Fce06253aba52736c15a80e9b50ff017a' type='text/javascript'%3E%3C/script%3E"));
+**** DONE formvalidate 使用 onsubmit 检查
+ ar formvalidate = function(){
+   $(".login").bind('click',function(){
+     var a = $(".username").val();
+     var b = $(".password").val();
+     if(a!=''&&b!=''){
+       $(".error").addClass("hidden");
+       $(this).parents('form').submit();
+     }else{
+       $(".error").removeClass("hidden");
+       return false;
+     }
+   })
+ }
+**** DONE /join
+
+     (function(){
+     if(window.location.href.indexOf("?")==-1) return;
+     var url = window.location.href.split("?")[1];
+     if(url.length > 0){
+       var param = url.split("=");
+       if(param.length > 1 && param[1].length > 0){
+         if(param[0] == 'fr'){
+           document.getElementById('join').href="http://www.tianji.com/join?fr="+param[1];
+           document.getElementById('iq_evaluation').href="http://www.tianji.com/join?fr="+param[1];
+         }else{
+           document.getElementById('join').href="http://www.tianji.com/join?ch="+param[1];
+           document.getElementById('iq_evaluation').href="http://www.tianji.com/join?ch="+param[1];
+         }
+       }
+     }
+   }())
+**** TODO 英文版是否同时据此修改, I18n?
+**** TODO form提交后的跳转
+*** fp http://192.168.2.159/home/login_new.php
+** 后台错误记录
+   template missing: ajax/html 请求的不同模版问题
+   api: java借口调用超时、返回为空的处理；controller中变量为空时，模版中的相应处理
+*** TODO http://tianji.com/admin/error_logs/4fed75fc659e9306fe000263 缺少params参数
+**** undefined method `split' for nil:NilClass
+
+/tianji/web/releases/20120629071748/app/controllers/ajax/forms_controller.rb:9:in `global_share'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/implicit_render.rb:4:in `send_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/base.rb:167:in `process_action'
+**** request: http://www.tianji.com/ajax/forms/global_share?ticket=ST-1514839-chcvb4MrcLCsljdaj4mJ-cas
+{"ticket"=>"ST-1514839-chcvb4MrcLCsljdaj4mJ-cas", "action"=>"global_share", "controller"=>"ajax/forms"}
+*** TODO http://tianji.com/admin/error_logs/4fd3c40a659e93703b0000a3 js请求方法对html请求来说报错
+**** Missing template topics/sort, application/sort with {:locale=>[:en, :"zh-CN"], :formats=>[:html], :handlers=>[:erb, :builder, :coffee]}. Searched in: * "/tianji/web/releases/20120629071748/app/views"
+
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_view/path_set.rb:58:in `find'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_view/lookup_context.rb:109:in `find'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_view/renderer/abstract_renderer.rb:3:in `find_template'
+**** request: http://www.tianji.com/topics/331/sort?key=time
+{"key"=>"time", "action"=>"sort", "controller"=>"topics", "id"=>"331"}
+*** TODO http://tianji.com/admin/error_logs/4fd704a32268d4221c000085 需要检查线上数据,UserMongo.name不能为null或空串
+    http://tianji.com/admin/error_logs/4fc7d2b42268d44f590000b9
+**** undefined method `scan' for nil:NilClass
+/tianji/web/shared/bundle/ruby/1.9.1/gems/chinese_pinyin-0.4.1/lib/chinese_pinyin.rb:40:in `translate'
+/tianji/web/releases/20120627034450/app/helpers/application_helper.rb:272:in `block in friend_chars'
+/tianji/web/releases/20120627034450/app/helpers/application_helper.rb:271:in `each'
+/tianji/web/releases/20120627034450/app/helpers/application_helper.rb:271:in `friend_chars'
+/tianji/web/releases/20120627034450/app/views/contacts/_friends.html.erb:7:in
+**** 由于UserMongo name 字段有的为null； 为空串也会出错
+     为空串时，UserMongo.sort_by_character 中upcase错误
+*** DONE http://tianji.com/admin/error_logs/4fce0688080cab3dfb0001a6
+**** translation missing: zh-CN.mongoid.errors.messages.calling_document_find_with_nil_is_invalid
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongoid-2.4.11/lib/mongoid/criteria.rb:328:in `raise_invalid'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongoid-2.4.11/lib/mongoid/criteria.rb:307:in `search'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongoid-2.4.11/lib/mongoid/criterion/inclusion.rb:125:in `find'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongoid-2.4.11/lib/mongoid/finders.rb:84:in `find'
+/tianji/web/releases/20120619073906/app/controllers/pub_profile_controller.rb:9:in
+`show'
+**** request: http://www.tianji.com/profile
+{"controller"=>"pub_profile", "action"=>"show"}
+**** pub_profile#show  中 params[:id]为空
+**** redirect_to $host and return if params[:id].blank?
+*** TODO http://tianji.com/admin/error_logs/4fbe0e0d080cab471100002a
+**** undefined method `read' for nil:NilClass
+/tianji/web/shared/bundle/ruby/1.9.1/gems/carrierwave-0.6.2/lib/carrierwave/uploader/cache.rb:73:in `cache_stored_file!'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/carrierwave-0.6.2/lib/carrierwave/uploader/versions.rb:174:in `recreate_versions!'
+/tianji/web/releases/20120627034450/app/models/upload/user_logo.rb:30:in `reprocess_avatar'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:418:in `_run__3747361795318707074__update__633278574134294459__callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:405:in `__run_callback'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:385:in `_run_update_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:81:in `run_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/callbacks.rb:272:in `update'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/persistence.rb:344:in `create_or_update'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/callbacks.rb:264:in `block in create_or_update'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:436:in `_run__3747361795318707074__save__633278574134294459__callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:405:in `__run_callback'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:385:in `_run_save_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:81:in `run_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/callbacks.rb:264:in `create_or_update'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/persistence.rb:84:in `save'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/validations.rb:50:in `save'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/attribute_methods/dirty.rb:22:in `save'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:241:in `block (2 levels) in save'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:295:in `block in with_transaction_returning_status'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/abstract/database_statements.rb:192:in `transaction'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:208:in `transaction'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:293:in `with_transaction_returning_status'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:241:in `block in save'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:252:in `rollback_active_record_state!'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:240:in `save'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/persistence.rb:213:in `block in update_attributes'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:295:in `block in with_transaction_returning_status'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/abstract/database_statements.rb:192:in `transaction'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:208:in `transaction'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:293:in `with_transaction_returning_status'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/persistence.rb:211:in `update_attributes'
+/tianji/web/releases/20120627034450/app/controllers/setting_controller.rb:61:in `crop'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/implicit_render.rb:4:in `send_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/base.rb:167:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/rendering.rb:10:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/callbacks.rb:18:in `block in process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:447:in `_run__3859561801316396665__process_action__1706614592943375215__callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:405:in `__run_callback'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:385:in `_run_process_action_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:81:in `run_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/callbacks.rb:17:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/rescue.rb:29:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/instrumentation.rb:30:in `block in process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/notifications.rb:123:in `block in instrument'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/notifications/instrumenter.rb:20:in `instrument'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/notifications.rb:123:in `instrument'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/instrumentation.rb:29:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/params_wrapper.rb:206:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/railties/controller_runtime.rb:18:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongo-rails-instrumentation-0.2.4/lib/mongo/rails/instrumentation/controller_runtime.rb:13:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/base.rb:121:in `process'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/rendering.rb:45:in `process'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal.rb:203:in `dispatch'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/rack_delegation.rb:14:in `dispatch'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal.rb:246:in `block in action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/routing/route_set.rb:73:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/routing/route_set.rb:73:in `dispatch'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/routing/route_set.rb:36:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/journey-1.0.3/lib/journey/router.rb:68:in `block in call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/journey-1.0.3/lib/journey/router.rb:56:in `each'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/journey-1.0.3/lib/journey/router.rb:56:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/routing/route_set.rb:600:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/omniauth-1.0.3/lib/omniauth/strategy.rb:168:in `call!'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/omniauth-1.0.3/lib/omniauth/strategy.rb:148:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/omniauth-1.0.3/lib/omniauth/builder.rb:42:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongoid-2.4.11/lib/rack/mongoid/middleware/identity_map.rb:33:in `block in call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongoid-2.4.11/lib/mongoid.rb:133:in `unit_of_work'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongoid-2.4.11/lib/rack/mongoid/middleware/identity_map.rb:33:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/client_side_validations-3.1.4/lib/client_side_validations/middleware.rb:18:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/best_standards_support.rb:17:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/etag.rb:23:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/conditionalget.rb:35:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/head.rb:14:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/params_parser.rb:21:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/flash.rb:242:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/session/abstract/id.rb:205:in `context'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/session/abstract/id.rb:200:in `call'
+/tianji/web/releases/20120627034450/lib/flash_session_cookie_middleware.rb:15:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/cookies.rb:338:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/query_cache.rb:64:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/abstract/connection_pool.rb:473:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/callbacks.rb:28:in `block in call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:405:in `_run__1128929972330577604__call__633278574134294459__callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:405:in `__run_callback'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:385:in `_run_call_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:81:in `run_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/callbacks.rb:27:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/sendfile.rb:102:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/remote_ip.rb:31:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/debug_exceptions.rb:16:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/show_exceptions.rb:56:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/rack/logger.rb:26:in `call_app'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/rack/logger.rb:16:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/quiet_assets-1.0.1/lib/quiet_assets.rb:20:in `call_with_quiet_assets'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/request_id.rb:22:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/methodoverride.rb:21:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/runtime.rb:17:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/lock.rb:15:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:136:in `forward'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:143:in `pass'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:155:in `invalidate'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:71:in `call!'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:51:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/engine.rb:479:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/application.rb:220:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/railtie/configurable.rb:30:in `method_missing'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/lib/unicorn/http_server.rb:531:in `process_client'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/lib/unicorn/http_server.rb:606:in `worker_loop'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/lib/unicorn/http_server.rb:487:in `spawn_missing_workers'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/lib/unicorn/http_server.rb:137:in `start'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/bin/unicorn_rails:209:in `'
+/tianji/web/shared/bundle/ruby/1.9.1/bin/unicorn_rails:19:in `load'
+/tianji/web/shared/bundle/ruby/1.9.1/bin/unicorn_rails:19:in `'
+**** fix
+*** DONE http://tianji.com/admin/error_logs/4fc77a5fa2e3a9634e00012e
+**** Cannot redirect to nil!
+
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/redirecting.rb:70:in `redirect_to'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/flash.rb:25:in `redirect_to'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/instrumentation.rb:60:in `block in redirect_to'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/notifications.rb:123:in `block in instrument'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/notifications/instrumenter.rb:20:in `instrument'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/notifications.rb:123:in `instrument'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/instrumentation.rb:59:in `redirect_to'
+/tianji/web/releases/20120627034450/app/controllers/tools_controller.rb:41:in `shared'
+**** redirect_to (params[:callback_url] || $host) and return if @current_user.blank?
+*** http://tianji.com/admin/error_logs/4fbea7ec080cab056e0002c6
+**** undefined method `id' for nil:NilClass
+
+/tianji/web/releases/20120627034450/app/controllers/companies/schoolmates_controller.rb:10:in `join'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/implicit_render.rb:4:in `send_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/base.rb:167:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/rendering.rb:10:in `process_action'
+**** request:
+
+http://www.tianji.com/companies/126/schoolmates/join
+{"action"=>"join", "controller"=>"companies/schoolmates", "id"=>"126"}
+**** fix: @current_user 未设置 # before_filter :access_denied, :only => [:join, :quit]
+*** TODO http://tianji.com/admin/error_logs/4fbed3d12268d415a6000571
+**** Duplicate entry '44626920' for key 'index_users_on_id'
+
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/abstract_mysql_adapter.rb:243:in `query'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/abstract_mysql_adapter.rb:243:in `block in execute'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/abstract_adapter.rb:280:in `block in log'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/notifications/instrumenter.rb:20:in `instrument'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/abstract_adapter.rb:275:in `log'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/abstract_mysql_adapter.rb:243:in `execute'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/mysql2_adapter.rb:211:in `execute'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/mysql2_adapter.rb:234:in `exec_insert'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/abstract/database_statements.rb:90:in `insert'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/abstract/query_cache.rb:14:in `insert'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/relation.rb:66:in `insert'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/persistence.rb:363:in `create'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/timestamp.rb:57:in `create'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/callbacks.rb:268:in `block in create'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:403:in `_run__460478790190936690__create__4362029083126940305__callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:405:in `__run_callback'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:385:in `_run_create_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:81:in `run_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/callbacks.rb:268:in `create'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/persistence.rb:344:in `create_or_update'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/callbacks.rb:264:in `block in create_or_update'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:425:in `_run__460478790190936690__save__4362029083126940305__callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:405:in `__run_callback'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:385:in `_run_save_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:81:in `run_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/callbacks.rb:264:in `create_or_update'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/persistence.rb:84:in `save'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/validations.rb:50:in `save'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/attribute_methods/dirty.rb:22:in `save'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:241:in `block (2 levels) in save'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:295:in `block in with_transaction_returning_status'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/abstract/database_statements.rb:192:in `transaction'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:208:in `transaction'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:293:in `with_transaction_returning_status'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:241:in `block in save'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:252:in `rollback_active_record_state!'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/transactions.rb:240:in `save'
+/tianji/web/releases/20120627034450/app/models/user.rb:294:in `sync_by_id'
+/tianji/web/releases/20120627034450/app/models/user.rb:182:in `find_by_remote_production'
+/tianji/web/releases/20120627034450/app/models/user.rb:162:in `find_by_remote'
+/tianji/web/releases/20120627034450/app/controllers/application_controller.rb:53:in `current_user'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:440:in `_run__3180127683454162095__process_action__3975804515476797807__callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:405:in `__run_callback'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:385:in `_run_process_action_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:81:in `run_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/callbacks.rb:17:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/rescue.rb:29:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/instrumentation.rb:30:in `block in process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/notifications.rb:123:in `block in instrument'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/notifications/instrumenter.rb:20:in `instrument'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/notifications.rb:123:in `instrument'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/instrumentation.rb:29:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/params_wrapper.rb:206:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/railties/controller_runtime.rb:18:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongo-rails-instrumentation-0.2.4/lib/mongo/rails/instrumentation/controller_runtime.rb:13:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/base.rb:121:in `process'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/rendering.rb:45:in `process'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal.rb:203:in `dispatch'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/rack_delegation.rb:14:in `dispatch'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal.rb:246:in `block in action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/routing/route_set.rb:73:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/routing/route_set.rb:73:in `dispatch'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/routing/route_set.rb:36:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/journey-1.0.3/lib/journey/router.rb:68:in `block in call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/journey-1.0.3/lib/journey/router.rb:56:in `each'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/journey-1.0.3/lib/journey/router.rb:56:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/routing/route_set.rb:600:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/omniauth-1.0.3/lib/omniauth/strategy.rb:168:in `call!'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/omniauth-1.0.3/lib/omniauth/strategy.rb:148:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/omniauth-1.0.3/lib/omniauth/builder.rb:42:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongoid-2.4.11/lib/rack/mongoid/middleware/identity_map.rb:33:in `block in call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongoid-2.4.11/lib/mongoid.rb:133:in `unit_of_work'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongoid-2.4.11/lib/rack/mongoid/middleware/identity_map.rb:33:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/client_side_validations-3.1.4/lib/client_side_validations/middleware.rb:18:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/best_standards_support.rb:17:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/etag.rb:23:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/conditionalget.rb:25:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/head.rb:14:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/params_parser.rb:21:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/flash.rb:242:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/session/abstract/id.rb:205:in `context'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/session/abstract/id.rb:200:in `call'
+/tianji/web/releases/20120627034450/lib/flash_session_cookie_middleware.rb:15:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/cookies.rb:338:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/query_cache.rb:64:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/abstract/connection_pool.rb:473:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/callbacks.rb:28:in `block in call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:405:in `_run__225631180056245221__call__4362029083126940305__callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:405:in `__run_callback'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:385:in `_run_call_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:81:in `run_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/callbacks.rb:27:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/sendfile.rb:102:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/remote_ip.rb:31:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/debug_exceptions.rb:16:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/show_exceptions.rb:56:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/rack/logger.rb:26:in `call_app'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/rack/logger.rb:16:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/quiet_assets-1.0.1/lib/quiet_assets.rb:20:in `call_with_quiet_assets'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/request_id.rb:22:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/methodoverride.rb:21:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/runtime.rb:17:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/lock.rb:15:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:136:in `forward'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:245:in `fetch'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:185:in `lookup'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:66:in `call!'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:51:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/engine.rb:479:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/application.rb:220:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/railtie/configurable.rb:30:in `method_missing'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/lib/unicorn/http_server.rb:531:in `process_client'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/lib/unicorn/http_server.rb:606:in `worker_loop'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/lib/unicorn/http_server.rb:487:in `spawn_missing_workers'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/lib/unicorn/http_server.rb:137:in `start'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/bin/unicorn_rails:209:in `'
+/tianji/web/shared/bundle/ruby/1.9.1/bin/unicorn_rails:19:in `load'
+/tianji/web/shared/bundle/ruby/1.9.1/bin/unicorn_rails:19:in `'
+**** request: http://www.tianji.com/p/4564995?ticket=ST-1403758-oC9SgoOhYLkAmvuRW2rf-cas
+{"ticket"=>"ST-1403758-oC9SgoOhYLkAmvuRW2rf-cas", "controller"=>"profile", "action"=>"show", "id"=>"4564995"}
+**** unknown
+*** http://tianji.com/admin/error_logs/4fd5b5ee2268d454e7000001
+**** Missing template home/email_notice, application/email_notice with {:locale=>[:"zh-CN"], :formats=>[:html], :handlers=>[:erb, :builder, :coffee]}. Searched in: * "/tianji/web/releases/20120627034450/app/views"
+
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_view/path_set.rb:58:in `find'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_view/lookup_context.rb:109:in `find'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_view/renderer/abstract_renderer.rb:3:in `find_template'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_view/renderer/template_renderer.rb:34:in `determine_template'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_view/renderer/template_renderer.rb:10:in `render'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_view/renderer/renderer.rb:36:in `render_template'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_view/renderer/renderer.rb:17:in `render'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/rendering.rb:110:in `_render_template'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/streaming.rb:225:in `_render_template'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/rendering.rb:103:in `render_to_body'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/renderers.rb:28:in `render_to_body'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/compatibility.rb:50:in `render_to_body'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/rendering.rb:88:in `render'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/rendering.rb:16:in `render'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/instrumentation.rb:40:in `block (2 levels) in render'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/core_ext/benchmark.rb:5:in `block in ms'
+/usr/local/lib/ruby/1.9.1/benchmark.rb:295:in `realtime'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/core_ext/benchmark.rb:5:in `ms'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/instrumentation.rb:40:in `block in render'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/instrumentation.rb:83:in `cleanup_view_runtime'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/railties/controller_runtime.rb:24:in `cleanup_view_runtime'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongo-rails-instrumentation-0.2.4/lib/mongo/rails/instrumentation/controller_runtime.rb:18:in `cleanup_view_runtime'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/instrumentation.rb:39:in `render'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/implicit_render.rb:10:in `default_render'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/implicit_render.rb:5:in `send_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/base.rb:167:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/rendering.rb:10:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/callbacks.rb:18:in `block in process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:447:in `_run__750149365116982116__process_action__2515635528531152851__callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:405:in `__run_callback'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:385:in `_run_process_action_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:81:in `run_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/callbacks.rb:17:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/rescue.rb:29:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/instrumentation.rb:30:in `block in process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/notifications.rb:123:in `block in instrument'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/notifications/instrumenter.rb:20:in `instrument'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/notifications.rb:123:in `instrument'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/instrumentation.rb:29:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/params_wrapper.rb:206:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/railties/controller_runtime.rb:18:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongo-rails-instrumentation-0.2.4/lib/mongo/rails/instrumentation/controller_runtime.rb:13:in `process_action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/base.rb:121:in `process'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/abstract_controller/rendering.rb:45:in `process'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal.rb:203:in `dispatch'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal/rack_delegation.rb:14:in `dispatch'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_controller/metal.rb:246:in `block in action'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/routing/route_set.rb:73:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/routing/route_set.rb:73:in `dispatch'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/routing/route_set.rb:36:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/journey-1.0.3/lib/journey/router.rb:68:in `block in call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/journey-1.0.3/lib/journey/router.rb:56:in `each'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/journey-1.0.3/lib/journey/router.rb:56:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/routing/route_set.rb:600:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/omniauth-1.0.3/lib/omniauth/strategy.rb:168:in `call!'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/omniauth-1.0.3/lib/omniauth/strategy.rb:148:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/omniauth-1.0.3/lib/omniauth/builder.rb:42:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongoid-2.4.11/lib/rack/mongoid/middleware/identity_map.rb:33:in `block in call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongoid-2.4.11/lib/mongoid.rb:133:in `unit_of_work'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/mongoid-2.4.11/lib/rack/mongoid/middleware/identity_map.rb:33:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/client_side_validations-3.1.4/lib/client_side_validations/middleware.rb:18:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/best_standards_support.rb:17:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/etag.rb:23:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/conditionalget.rb:25:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/head.rb:14:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/params_parser.rb:21:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/flash.rb:242:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/session/abstract/id.rb:205:in `context'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/session/abstract/id.rb:200:in `call'
+/tianji/web/releases/20120627034450/lib/flash_session_cookie_middleware.rb:15:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/cookies.rb:338:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/query_cache.rb:64:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activerecord-3.2.6/lib/active_record/connection_adapters/abstract/connection_pool.rb:473:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/callbacks.rb:28:in `block in call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:405:in `_run__1128929972330577604__call__633278574134294459__callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:405:in `__run_callback'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:385:in `_run_call_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/activesupport-3.2.6/lib/active_support/callbacks.rb:81:in `run_callbacks'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/callbacks.rb:27:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/sendfile.rb:102:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/remote_ip.rb:31:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/debug_exceptions.rb:16:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/show_exceptions.rb:56:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/rack/logger.rb:26:in `call_app'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/rack/logger.rb:16:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/quiet_assets-1.0.1/lib/quiet_assets.rb:20:in `call_with_quiet_assets'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/actionpack-3.2.6/lib/action_dispatch/middleware/request_id.rb:22:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/methodoverride.rb:21:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/runtime.rb:17:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-1.4.1/lib/rack/lock.rb:15:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:136:in `forward'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:245:in `fetch'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:185:in `lookup'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:66:in `call!'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/rack-cache-1.2/lib/rack/cache/context.rb:51:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/engine.rb:479:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/application.rb:220:in `call'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/railties-3.2.6/lib/rails/railtie/configurable.rb:30:in `method_missing'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/lib/unicorn/http_server.rb:531:in `process_client'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/lib/unicorn/http_server.rb:606:in `worker_loop'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/lib/unicorn/http_server.rb:487:in `spawn_missing_workers'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/lib/unicorn/http_server.rb:498:in `maintain_worker_count'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/lib/unicorn/http_server.rb:272:in `join'
+/tianji/web/shared/bundle/ruby/1.9.1/gems/unicorn-4.3.1/bin/unicorn_rails:209:in `'
+/tianji/web/shared/bundle/ruby/1.9.1/bin/unicorn_rails:19:in `load'
+/tianji/web/shared/bundle/ruby/1.9.1/bin/unicorn_rails:19:in `'
+**** request: http://www.tianji.com/home/email_notice?_=1340626011119&ticket=ST-1477047-rexjzqYfwdisknzNubEQ-cas
+{"_"=>"1340626011119", "ticket"=>"ST-1477047-rexjzqYfwdisknzNubEQ-cas", "controller"=>"home", "action"=>"email_notice"}
+**** fix: 区别处理html和js请求
+# home_controller#email_notice
+    respond_to do |format|
+      format.js
+      format.html {redirect_to "http://m.tianji.com/inbox/mrd"}
+    end
+** 后台菜单
+*** scheme
+**** 获得可用权限
+     role的可用权限
+**** 构建目录
+**** menu 与 role 的对应设置
+*** model
+**** role  admin_roles
+**** menu  admin_menus
+     cname
+     ename
+     parent_id, :default => 0
+     position, :default => 0
+     path
+     permit_str
+
+
+    Admin::Menu.create({:cname => '系统设置'     , :parent_id => 0}).children.create([{:cname => '管理员', :path => "/admin/staffers", :permission_str => "[:manage, staffer][:read, role]"}, {:cname => '权限角色', :path => "/admin/roles"}, {:cname => '同步所有新闻频道', :path => "/admin/news_channels/sync_all"}])
+    Admin::Menu.create({:cname => '功能测试'     , :parent_id => 0}).children.create([{:cname => '错误日志', :path => "/admin/error_logs"}])
+    Admin::Menu.create({:cname => '市场活动'     , :parent_id => 0}).children.create([{:cname => '竞赛小组列表', :path => "/admin/group_invitations"}])
+    Admin::Menu.create({:cname => '软件管理'     , :parent_id => 0}).children.create([{:cname => '手机客户端管理', :path => "/admin/softwares"}])
+
+#     Admin::Menu.create([
+#                          {:cname => '系统设置'     , :parent_id => 0, :children_attributes => [
+#                              {:cname => '管理员', :path => "/admin/staffers"},
+#                              {:cname => '权限角色', :path => "/admin/roles"},
+#                              {:cname => '同步所有新闻频道', :path => "/admin/news_channels/sync_all"},
+#                            ]},
+#                          {:cname => '功能测试'     , :parent_id => 0, :children_attributes => [
+#                              {:cname => '错误日志', :path => "/admin/error_logs"},
+#                            ]},
+#                          {:cname => '市场活动'     , :parent_id => 0, :children_attributes => [
+#                              {:cname => '竞赛小组列表', :path => "/admin/group_invitations"},
+#                            ]},
+#                          {:cname => '软件管理'     , :parent_id => 0, :children_attributes => [
+#                              {:cname => '手机客户端管理', :path => "/admin/softwares"}
+#                            ]},
+#                        ])
+
+**** admin_menus_admin_roles
+     admin_menu_id
+     role_id
+** 邀请
+
+我加入了天际圈，快接受我的邀请点击http://www.tianji.com/market/group_invitation/sign_up/<% params[:id] %>来加入吧！
+
+
+   输入多个email,可发送邀请链接到email；站外用户可使用邀请链接进行注册
+   流程；
+   该功能可提供多种产品的邀请，因此要区分不同的邀请类型；
+*** Q
+**** 邀请页：复制到剪贴板 未实现
+**** UserMongo
+#<UserMongo _id: 41706518, _type: "UserMongo", created_at: 2012-05-15 08:06:00 UTC, updated_at: 2012-05-15 08:09:24 UTC, friend_ids: [], following_ids: [], follower_ids: [], subject_ids: [], group_ids: [274], event_ids: [], following_company_ids: [], interact_id: nil, email: "adfadf@sohu.com", tp: 0, industry_id: 0, last_news_category_id: nil, normal_logo: nil, profile_cent_sum: 0, profile_cent_en_sum: 0, articles_count: 0, topics_count: 0, posts_count: 0, followings_count: 0, followers_count: 0, groups_count: 0, account_type: "basic", notifications_count: 0, messages_count: 0, emails_count: 0, request_ip: "127.0.0.1", last_news_at: nil, is_author: false, intro: nil, total_view_count: 0, last_sync_at: nil, last_login_at: 2012-05-15 08:09:24 UTC, is_blocked: false, news_favorites_count: 0, news_subscriptions_count: 0, statuses_count: 0, city: nil, en_headline: nil, en_name: nil, friend_group_id: nil, headline: "从事高新技术行业", locale: "zh-CN", name: "aa", remote_industry: nil>
+***** 资料完整度（筛选）  profile_cent_sum profile_cent_en_sum
+***** 工作经历是否为空 following_company_ids
+***** 所在行业
+***** 有效用户数
+***** 无效用户数
+*** design
+**** 邀请好友页：http://211.151.73.237/event/dragon_rank/invite.php
+**** 活动介绍页：http://211.151.73.237/event/dragon_rank/activity.php
+**** 龙虎榜_首页：http://211.151.73.237/event/dragon_rank
+**** 龙虎榜_排行榜页：http://211.151.73.237/event/dragon_rank/rank.php
+
+首页：http://192.168.2.159/event/dragon_rank/
+活动介绍页：http://192.168.2.159/event/dragon_rank/activity.php
+发送邀请页：http://192.168.2.159/event/dragon_rank/invite.php
+圈子排行页：http://192.168.2.159/event/dragon_rank/rank.php
+*** reference
+**** 数据写入参考 model/article.rb
+      include MongoSync # 写操作自动同步到mongodb，对应表为xxx_mongo.rb
+**** 数据读取参考： model/article_mongo.rb
+     查询要加索引
+**** 用户登录： http://tianji.com/login中的form登录 或 User.authenticate(user)
+*** tec
+**** 排行 acts_as_list  actived_count变化时更新排行
+     app/controllers/home_controller.rb
+
+     def set_group_invite
+        ...
+        while (event_group.higher_item && event_group.actived_count >= event_group.higher_item.actived_count) do
+          event_group.move_higher
+        end
+        ...
+     end
+*** model
+**** invitations
+     token
+     email
+     inviter_id
+     user_id
+     type
+
+**** group_invitations < invitation
+**** invitation_mongo
+**** event_tianji
+     title:string
+     start_at:datetime
+     end_at:datetime
+     start_on:date
+     end_on:date
+     abbr:string
+     content:string
+** 分享到天际 tools/share_to
+   从站外提供链接，转入后判断天际是否登录，登录后转入分享页面，抓取链
+   接标题等信息，并提供分析功能。
+   参考微博分享 和 天际首页“分享网址”功能
+
+   http://s.tianji.com/maintenance.html
+*** ajax/statuses/link  StatusSiteUrl
+  def link
+    site = StatusSiteUrl.create_site(CGI::unescape(params[:site_url]))
+    render json: site.as_json(only: [:id, :url, :title, :content])
+  end
+*** ajax/statuses/create Status
+** qiyun
+   !!mail deliver
+   !!qiyun_host
+
+   !! database.yml  qiyun_dp
+   天际提供平台，企云依托平台提供服务；天际用户信息不会提供给企云；
+   天际用户激活企云服务，自动写入企云数据库用户必要字段;
+   从企云注册，首先创建天际用户，然后自动执行激活程序;
+
+qiyuns.com
+diiposoft.com
+*** TODO tmp
+**** config/in../default.rb  qiyun_host=127.0.0.1
+**** 邮件发送: config/en../development.rb smtp_settings
+**** database.yml:  qiyun_dp
+
+**** 迪跑 用户名/登录用户名 当前使用 注册时的用户名，重名的问题将可能不支持
+
+*** debug
+**** reg
+require 'rest-client'
+p = {"utf8"=>"✓", "authenticity_token"=>"BEiKF2qKvK2/8JCmhfKKQOe5PF97Dw5XQfclKnC1AQI=", "qiyun_user"=>{"email"=>"shangjingmin@gmail.com", "password"=>"[FILTERED]", "name"=>"测试"}, "commit"=>"提交信息"}
+url = 'http://sjm.com:3000/q/qiyun_users'
+RestClient.post(url, :params => p)
+*** CAS
+*** flow
+**** qiyun reg
+**** tianji active
+*** talk
+**** HIRO2012-04-23 13:42:32  请修改一下nginx的配置，让系统支持office2007的文件格式和apk文件格式
+
+在/etc/nginx/mime.types文件中加入以下两行.
+
+application/vnd.openxmlformats docx pptx xlsx;
+application/vnd.android.package-archive apk;
+HIRO2012-04-23 13:42:45
+
+sjm2012-04-23 13:43:18
+是指 qiyuns.com 网站的么？
+【提示：此用户正在使用Q+ Web：http://webqq.qq.com/】
+HIRO2012-04-23 13:43:31
+是的
+HIRO2012-04-23 13:43:42
+具体你问王长明
+sjm2012-04-23 13:44:21
+好的，等长明回来我问下他服务器的用户密码
+HIRO2012-04-23 13:44:57
+行
+*** DEPO
+**** USER
+CREATE TABLE IF NOT EXISTS `user` (
+  `userid` int(11) NOT NULL AUTO_INCREMENT,
+  `login_name` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `user_type` tinyint(4) DEFAULT NULL,
+  `user_locale` varchar(255) DEFAULT NULL,
+  `time_zone` varchar(255) DEFAULT NULL,
+  `birth_date` date DEFAULT NULL,
+  `photo` varchar(255) DEFAULT NULL,
+  `thumbnail` varchar(255) DEFAULT NULL,
+  `description` varchar(200) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `create_ts` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `updated_by` int(11) DEFAULT NULL,
+  `update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `login_ip` varchar(15) NOT NULL,
+  `status` int(11) NOT NULL DEFAULT '0',
+  `show_mentions` enum('0','1') NOT NULL DEFAULT '0',
+  `permission` int(11) NOT NULL DEFAULT '0',
+  `pfid` int(11) DEFAULT '0',
+  `character` tinyint(4) DEFAULT '0' COMMENT '0:students 1:teachers',
+  `taglist` varchar(255) DEFAULT NULL,
+  `phone` text,
+  PRIMARY KEY (`userid`),
+  UNIQUE KEY `login_name_key` (`login_name`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=12348 ;
+
+** i18n
+    <% :latest_comments.t(:scope => :profile) %>
+
+    原则上在viewer中进行翻译
+
+    检查翻译是否已存在
+
+    区分单复数
+
+    # 查找中文 插入翻译
+    pcregrep -r "[\x80-\xff]" *
+    alt+x: ror-insert-i18n
+*** profile /p
+* config
+** base
+*** wifi： 无线网络密码：7654266887  SSID:newTianji
+  关于各楼层的网络(network)设置:
+     2208/2209 ：
+     网关(gw) 192.168.2.1
+     DNS  192.168.2.1
+     WIFI passwd: 1022082209
+     技术支持可以找 白潞
+
+     2607 ：
+     网关(gw) 192.168.3.1
+     DNS  192.168.3.1
+     WIFI passwd: tianji2607
+     技术支持可以找 王宏伟
+
+     709 ：
+     网关(gw) 192.168.1.1
+     DNS  192.168.1.1
+     WIFI passwd: tianji709
+     技术支持可以找 我
+
+
+  Liqun
+
+有线：不必设置
+*** 打印机：前台 192.168.7.7
+前台新到一台大型扫描打印一体机，IP地址是192.168.7.7, 打印机的驱动程序在ftp.tianji.com的“佳能驱动”文件夹下  ，ftp地址为：ftp://ftp.tianji.com/%BC%D1%C4%DC%C7%FD%B6%AF/ 可以下载安装使用，
+有不清楚或需要帮助的同事可以联系白璐或王洪伟来协助进行连接。
+
+192.168.3.4
+打印机IP这里需要说一下：
+709的同事连接192.168.1.250
+2206的同事连接 192.168.1.150
+2208的同事连接前台打印机192.168.2.28
+2209的同事连接192.168.2.31
+26楼的同事连接192.168.3.4
+*** 项目管理 jira.tianji.com /  http://s1.tianji.com/redmine/
+*** git@211.151.73.231:tianjicom
+   ssh public key 传给王长明，不要用qq传，要直接传文件，否则内容可能被转义;
+
+    cap deploy 测试机自动部署
+*** 内网： dns: 192.168.1.81  192.168.1.111
+    测试环境使用
+    192.168.1.51 core.data.tianji.com
+    wang1@126.com 123456  22578891
+
+qa 已经使用 java的qa api了， 如果要正常登录的话
+
+需要把本地dns转成 192.168.1.111， 其余的和alpha环境使用方法一样
+*** ROR
+**** ruby1.9.3
+**** mongodb、redis
+**** gem: 最新
+** sec
+*** 500k数据
+内网 192.168.1.160
+    ActiveRecord::Base.establish_connection(
+  adapter: "mysql2",
+  encoding: "utf8",
+  reconnect: true,
+  database: "tianji_kpi",
+  pool: 5,
+  username: "kpi",
+  password: "123456",
+  host: "sql3.qa.tianji.com"
+)
+
+** ROR
+*** ruby 1.9.3 (must) rails(最新) mongodb
+**** error: invalid multibyte char (US-ASCII)  $>export RUBYOPT="-KU -E utf-8:utf-8"
+**** error: /usr/bin/ruby1.8: illegal switch in RUBYOPT: -o (RuntimeError)   $>gem install bundle
+**** error:  cannot load such file -- readline
+     http://stackoverflow.com/questions/9340497/cannot-load-such-file-readline-loaderror-when-running-heroku-create-stack
+sudo apt-get install libreadline-dev
+
+rvm remove 1.9.3
+
+rvm install 1.9.3
+
+# uninstall rb-readline gem is ok
+Then add to your Gemfile:
+
+gem 'rb-readline'
+
+**** error: ruby-debug19
+     http://blog.wyeworks.com/2011/11/1/ruby-1-9-3-and-ruby-debug
+       linecache19-0.5.13.gem and ruby-debug-base19-0.11.26.gem
+     gem install ruby_core_source
+     gem install ruby-debug19 --force -- --with-ruby-include=$rvm_path/src/ruby-1.9.3-head/
+**** error: linecache19   checking for vm_core.h... no
+     gem install linecache19 --
+     --with-ruby-include=$rvm_path/src/ruby-1.9.3-preview1
+**** error: rake abort:  stack level too deep
+     bundle exec rake db:migrate
+**** error: gem install mysql2
+     sudo apt-get install libmysqlclient-dev
+
+**** tianjicom
+清理数据库     rake db:mongoid:drop && rake db:drop
+生成数据库及数据     rake db:creater &&  rake db:migrate && rake db:seed --trace  && rake db:mongoid:create_indexes
+***** rake db:seed
+****** change models/User.rb some code
+******* 17-
+# after_update :reprocess_avatar, :if => :cropping?
+******* 330
+#    user.small_logo = pack_logo(remote_user["smallPhoto"], user.id)
+******* 334
++#    user.notifications_count = remote_user["notificationCount"]
++#    user.invitations_count = remote_user["invitationCount"]
++#    user.messages_count = remote_user["messageCount"]
++#    user.emails_count = remote_user["emailCount"]
+****** db/seeds.rb
+******* 150
+  # 人脉圈相关
+   Group.transaction do
++    begin
+     USERS.each_index do |i|
+       u = USERS[i]
+       3.times do |t|
+         pos = i*5+t
+         e = Group.create(name:['私募投融资人脉圈', '职业社交网站运营交流', '纳斯达克上市运作'][t] + (i+1).to_s, user: u, description:"MBA人脉圈 单身人脉圈 创业人脉圈 金融地产投融资人脉圈 正式启动 每周沙龙活动。现在接受报名QQ：1071110604", group_category_id:i, verify: t.even?)
+-        e.set_active
++        begin
++          e.set_active
++        rescue Exception => tmp
++          puts "==== #{tmp.message}"
++        end
+       end
+       puts "#{u.name}[人脉圈]测试数据生成"
++      end
++    rescue Exception => tmp
++      puts "==== #{tmp.message}"
+     end
+
+** newrelic
+*** https://rpm.newrelic.com/accounts/306801/applications/2009338/transactions 耗时最长
+
+刘海峰(139309)  13:17:54
+https://rpm.newrelic.com/accounts/306801/applications/2009338/transactions
+
+看一下左边耗时最长的页面，各自认领并优化。
+
+中午公司对网站做了推广，流量加倍。但是因为EventsController#index的效率问题，CPU超载，把网站拖垮了。属于非常严重的隐患。EventsController#index一直都是耗时最长的页面。
+
+
+明天中午11点，我再检查这个监控页面。没有优化的页面，团队负责人要向我说明不能优化的原因。
+
+* tec
+** email
+*** Resque.enqueue(FriendRequester, params) 添加异步任务队列： workder对象
+*** app/workers/friend_requester.rb 执行特定任务邮件的渲染和发送
+*** app/mailers/tianji_base.rb#friend_request 邮件渲染
+*** app/mailers/tianji_base/friend_request.html.erb
+t

@@ -1,0 +1,110 @@
+* tec
+** mongoid
+*** base
+**** all query must index, index sequence: maybe unused is end, such as _type
+**** user where, donn't use conditons
+**** where
+*** 定值查询 不等于  ne 
+Person.find([id_one, id_two])
+Person.find(["4baa56f1230048567300485c","4baa56f1230048567300485d"])
+Person.where(last_name: "Black").find([ id_one, id_two ])
+
+Person.where(:title.ne => "Mr")
+
+EventInvitationMongo.where(event_id: event_id).map(&:invitee_id)
+GroupInvitationMongo.where(:email => email, :group_id => group_id).exists?
+topic = MessageTopicMongo.where(user_id: user_id, :receiver_id.in => [sender_id, receiver_id]).first
+*** 或查询
+*** 区域值查询
+**** 列表内 不在列表 .in .nin not_in
+Person.where(:title.in => ["Sir", "Madam"])
+Person.where(:title.nin => ["Esquire"])
+
+# Example queries using symbol h4s to perform more complex criteria.
+Person.where(:title.all => ["Sir"])
+Person.where(:age.exists => true)
+**** 大于 小于
+Person.where(:age.gt => 18)
+Person.where(:age.gte => 18)
+Person.where(:age.lt => 55)
+Person.where(:age.lte => 55)
+Person.where(:aliases.size => 2)
+Person.where(:location.near => [ 22.50, -21.33 ])
+Person.where(:location.within => { "$center" => [ [ 50, -40 ], 1 ] })
+Person.where(
+  :skills.matches => {:level => "pro", :name => "photographer"}
+)
+Person.where(age: 18...35)
+
+# Using both symbol h4s on embedded docs
+# Match all people who live at a house with a number over 100
+Person.where(:"addresses.house_no".gt => 100)
+*** 空值查询 not_in(field: [nil, ''])
+app/controllers/admin/users_controller.rb:      @users = UserMongo.not_in(normal_logo: [nil, '']).where(:last_login_at.gte => @date).desc(:la
+*** 排序 asc desc
+# Sort people by first and last name ascending.
+Person.asc(:first_name, :last_name)
+Person.ascending(:first_name, :last_name)
+
+# Sort people by first and last name descending.
+Person.desc(:first_name, :last_name)
+Person.descending(:first_name, :last_name)
+
+# Provide the sorting options.
+Person.order_by([[:first_name, :asc], [:last_name, :desc]])
+*** 去重 distinct(:field)
+# Get the distinct values for last names
+Person.all.distinct(:last_name)
+*** 限数记录 limit
+# Only return 20 documents.
+Person.limit(20)
+*** 应对n+1查询 includes
+# Eager load the posts and games when retrieving the people.
+Person.includes(:posts, :game)    
+*** 是否存在 .exists?
+Person.where(title: "Sir").exists?
+*** 记录数 .count
+# Get the count of documents given the provided conditions.
+Person.where(title: "Sir").count    
+*** 首尾记录 .first .last
+*** .find_or_create_by  .find_or_initialize_by
+*** index
+belongs_to :post, index: true
+has_and_belongs_to_many :preferences, index: true    
+index :ssn, unique: true, background: true
+index "addresses.street"
+index([[ :first_name, Mongo::ASCENDING ], [ :last_name, Mongo::ASCENDING ]], unique: true)
+
+Person.collection.ensure_index([['birthday',Mongo::DESCENDING]])
+Person.collection.drop_index('birthday_-1')
+
+rake db:mongoid:create_indexes
+*** scope
+  scope :rock_n_rolla, where(occupation: "Rockstar")
+  scope :washed_up, where(:age.gt => 30)
+  scope :over, ->(limit) { where(:age.gt => limit) }
+*** 嵌套条件查询
+Group.joins(:event_tianji_groups).where(event_tianji_groups: {event_tianji_id: 1}).order("event_tianji_groups.id desc").limit(4).all
+** TODO gems
+*** cancan
+** tianjicom
+*** TODO user
+*** TODO feed
+*** TODO admin
+*** TODO user creatation
+*** TODO profile
+*** TODO special operation
+*** TODO Job
+** effect
+*** 查看更多
+**** 使用auto_paginate  发起ajax请求
+      <% if @friends.length == @per_page %>
+      <%= auto_paginate(current_page: @current_page, sort: "id") %> # 请求默认地址
+      <% end %>
+**** index.js.erb  渲染js
+**** _friend.html.erb item模板
+*** 分页
+    <div class="page_area">
+      <%= will_paginate @friendships %>
+    </div>    
+*** 

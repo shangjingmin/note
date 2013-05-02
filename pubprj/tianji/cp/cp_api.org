@@ -1,0 +1,76 @@
+#+OPTIONS: ^:{}
+
+* cp
+** test
+*** http://www.tianji.com/rest/employers/
+*** http://www.tianji.com/rest/employers?company_name=天际
+*** http://www.tianji.com/rest/employers?company_name=天际&from=job_company
+*** http://www.tianji.com/rest/employers/get_names?company_name=天际
+*** http://www.tianji.com/rest/employers/get_names?company_name=天际网&precise=1
+*** http://www.tianji.com/rest/employers/lists?q=天际
+*** http://www.tianji.com/rest/employers/list_names?ids=724,640
+*** 
+** api
+招聘频道可以通过接口实现公司信息的创建、获取和修改。
+关键字段说明：
+ + status: -1:未开通招聘服务;0:新增;2:审核未通过;6:已审核。 当记录从公司主页创建时该字段默认为-1。
+ + logo/licence: 返回时为文件的访问路径，前面加上$host即为文件的URL
+ + from: 记录来源，从招聘频道注册的公司为(job_company/job/job_person/job_speed  招聘频道导入数据/招聘/个人招聘/企业快速注册), 对API接口，若忽略该字段则标记为job
+ + field: 行业，截取后两位后，剩余部分即为一级行业分类
+
+ 若有分页需要，均使用以下参数：per_page(每页记录数，默认30，不超过1000)/page(第几页，默认1)
+*** GET /rest/employers  公司列表
+**** params: company_name(右模糊匹配,亦可命名为name)/status/from(来源)/order(排序字段，默认为created_at desc)
+**** demo: http://192.168.3.26:8080/rest/employers?company_name=a&per_page=2&order=position
+**** return: total_count为查询范围内记录的总数
+{"state":"200","data":{"total_count":5,"records":[
+{"id":5,"company_name":"fffe","description":null,"nature":4,"size":0,"field":101,"email":"e1351571705@e.com","website":null,"status":0,"tel":null,"country":"HK","province":34,"city":"\u6dc4\u535a","address":null,"type":"Employer","from":"job","position":null,"logo":"/upload/corps/logo/000/000/005/original.jpg","licence":"/upload/corps/licence/000/000/005/original.jpg","created_at":"2012-10-30T12:35:07+08:00","updated_at":"2012-10-30T12:35:07+08:00"},
+{"id":4,"company_name":"fffb","description":null,"nature":4,"size":0,"field":101,"email":"e1351571543@e.com","website":null,"status":6,"tel":null,"country":"HK","province":34,"city":"\u6dc4\u535a","address":null,"type":"Employer","from":"job","position":null,"logo":"/upload/corps/logo/000/000/004/original.jpg","licence":"/upload/corps/licence/000/000/004/original.jpg","created_at":"2012-10-30T12:24:26+08:00","updated_at":"2012-10-30T12:32:24+08:00"}
+]}}
+**** exception return: {"state":"404","data":{},"error":"Exception's Message"}
+*** GET /rest/employers/exist 公司是否在已审核（招聘/公司主页任一频道审核都算已审核）的公司中存在
+**** prams: company_name(不可为空)
+**** demo: http://www.tianji.com/rest/employers/exist?name=天际网
+**** return: {"state":"200","data":[{"id":23497,"company_name":"天际网"}]}
+     若没有对应记录：{"state":"200","data":[]}
+**** exception:exception return: {"state":"404","data":{},"error":"Exception's Message"}
+
+*** GET /rest/employers/lists 已审核公司列表(支持分页)
+**** params: q(公司名，模糊匹配)/province(省市)/city(城市)
+**** demo: http://192.168.3.26:8080/rest/employers/lists?q=a&province=36&city=南昌
+**** return: 同 GET /rest/employers
+*** GET /rest/employers/list_names 根据id串批量获取已审核公司信息(id限制在1000个以内)
+**** params: ids: id串，逗号分割
+**** demo: http://192.168.3.26:8080/rest/employers/list_names?ids=692,691
+**** return: 同 GET /rest/employers/get_names
+*** GET /rest/employers/:id 公司详情
+**** params: 无
+**** demo: http://192.168.3.26:8080/rest/employers/4
+**** return: {"state":"200","data":{"id":4,"company_name":"fffb","description":null,"nature":4,"size":0,"field":101,"primary_industry":1,"email":"e1351571064@e.com","website":null,"status":2,"confirmed_at":null,"sales_name":null,"confirmed_user_id":null,"tel":null,"country":"HK","province":34,"city":"\u6dc4\u535a","address":null,"type":"Employer","from":"job","position":null,"logo":"/upload/corps/logo/000/000/004/original.jpg","licence":"/upload/corps/licence/000/000/004/original.jpg","created_at":"2012-10-30T12:24:26+08:00","updated_at":"2012-10-30T12:24:26+08:00"}}
+**** exception return: {"state":"404","data":{},"error":"Couldn't find Employer with id=4 [WHERE `corps`.`type` IN ('Employer')]"}
+*** POST /rest/employers 添加公司
+**** params: {company_name: 'employer name',..., logo:File.new('/home/tmp/photo.jpg', 'rb'), licence:File.new('/home/tmp/li.jpg', 'rb')}
+**** demo: RestClient.post('http://192.168.3.26:8080/rest/employers', {:company_name=>"fffb", :nature=>4, :size=>0, :industry=>101, :email=>"e1351571064@e.com", :country=>"HK", :province=>"34", :city=>"淄博", :logo => File.new('/home/sjm/photo.jpg'), :licence => File.new('/home/sjm/li.jpg')})
+**** return: "{\"state\":\"200\",\"data\":{\"id\":4,\"company_name\":\"fffb\",\"description\":null,\"nature\":4,\"size\":0,\"field\":101,\"email\":\"e1351571064@e.com\",\"website\":null,\"status\":6,\"confirmed_at\":null,\"sales_name\":null,\"confirmed_user_id\":null,\"tel\":null,\"country\":\"HK\",\"province\":34,\"city\":\"\\u6dc4\\u535a\",\"address\":null,\"type\":\"Employer\",\"from\":\"job\",\"position\":null,\"logo\":\"/upload/corps/logo/000/000/004/original.jpg\",\"licence\":\"/upload/corps/licence/000/000/004/original.jpg\",\"created_at\":\"2012-10-30T12:24:26+08:00\",\"updated_at\":\"2012-10-30T12:24:26+08:00\"}}"
+**** exception return: "{\"state\":\"403\",\"data\":{\"company_name\":[\"EmployerName\\u5df2\\u7ecf\\u88ab\\u5360\\u7528\"],\"email\":[\"EmployerEmail\\u5df2\\u7ecf\\u88ab\\u5360\\u7528\"]},\"error\":\"data save failed\"}"
+     JSON.parse: {"state"=>"403", "data"=>{"company_name"=>["EmployerName已经被占用"], "email"=>["EmployerEmail已经被占用"]}, "error"=>"data save failed"}
+*** POST /rest/employers/:id/update_record 更新公司;  营业执照和logo也可以使用该接口post上传
+**** params: {:company_name: 'employer name',:logo => File.new('/home/sjm/photo.jpg')...}
+**** demo: RestClient.put('http://192.168.3.26:8080/rest/employers/8/update_record', {:company_name=>"aaa1351156628", :logo => File.new('/home/sjm/photo.jpg'), :country=>"MO", :province=>"12", :city=>"东营"})
+**** return: {"state":"200","data":{"id":8,"company_name":"aaa1351156628","description":null,"nature":4,"size":0,"field":101,"email":"e1351571064@e.com","website":null,"status":6,"confirmed_at":null,"sales_name":null,"confirmed_user_id":null,"tel":null,"country":"HK","province":34,"city":"\u6dc4\u535a","address":null,"type":"Employer","from":"job","position":null,"logo":"/upload/corps/logo/000/000/004/original.jpg","licence":"/upload/corps/licence/000/000/004/original.jpg","created_at":"2012-10-30T12:24:26+08:00","updated_at":"2012-10-30T12:24:26+08:00"}}
+**** exception return: "{\"state\":\"403\",\"data\":{\"company_name\":[\"EmployerName\\u5df2\\u7ecf\\u88ab\\u5360\\u7528\"],\"email\":[\"EmployerEmail\\u5df2\\u7ecf\\u88ab\\u5360\\u7528\"]},\"error\":\"data save failed\"}"
+     JSON.parse: {"state"=>"403", "data"=>{"company_name"=>["EmployerName已经被占用"], "email"=>["EmployerEmail已经被占用"]}, "error"=>"data save failed"}
+*** POST /rest/employers/:id/remove_img 删除图片(logo/营业执照)
+**** params: field(要删除的字段：logo/licence)
+**** demo: RestClient.post('http://192.168.3.26:8080/rest/employers/691/remove_img', {:field => 'licence'})
+**** return: "{\"state\":\"200\",\"data\":{\"id\":7,\"company_name\":\"test-001\",\"description\":null,\"nature\":null,\"size\":null,\"primary_industry\":1,\"field\":102,\"email\":null,\"website\":null,\"status\":0,\"tel\":null,\"found_year\":null,\"country\":null,\"province\":null,\"city\":null,\"address\":null,\"type\":\"Employer\",\"from\":\"job\",\"position\":null,\"logo\":\"/images/logos/company/logo.png\",\"licence\":\"/images/licences/company/licence.png\",\"user_id\":null,\"approved_at\":null,\"sales_name\":null,\"active\":false,\"confirmed\":false,\"banned\":false,\"deleted\":false,\"created_at\":\"2012-11-20T14:03:30+08:00\",\"updated_at\":\"2012-11-21T16:02:55+08:00\"}}"
+*** GET /rest/employers/logs 审核日志列表
+**** params: company_id(公司id)
+**** demo: http://192.168.3.26:8080/rest/employers/logs?company_id=307
+**** return: {"state":"200","data":{"total_count":1,"records":[{"id":2,"corp_id":307,"operator_id":123,"operator_name":null,"operation":"approved_pass","operated_at":"2012-11-14T11:44:12+08:00","comment":"\u5907\u6ce8/\u672a\u901a\u8fc7\u539f\u56e0","from":"job","created_at":"2012-11-14T11:44:12+08:00","updated_at":"2012-11-14T11:44:12+08:00","company_name":"HP"}]}}
+*** POST /rest/employers/:id/audit 添加公司审核记录
+如果status参数与当前记录status相同，则返回403
+**** params: {status: 2/6, operator_id: 1, comment: '备注/未通过原因'}
+**** demo: RestClient.post('http://192.168.3.26:8080/rest/employers/307/audit', {:status => 2, :operator_id => 1, :operator_name => '审核人', :comment => '测试审核通过操作'})
+**** return:  {"state"=>"200", "data"=>{"comment"=>"测试审核通过操作", "corp_id"=>307, "created_at"=>"2012-11-19T10:30:34+08:00", "from"=>"job", "id"=>3, "operated_at"=>"2012-11-19T10:30:34+08:00", "operation"=>"approved_out", "operator_id"=>1, "operator_name"=>"审核人", "updated_at"=>"2012-11-19T10:30:34+08:00"}}
+**** exception return: {"state"=>"403", "data"=>{}, "error"=>"parameters error"}

@@ -1,0 +1,115 @@
+#+OPTIONS: ^:{}
+
+* Company Page
+** data import
+*** 清理数据：
+Corp.all.each{|r| r.destroy}
+*** sql ？ id/corp_id 不能使用导入值
+mysqlimport --local --columns=id,user_id,name,description,nature,size,industry,website,created_at,approved_at,logo,tel,country,province,city,approver_name,email,status --ignore-lines=1 --delete --default-character-set=utf8 --fields-terminated-by=\, --fields-optionally-enclosed-by=\" --lines-terminated-by="\r\n" -u root -p tianji corps.csv
+
+mysqlimport --local --columns=corp_id,@x,@x,content,@x,@x,@x,@x,@x,@x,@x,@x,@x,@x,@x,@x,@x --ignore-lines=1 --delete --default-character-set=utf8 --fields-terminated-by=\, --fields-optionally-enclosed-by=\" --lines-terminated-by="\r\n" -u root -p tianji corp_descriptions.csv
+
+*** 
+*** 数据加工： type="Employer"/status=0/ primary_industry/ from='job_company'/   logo/description
+# 只测试，正式环境要导入corp_description
+Corp.all.each do |r|
+  if !r.corp_description
+    r.build_corp_description(content: r.description)
+    r.save
+  end
+end
+
+Corp.all.each{|r| r.from='job_company';r.type="Employer"; r.primary_industry = r.industry.to_s[0, r.industry.to_s.length-2] if r.industry; r.save}
+CorpMongo.not_in(_type: "EmployerMongo").each{|r| r[:_type] = "#{r.type}Mongo"; r.save}
+
+*** 数据检查：
+
+Corp.where("id not in (?)", CorpMongo.all.to_a.collect{|r| r.id}).collect{|r| [r.id, r.name]}
+CorpMongo.not_in(:_id => Corp.all.collect{|r| r.id}).to_a.collect{|r| [r.id, r.name]}
+
+*** logo && status
+Corp.limit(10).each{|r| fname = /home/sjm/li.jpg; r.logo = File.open(fname) if File.exist?(fname); r.save}
+
+Corp.limit(10).each{|r| fname = "/home/www/companylogo/#{r.id}.jpg"; r.logo = File.open(fname) if File.exist?(fname); r.save}
+
+** [[./cp_api.org][APIs]]: 公司基础信息对招聘频道API接口
+** [[./cp_corp_model.org][Corp Models]]: 公司基础信息模块数据结构
+** [[./cp_model.org][CompanyPage models]]: 公司主页模块数据结构
+** CP_frontpage 前端页面
+*** ---------------------------后台修改------------------
+
+企业主页 http://192.168.3.42/new_companies/companyBack/cp_Home.php
+
+公司
+
+招聘 http://192.168.3.42/new_companies/companyBack/cp_Recruitment.php
+
+工作在阿里
+http://192.168.3.42/new_companies/companyBack/cp_workAliEnment.php
+http://192.168.3.42/new_companies/companyBack/cp_workAliEnment01.php
+http://192.168.3.42/new_companies/companyBack/cp_workAliEnment02.php
+http://192.168.3.42/new_companies/companyBack/cp_workAliEnment03.php
+http://192.168.3.42/new_companies/companyBack/cp_workAliEnment04.php
+http://192.168.3.42/new_companies/companyBack/cp_workAliSalary.php （薪 资福利）
+http://192.168.3.42/new_companies/companyBack/cp_workAliSalary01.php （薪资福利编辑页）
+http://192.168.3.42/new_companies/companyBack/cp_workAliTrain.php(培训发展)
+http://192.168.3.42/new_companies/companyBack/cp_workAliTrain01.php(培训 发展 编辑页)
+
+关于阿里
+http://192.168.3.42/new_companies/companyBack/cp_aboutAli.php
+
+公司介绍：http://192.168.3.42/new_companies/companyBack/cp_aboutAli.php
+编辑页面： http://192.168.3.42/new_companies/companyBack/cp_aboutAliCompany.php
+
+企业结构：http://192.168.3.42/new_companies/companyBack /cp_aboutAliStructure.php
+编辑页面：http://192.168.3.42/new_companies/companyBack /cp_aboutAliStructure01.php
+http://192.168.3.42/new_companies/companyBack/cp_aboutAliStructure02.php
+http://192.168.3.42/new_companies/companyBack/cp_aboutAliStructure03.php
+
+企业文化：http://192.168.3.42/new_companies/companyBack /cp_aboutAliCulture.php
+编辑页面：http://192.168.3.42/new_companies/companyBack /cp_aboutAliCulture01.php
+
+
+设置企业主页
+
+
+
+所有弹框放在：http://192.168.3.42/new_companies/companyBack/cp_window.php
+
+
+*** ----------------------------------前台页面---------------------------
+公共主页
+http://192.168.3.42/new_companies/comanyHome.php
+
+其他相关页面
+
+http://192.168.3.42/new_companies/comanyHome_1.php
+http://192.168.3.42/new_companies/comanyHome_2.php
+http://192.168.3.42/new_companies/comanyHome_3.php
+http://192.168.3.42/new_companies/comanyHome_4.php
+http://192.168.3.42/new_companies/comanyHome_5.php
+http://192.168.3.42/new_companies/comanyHome_6.php
+http://192.168.3.42/new_companies/comanyHome_7.php
+
+
+
+
+
+*** simple cp
+
+http://192.168.3.42/new_companies/simplecp/chen_companyedit_bianji.php 企业信息编辑
+http://192.168.3.42/new_companies/simplecp/chen_companyedit_front.ph p企 业信息 前台
+http://192.168.3.42/new_companies/simplecp/chen_companyedit_marke.php 企 业信息编辑
+http://192.168.3.42/new_companies/simplecp/chen_companyedit.php 企业信息 编辑
+http://192.168.3.42/new_companies/simplecp/chen_confirm.php 企业信息 确认
+http://192.168.3.42/new_companies/simplecp/chen_formsuccess.php 企业信息 编辑成功
+http://192.168.3.42/new_companies/simplecp/chen_windows.php 弹窗
+
+
+*** register/login
+http://192.168.3.107/companies/cp_login.php
+http://192.168.3.107/new_companies/zc_two.php
+http://192.168.3.107/new_companies/zc_three.php
+
+** [[./cp_job_speed.org][快速注册]]
+** [[./cp_new.org]]

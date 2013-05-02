@@ -1,0 +1,139 @@
+#+OPTIONS: ^:{}
+
+* cp
+** tmp
+  http://www.tianji.com/company/speedreg/4924/edit
+** cp_job_speed: ?logo预览/执照上传页样式
+*** java接口
+**** /sr/external/apply 数据提交
+ url:http://job.tianji.com/sr/external/apply
+ method:POST
+ param:
+ {
+ "userId":"用户ID"
+ "userName":"用户姓名"
+ "companyId":"公司ID"
+ "email":"邮箱"
+ "contact":"联系方式"
+ }
+ return:true|false
+***** debug
+a = Java::Base.post("http://job.tianji.com/sr/external/apply", {}, {userId: "1", companyId: "1"}, host: "true")
+
+
+
+a = Java::Base.post("http://192.168.1.107/sr/external/apply", {}, {userId: "1", companyId: "1"}, host: "true")
+
+  JOB_ADMIN_URL = "http://job.tianji.com/sr/authority/Navi"
+
+/media/windata/tianji/doc/cp/job_old_data/corps.csv
+
+
+=> #<Java::Base:0xa7806e0
+ @json=nil,
+ @response=
+  #<Typhoeus::Response:0xa96b8d8
+   @app_connect_time=0.0,
+   @body="false",
+   @code=200,
+   @connect_time=0.004791,
+   @curl_error_message="No error",
+   @curl_return_code=0,
+   @effective_url="http://job.tianji.com/sr/external/apply",
+   @headers=
+    "HTTP/1.1 200 OK\r\nServer: nginx/1.1.14\r\nDate: Wed, 28 Nov 2012 03:33:15 GMT\r\nContent-Type: application/json;charset=utf-8\r\nTransf
+   @http_version=nil,
+   @mock=false,
+   @name_lookup_time=0.003727,
+   @pretransfer_time=0.004808,
+   @primary_ip="192.168.1.107",
+   @request=
+    :method => :post,
+        :url => http://job.tianji.com/sr/external/apply,
+        :body => "{\"userID\":\"43085436\",\"userName\":\"\\u516c\\u53f8\",\"companyID\":\"16\",\"email\":\"a3aasdfd1@a.com\",\"contact\":\"1
+        :headers => {"Content-Type"=>"application/json", "Accept"=>"application/json;charset=utf-8", "User-Agent"=>"Mozilla/5.0 (X11; Linux x
+   @requested_http_method=nil,
+   @requested_url=nil,
+   @start_time=nil,
+   @start_transfer_time=0.099791,
+   @status_message=nil,
+   @time=0.099862>>
+
+**** 首页数据接口
+**** 从天际网登录后直接登录到企业招聘后台
+通过企业快速注册成功的企业，从天际网登录后直接登录到企业招聘后台，招聘后台地址如下：
+
+         http://job.tianji.com/sr/authority/Navi
+
+         http://job.tianji.com/sr/authority/validAuth
+*** frontpage
+
+http://192.168.3.72/companies/login/
+
+http://192.168.3.72/companies/login/email_index.php
+
+http://192.168.3.72/companies/login/login_two.php
+
+http://192.168.3.72/companies/login/pop_up.php
+
+
+
+    <%= # javascript_include_tag '/javascripts/aquery/StringLength'%>
+    <%= # javascript_include_tag '/javascripts/aquery/form2.0'%>
+    <%= # javascript_include_tag '/javascripts/aquery/belated_png'%>
+    <%= # javascript_include_tag '/javascripts/aquery/browser'%>
+    <%= # javascript_include_tag '/javascripts/companies/company_form'%>
+
+*** preview
+<iframe class="hide" id="hiddenframe" name="hiddenframe" style="display: none;"></iframe>
+
+<form id="logoForm" class="logoForm hide" target="hiddenframe" enctype="multipart/form-data" name="logoForm" method="POST" action="http://job.tianji.com/sr/icoshow/uploadPicture" style="display:none;">
+</form>
+
+	      $('.form-company').on('change','.filename',function() {
+                $('#logoForm').html('')
+                $(this).replaceWith($(this).clone())
+                $(this).appendTo('#logoForm');
+                $('#logoForm').submit();   
+           });
+
+parent.window.getImgId({"name":"2286","thumbnail":"http://job.tianji.com/sr/icoshow/small/2286"});
+
+
+    var getImgId=function(arg){
+      if(typeof arg!="object") return false;
+      if(arg.name==-1){
+        $('.form-company .caution').show();
+        return false;
+      };
+	  $('.form-company .caution').hide();
+      $('.company-logo').attr('src',arg.thumbnail);
+      $('#logo').val(arg.name);
+      $('.company-logo').show();
+      return true;
+    }
+
+*** user add friends
+
+日期:2012-11-27 
+ZhongWei 11:58:39 
+http://job.tianji.com/sr/authority/Navi 
+日期:2012-11-29 
+ZhongWei 18:08:15 
+http://www.tianji.com/p/20466362 
+ZhongWei 18:24:58 
+20466362
+ID:akuma_sega_143_8@163.com
+PW:Sun5kong! 
+商敬民 18:23:32 
+您好，我现在有事不在，一会再和您联系。 
+ZhongWei 18:26:53 
+20466352 用户名：lanhaitao420@126.com 密码：lanhaitao 
+ZhongWei 18:27:01 
+上述2个用户加的好友 
+商敬民 18:25:43 
+好的，多谢 
+ZhongWei 18:27:10 
+20466362为企业注册的用户 
+
+

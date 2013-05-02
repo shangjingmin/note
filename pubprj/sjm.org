@@ -1,0 +1,23 @@
+* tmp
+** efile
+*** 文件与附件一对一
+    
+*** 可 组织机构 选择共享人
+
+** 
+* public
+** [[file:tmp.org][tmp]]
+** [[file:public/notebook/q.org][q]]
+** [[file:public/notebook/code.org][code]]
+** [[file:public/notebook/code.org][code]]
+** [[file:public/notebook/db.org][db]]
+** [[file:public/notebook/dev.org][dev]]
+** [[file:public/notebook/java.org][java]]
+** [[file:public/notebook/lift.org][lift]]
+** [[file:public/notebook/pro.org][pro]]
+** [[file:public/notebook/ror.org][ror]]
+** [[file:public/notebook/ubuntu_init.org][ubuntu_init]]
+** [[file:public/notebook/ubuntu.org][ubuntu]]
+*** shell user management
+**** 
+** [[file:public/notebook/web.org][web]]

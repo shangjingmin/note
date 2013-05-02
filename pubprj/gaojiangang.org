@@ -1,0 +1,263 @@
+* 快速注册
+* cp登陆/密码
+* corp 数据检查
+* corp type去除/from改名
+* TV
+* efile
+** 文件上传
+* gaojiangang
+** excel
+*** add number and money
+Sub Macro1()
+'
+' Macro1 Macro
+'
+'
+
+    Dim src_sheet As String ' 原数据表名
+    Dim res_sheet As String ' 目的数据表名
+    Dim start_row As Integer ' 需要处理的数据起始行
+    Dim same_colum As Integer ' 确定数据是否合并的列
+    Dim merge_colum1 As Integer
+    Dim merge_colum2 As Integer
+
+    str_sheet = "555"
+    res_sheet = "result"
+    start_row = 4
+    same_column = 4
+    merge_column1 = 6
+    merge_column2 = 7
+
+
+
+    Dim Row1 As Integer
+    Dim Row2 As Integer
+    Dim isOk As Boolean
+    Dim max_row2 As Integer
+    Dim Row3 As Integer
+
+    For Row1 = start_row To Worksheets(str_sheet).UsedRange.Rows.Count
+        isOk = False
+
+        For Row2 = start_row To Worksheets(res_sheet).UsedRange.Rows.Count
+            If Worksheets(res_sheet).Cells(Row2, same_column).Value2 = Worksheets(str_sheet).Cells(Row1, same_column).Value2 Then
+                Worksheets(res_sheet).Cells(Row2, merge_column1) = Worksheets(res_sheet).Cells(Row2, merge_column1) + Worksheets(str_sheet).Cells(Row1, merge_column1)
+                Worksheets(res_sheet).Cells(Row2, merge_column2) = Worksheets(res_sheet).Cells(Row2, merge_column2) + Worksheets(str_sheet).Cells(Row1, merge_column2)
+                isOk = True
+            End If
+        Next Row2
+
+        If Not isOk Then
+            max_row2 = Worksheets(res_sheet).UsedRange.Rows.Count
+            Worksheets(res_sheet).Cells(max_row2 + 1, same_column) = Worksheets(str_sheet).Cells(Row1, same_column)
+            Worksheets(res_sheet).Cells(max_row2 + 1, merge_column1) = Worksheets(str_sheet).Cells(Row1, merge_column1)
+            Worksheets(res_sheet).Cells(max_row2 + 1, merge_column2) = Worksheets(str_sheet).Cells(Row1, merge_column2)
+        End If
+    Next Row1
+End Sub
+
+*** add number and money 20111023  market sale
+Sub Macro1()
+' 累加销售数据
+
+    Set sale = Worksheets("sale")
+    Set market = Worksheets("market")
+    Set other = Worksheets("others")
+    Dim isOk As Boolean
+    Dim sale_row As Long
+    Dim market_row As Long
+    Dim others_row As Long
+    Dim max_sale_rows As Long
+    Dim max_market_rows As Long
+    Dim max_other_rows As Long
+    Dim tmp_column As Long
+
+' 删除市场数据中第7列为0的数据
+' 逐行扫描销售数据（循环）
+'   逐行扫描市场数据（循环）
+'     若日期、时间、商品编码一致，则追加到市场数据对应列，结束市场扫描
+'     若不一致，则放入others数据表中
+    For market_row = 1 To market.UsedRange.Rows.Count
+        If 0 = market.Cells(market_row, 7) Then
+            market.Rows(market_row).EntireRow.Delete
+        End If
+    Next market_row
+
+    max_sale_rows = sale.UsedRange.Rows.Count
+    max_market_rows = market.UsedRange.Rows.Count
+    max_other_rows = other.UsedRange.Rows.Count
+
+    For sale_row = 3 To max_sale_rows
+        isOk = False
+        For market_row = 1 To max_market_rows
+            If sale.Cells(sale_row, 3) = market.Cells(market_row, 3) And sale.Cells(sale_row, 4) = market.Cells(market_row, 4) And sale.Cells(sale_row, 5) = market.Cells(market_row, 5) Then
+                market.Cells(market_row, 11) = sale.Cells(sale_row, 8) + market.Cells(market_row, 11)
+                market.Cells(market_row, 12) = sale.Cells(sale_row, 9) + market.Cells(market_row, 12)
+                market.Cells(market_row, 13) = sale.Cells(sale_row, 10) + market.Cells(market_row, 13)
+                isOk = True
+                Exit For
+            End If
+        Next market_row
+        If Not isOk Then
+            max_other_rows = other.UsedRange.Rows.Count + 1
+
+            For tmp_column = 1 To sale.UsedRange.Columns.Count
+                other.Cells(max_other_rows, tmp_column) = sale.Cells(sale_row, tmp_column)
+            Next tmp_column
+        End If
+    Next sale_row
+
+End Sub
+
+
+*** a20111023-2324
+Sub Macro1()
+' 累加销售数据
+
+    Set sale = Worksheets("sale")
+    Set market = Worksheets("market")
+    Set other = Worksheets("others")
+    Set logs = Worksheets("logs")
+    Dim isOk As Boolean
+    Dim sale_row As Long
+    Dim market_row As Long
+    Dim others_row As Long
+    Dim max_sale_rows As Long
+    Dim max_market_rows As Long
+    Dim max_other_rows As Long
+    Dim tmp_column As Long
+
+' 删除市场数据中第7列为0的数据
+' 逐行扫描销售数据（循环）
+'   逐行扫描市场数据（循环）
+'     若日期、时间、商品编码一致，则追加到市场数据对应列，结束市场扫描
+'     若不一致，则放入others数据表中
+    For market_row = 1 To market.UsedRange.Rows.Count
+        If 0 = market.Cells(market_row, 7).Value2 Then
+            market.Rows(market_row).EntireRow.Delete
+        End If
+    Next market_row
+    Dim next_market_row As Integer
+    Dim market_row2 As Integer
+
+    For market_row = 1 To market.UsedRange.Rows.Count
+        next_market_row = market_row + 1
+        For market_row2 = next_market_row To market.UsedRange.Rows.Count
+            If market.Cells(market_row, 5).Value2 = market.Cells(market_row2, 5).Value2 Then
+                market.Cells(market_row, 16).Value2 = market.Cells(market_row2, 3).Value2
+                market.Cells(market_row, 17).Value2 = market.Cells(market_row2, 4).Value2
+                Exit For
+            End If
+        Next market_row2
+    Next market_row
+
+    max_sale_rows = sale.UsedRange.Rows.Count
+    max_market_rows = market.UsedRange.Rows.Count
+    max_other_rows = other.UsedRange.Rows.Count
+
+    For sale_row = 3 To max_sale_rows
+        isOk = False
+        For market_row = 1 To max_market_rows
+            If sale.Cells(sale_row, 5) = market.Cells(market_row, 5) And sale.Cells(sale_row, 3) >= market.Cells(market_row, 3) And sale.Cells(sale_row, 4) >= market.Cells(market_row, 4) And (market.Cells(market_row, 16).Value = "" Or sale.Cells(sale_row, 3) < market.Cells(market_row, 16) Or (sale.Cells(sale_row, 3) = market.Cells(market_row, 16) And sale.Cells(sale_row, 4) <= market.Cells(market_row, 17))) Then
+                market.Cells(market_row, 11) = sale.Cells(sale_row, 8) + market.Cells(market_row, 11)
+                market.Cells(market_row, 12) = sale.Cells(sale_row, 9) + market.Cells(market_row, 12)
+                market.Cells(market_row, 13) = sale.Cells(sale_row, 10) + market.Cells(market_row, 13)
+                isOk = True
+                Exit For
+            End If
+            If sale.Cells(sale_row, 5) < market.Cells(market_row, 5) Then
+                Exit For
+            End If
+        Next market_row
+        If Not isOk Then
+            max_other_rows = other.UsedRange.Rows.Count + 1
+
+            For tmp_column = 1 To sale.UsedRange.Columns.Count
+                other.Cells(max_other_rows, tmp_column) = sale.Cells(sale_row, tmp_column)
+            Next tmp_column
+        End If
+
+        logs.Cells(sale_row, 1) = sale_row
+        logs.Cells(sale_row, 2) = Now
+    Next sale_row
+
+End Sub
+
+
+** sql
+*** sqlserver procedure
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+
+
+ALTER    PROCEDURE market_sale AS
+begin
+-- market: id prod_code market_date market_time
+-- sale: id prod_code sale_date sale_time order_count prod_count order_amount
+
+-- alter table market_001 add id int identity
+-- alter table sale_001 add id int identity
+-- delete from market
+-- delete from sale
+-- alter table market_001 add sum_order_count float, sum_prod_count float, sum_order_amount float
+
+-- update t2 set t2.sum_order_count = t1.F11, t2.sum_prod_count = t1.F12, t2.sum_order_amount = t1.F13
+--      from market t1 left join market_001 t2 on t2.id = t1.old_id
+-- update t2 set t2.market_id = t1.market_id
+--      from sale t1 left join sale_001 t2 on t2.id=t1.old_id
+
+-- select top 1 * from market
+-- select top 1 * from market_001
+-- select top 1 * from sale
+-- select top 1 * from sale_001
+
+insert into market(old_id, prod_code, market_date, market_time)
+        select id, prod_code, market_date, market_time
+        from market_001
+insert into sale(old_id, prod_code, sale_date, sale_time, order_count, prod_count, order_amount)
+        select id, prod_code, sale_date, sale_time, order_count, prod_count, order_amount
+        from sale_001
+
+declare @m_id int, @m_id0 int, @m_code varchar(20), @m_code0 varchar(20), @e_date datetime, @e_time float
+print 0
+-- 删除sale sale_date 为空的数据
+        delete from sale where sale_date is null
+print 1
+-- 确定 market 本次结束时间
+        create table #t_m(id int IDENTITY, pid int, code varchar(20),  s_date datetime, s_time float,  e_date datetime, e_time float)
+print 2
+        insert into #t_m(pid, code, s_date, s_time)
+                select id, prod_code, market_date, market_time
+                from market
+                order by prod_code, market_date, market_time, id
+print 3
+        update t1 set e_date = t2.s_date, e_time = t2.s_time
+                from #t_m t1 left join #t_m t2 on t2.code = t1.code and t2.id = t1.id + 1
+print 4
+        update market set end_date = e_date, end_time = e_time from market left join #t_m on market.id = #t_m.pid
+print 5
+        update sale set market_id = market.id
+                from sale
+                left join market on sale.prod_code = market.prod_code and
+                        (sale.sale_date > market.market_date or (sale.sale_date = market.market_date and sale.sale_time >= market.market_time)) and
+                        (sale.sale_date < isnull(market.market_date, sale.sale_date+1) or (sale.sale_date = isnull(market.market_date, sale.sale_date+1) and sale.sale_time <= market.market_time))
+print 6
+        update market set F11 = sum_order_count, F12 = sum_prod_count, F13 = sum_order_amount
+                from market left join (
+                        select market_id, sum(isnull(order_count,0)) sum_order_count, sum(isnull(prod_count,0)) sum_prod_count, sum(isnull(order_amount,0)) sum_order_amount
+                        from sale group by market_id
+                        ) t on market.id = t.market_id
+print 7
+        select top 10 * from market
+print 8
+end
+
+
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS ON
+GO

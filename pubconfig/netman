@@ -1,0 +1,22 @@
+#!/bin/bash
+#Created from mksh on 2013年 02月 18日 星期一 15:14:16 CST
+#Description: 
+#
+#test platforms(based on NetworkManager's nmcli): 
+# * 2013.2.18  Ubuntu tested!
+
+[ $# -lt 1 ] && echo Usage $0 target_connection, eg. netman qa && exit 1
+target_conn_name=$1
+all_conns=$(echo $(nmcli con|awk '{print $1}'))
+#这个字符串包含匹配好牛逼啊！注意最后一个的空格，技巧啊！
+[[ ! "$all_conns " =~ .*" $target_conn_name ".* ]] && echo Invalid connections: $target_conn_name, all connections $all_conns && exit 1
+#check whether conneting
+current_conn_name=$(nmcli con status|tail -n1|awk '{print $1}')
+if [ $target_conn_name  == $current_conn_name ];then
+  echo ==Online: $target_conn_name is online with $(nmcli con status|tail -n1)
+else
+  echo ==Connecting from $current_conn_name to $target_conn_name ...
+  nmcli con up uuid $(nmcli con|grep $target_conn_name|awk '{print $2}')
+fi
+echo ==check by \'ping tianji.com\', no error found so far, Gook luck to you! 
+#ping -c1 tianji.com

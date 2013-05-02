@@ -1,0 +1,23 @@
+* db
+** mysql
+*** manage
+*** dump and import
+**** mysqldump -h127.0.0.1 -utianji -ptianji tianji corps > corps.sql
+**** mysql> source corps.sql
+*** query
+*** update
+*** delete
+** mongodb
+*** manage
+*** dump and import
+**** mongodump -h 127.0.0.1
+**** mongorestore -h 127.0.0.1 -d tianji -c corps --drop corps.json
+mongorestore -h 127.0.0.1 -d tianji --drop backup/tianji/
+*** query
+*** update
+db.corps.update({"status": 6}, {$set: {"cp_status": 6}}, false, true);
+db.corps.update({"category": {$in: ["51job", "dajie", "zhaopin", "fenzhi"]}, "user_id": {$in: ["", null]}}, {$set: {"status": -1}}, false, true)
+
+*** delete
+** memcached
+** redis

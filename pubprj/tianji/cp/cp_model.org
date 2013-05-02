@@ -1,0 +1,180 @@
+#+OPTIONS: ^:{}
+
+* cp
+** [[./cp_corp_model.org][corp models]]
+** models
+rails g model company_page_follower         company_page_id:integer user_id:integer
+rails g model company_page_board            company_page_id:integer title:string url:string category:string
+rails g model company_page_photo            company_page_id:integer photo:string description:string link:string position:integer category:string content_type:string file_size:float file_name:string
+rails g model company_page_content          company_page_id:integer content:text category:string
+rails g model company_page_show_comment     company_page_id:integer user_id:integer description:string comment:string position:integer
+rials g model company_page_team             company_page_id:integer category:string name:string desplay:boolean
+rails g model company_page_team_user        company_page_team_id:integer user_id:integer description:string email:string sns:string position:integer
+rails g model company_page_module           company_page_id:integer module_id:integer actived:boolean modified_count:integer last_modified_at:datetime
+*** company_pages 公司主页
+     若简版/专业版切换，需要status=6（待完善资料）
+
+| 字段名              | 类型     | limit | 默认值 | <10>中文                       | <10> 备注                                                                                                                 |
+|---------------------+----------+-------+--------+--------------------------------+---------------------------------------------------------------------------------------------------------------------------|
+| corp_id             | integer  |       |        | 公司id                         |                                                                                                                           |
+| email               | string   |       |        | 邮箱                           |                                                                                                                           |
+| password            | string   |       |        | 密码                           | md5                                                                                                                       |
+| slogan              | string   |       |        | 口号                           | 30                                                                                                                        |
+| name_abbrev         | string   |       |        | 名称缩写                       | 4个中文                                                                                                                   |
+| user_id             | integer  |       |        | 添加人                         |                                                                                                                           |
+| level               | integer  |       |      0 | 级别                           | 0:简版;6:售卖版                                                                                                           |
+| status              | integer  |       |      0 | 状态                           | 0:新增（待验证）;1:待审核(已验证);2:审核未通过（邮件链接修改资料后变为2）;6:待完善资料(已审核);7:已激活（完善资料保存后） |
+|---------------------+----------+-------+--------+--------------------------------+---------------------------------------------------------------------------------------------------------------------------|
+| found_year          | integer  |       |        | 创建年份                       |                                                                                                                           |
+| followers_count     | integer  |       |      0 | 关注数                         |                                                                                                                           |
+|---------------------+----------+-------+--------+--------------------------------+---------------------------------------------------------------------------------------------------------------------------|
+| weibo_url           | string   |       |        |                                |                                                                                                                           |
+| kaixin_url          | string   |       |        |                                |                                                                                                                           |
+| renren_url          | string   |       |        |                                |                                                                                                                           |
+|---------------------+----------+-------+--------+--------------------------------+---------------------------------------------------------------------------------------------------------------------------|
+| staffer_user_count  | integer  |       |      0 | 注册天际的雇员数               | 显示2个雇员，按与当前登陆用户相关性优先显示；？用户离开公司后，雇员数是否减少                                             |
+|---------------------+----------+-------+--------+--------------------------------+---------------------------------------------------------------------------------------------------------------------------|
+| login_times         | integer  |       |      0 | 登陆次数                       |                                                                                                                           |
+| last_login_at       | datetime |       |        | 末次登陆时间                   |                                                                                                                           |
+|---------------------+----------+-------+--------+--------------------------------+---------------------------------------------------------------------------------------------------------------------------|
+| latitude            | integer  |       |        | 纬度                           |                                                                                                                           |
+| longitude           | integer  |       |        | 经度                           |                                                                                                                           |
+|---------------------+----------+-------+--------+--------------------------------+---------------------------------------------------------------------------------------------------------------------------|
+| name                | string   |       |        |                                |                                                                                                                           |
+| logo                | string   |       |        |                                |                                                                                                                           |
+| website             | string   |       |        |                                |                                                                                                                           |
+| description         | string   |       |        | 公司简短描述                   | 149                                                                                                                       |
+| country             | string   |       |        | 国家                           |                                                                                                                           |
+| province            | integer  |       |        | 省市                           |                                                                                                                           |
+| city                | string   |       |        | 城市                           |                                                                                                                           |
+| address             | string   |       |        | 公司地址                       | 根据地址获取经纬度； ？所属省市                                                                                           |
+|---------------------+----------+-------+--------+--------------------------------+---------------------------------------------------------------------------------------------------------------------------|
+| active              | boolean  |       |  false | 是否激活                       |                                                                                                                           |
+| confirmed           | boolean  |       |  false | 是否确认/完善信息              |                                                                                                                           |
+| banned              | boolean  |       |  false | 是否停用                       |                                                                                                                           |
+| deleted             | boolean  |       |  false | 是否删除                       |                                                                                                                           |
+|---------------------+----------+-------+--------+--------------------------------+---------------------------------------------------------------------------------------------------------------------------|
+| crypted_password    |          |       |        |                                |                                                                                                                           |
+| password_salt       |          |       |        |                                |                                                                                                                           |
+| persistence_token   |          |       |        |                                |                                                                                                                           |
+| single_access_token |          |       |        |                                |                                                                                                                           |
+| perishable_token    |          |       |        |                                |                                                                                                                           |
+| login_count         | integer  |       |      0 | 登陆次数                       |                                                                                                                           |
+| failed_login_count  | integer  |       |      0 | 登陆失败次数                   |                                                                                                                           |
+| last_request_at     | datetime |       |        | 最后登陆时间                   |                                                                                                                           |
+| current_login_at    | datetime |       |        | 当前登陆时间                   |                                                                                                                           |
+| last_login_at       | datetime |       |        | 末次登陆时间                   |                                                                                                                           |
+| current_login_ip    | string   |       |        | 当前登陆ip                     |                                                                                                                           |
+| last_login_ip       | string   |       |        | 末次登陆ip                         |                                                                                                                           |
+|---------------------+----------+-------+--------+--------------------------------+---------------------------------------------------------------------------------------------------------------------------|
+| banners*            |          |       |        | 轮播图（主页/招聘页/工作环境） | attachment                                                                                                                |
+| video*              |          |       |        | 视频(主页/招聘页)              | 新浪播客、优酷网、土豆网、酷6网、我乐网、奇艺网、凤凰网视频网站; 视频第一帧图片attachment                                 |
+| intro*              |          |       |        | 公司简介(简版)                 | 富文本                                                                                                                    |
+| comments*           |          |       |        | 他们眼中的CP                   | company_show_commnets                                                                                                     |
+| manage_teams*       |          |       |        | 管理团队                       | （主页管理团队/招聘页招聘团队） ；每模块最多三个人员设置 company_team company_team_user                                   |
+| relation_company*   |          |       |        | 三个                           | 必须天际的CP用户，logo为对应CP用户上传的logo； logo144*45px                                                               |
+|---------------------+----------+-------+--------+--------------------------------+---------------------------------------------------------------------------------------------------------------------------|
+
+*** company_page_followers 公司关注
+|-----------------+---------+------+------|
+| 字段名          | 类型    | 中文 | 备注 |
+|-----------------+---------+------+------|
+| company_page_id | integer |      |      |
+| user_id         | integer |      |      |
+
+*** company_page_boards 公司动态
+|-----------------+---------+------+--------------------|
+| 字段名          | 类型    | 中文 | 备注               |
+|-----------------+---------+------+--------------------|
+| company_page_id | integer |      |                    |
+| title           | string  | 标题 | 28， 每个CP最多5条 |
+| url             | string  | 链接 |                    |
+| category        | string  |      | job/company        |
+
+*** company_page_photos 公司图片 banners
+     http://railscasts-china.com/episodes/file-uploading-by-carrierwave
+      轮播图（主页/招聘页/工作环境） | 4个，需要顺序；650X90 px， 图片规格为JPG,GIF,PNG，不超过2MB，最多上传4张 |
+      video图片 url<--link  site<---category
+|-----------------+---------+--------+----------+------------------------------------------------------------------------------|
+| 字段名          | 类型    | 默认值 | <10>中文 | <10>备注                                                                     |
+|-----------------+---------+--------+----------+------------------------------------------------------------------------------|
+| company_page_id | integer |        |          |                                                                              |
+| photo           | string  |        | 文件名   |                                                                              |
+| description     | string  |        | 描述     |                                                                              |
+| link            | string  |        | 链接     |                                                                              |
+| position        | integer |        | 序号     |                                                                              |
+| category        | string  |        | 分类     | 同一company_page_id下，区分不同的附件种类,如对应CP的轮播图（main/job/about） |
+| content_type    | string  |        | 文件类型 |                                                                              |
+| file_size       | float   |        | 文件大小 |                                                                              |
+| file_name       | string  |        | 文件名   |                                                                              |
+
+*** company_page_contents 富文本（薪酬福利/培训发展/公司介绍3000/企业文化3000/公司结构（图+文本1500））
+     公司主页相关的富文本编辑， intro默认从corp.description来
+|-----------------+---------+--------+----------+------------------------------------------|
+| 字段名          | 类型    | 默认值 | <10>中文 | <10>备注                                 |
+|-----------------+---------+--------+----------+------------------------------------------|
+| company_page_id | integer |        |          |                                          |
+| content         | text    |        |          |                                          |
+| category        | string  |        |          | welfare/training/intro/culture/structure |
+
+*** company_page_show_comments 评论
+     每个公司2条评论
+|-----------------+---------+--------+----------+----------|
+| 字段名          | 类型    | 默认值 | <10>中文 | <10>备注 |
+|-----------------+---------+--------+----------+----------|
+| company_page_id | integer |        |          |          |
+| user_id         | integer |        |          |          |
+| description     | string  |        |          | 15字     |
+| comment         | string  |        |          | 149      |
+| position        | integer |        |          |          |
+
+*** company_page_teams 团队模块
+     （主页管理团队/招聘页招聘团队） ；每模块最多三个人员设置
+|-----------------+---------+--------+----------+------------------------|
+| 字段名          | 类型    | 默认值 | <10>中文 | <10>备注               |
+|-----------------+---------+--------+----------+------------------------|
+| company_page_id | integer |        |          |                        |
+| category        | string  |        |          | manager1/2/3  job1/2/3 |
+| name            | string  |        |          | 15字                   |
+| active          | boolean |        | 是否显示 |                        |
+*** company_page_team_users团队成员
+     （主页管理团队/招聘页招聘团队） ；每模块最多三个人员设置
+|----------------------+---------+--------+---------------+----------|
+| 字段名               | 类型    | 默认值 | 中文          | <10>备注 |
+|----------------------+---------+--------+---------------+----------|
+| company_page_team_id | integer |        |               |          |
+| user_id              | integer |        |               |          |
+| description          | string  |        | 人员描述      |          |
+| email                | string  |        | 公司邮箱      |          |
+| sns                  | string  |        | 第三方sns链接 |          |
+| position             | integer |        | 顺序          |          |
+
+*** company_page_modules 公司模块 可用模块 模块启用且有值时前端才显示；模块启用时后端维护才显示
+|------------------+----------+--------+--------------+---------------------|
+| 字段名           | 类型     | 默认值 | <10>中文     | <10>备注            |
+|------------------+----------+--------+--------------+---------------------|
+| company_page_id  | integer  |        |              |                     |
+| module_id        | integer  |        |              |                     |
+| actived          | boolean  |      1 | 是否启用     | 模块开启/关闭时使用 |
+| modified_count   | integer  |      0 | 修改次数     |                     |
+| last_modified_at | datetime |        | 最后修改时间 |                     |
+
+*** company_page_tokens ?corp_tokens?操作码（激活/找回密码）
+|-----------------+---------+--------+--------------+---------------------------------------------------|
+| 字段名          | 类型    | 默认值 | <10>中文     | <10>备注                                          |
+|-----------------+---------+--------+--------------+---------------------------------------------------|
+| company_page_id | integer |        | 激活码对象id |                                                   |
+| token           | string  |        |              |                                                   |
+| request_count   | integer |      0 | 请求次数     | 0:新增;1..n:已请求；对只限单次请求的，1时即已失效 |
+| category        | string  |        | 分类         | confirm/active/reactive/reset_pwd/                |
+| status          | integer |      0 | 状态         | 0:新增;9:已失效（请求时设置是否失效）             |
+
+*** company_page_logs ?uncreated?操作日志,现只记录后台审核操作
+| 字段名          | 类型     | limit | 默认值 | <10>中文   | <10> 备注 |
+|-----------------+----------+-------+--------+------------+-----------|
+| company_page_id | integer  |       |        | 公司主页id |           |
+| operator_id     | integer  |       |        | 操作员id   |           |
+| operation       | string   |       |        | 操作       |           |
+| operated_at     | datetime |       |        | 操作时间   |           |
+| comment         | string   |       |        | 备注       |           |
+

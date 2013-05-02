@@ -1,0 +1,702 @@
+* init
+** study line
+*** j2se
+    Thinking In Java
+     Core Java™ 2， Volume I: Fundamentals
+     Java in a nutshell
+     JDK文档
+*** jsp
+**** 张龙 人行 培训
+关于中国人民银行企培视频的说明：
+这套视频是张龙老师（风中叶）为中国人民银行（央行）进行的企培，内容涉及HTTP协议详解、Tomcat服务器搭建、JSP详解、深入Servlet、Struts2、Hiberante3、Spring2.5深入详解以及这三个框架的整合，同时还有大量的练习题目。整个课程全部以实践驱动的方式进行，由张龙老师全程现场敲代码完成，对于学习者来说是一套不可多得的学习资料，这套视频张龙老师的培训价格为1.2万美元。
+这套视频是张龙老师在面授时全程录制而成，因此视频中偶尔会有学员的提问声音，请大家不要觉得惊讶或奇怪，整个视频的录制质量与张龙老师往日的视频相差无几，大家也可以从中了解到张龙老师在进行面授时的讲课方式以及教学方式，为后续的面授做好技术与思想上的准备。
+
+视频目录：
+    第一讲 HTTP协议详解
+    第二讲 HTTP协议详解 续
+    第三讲 搭建Java Web开发环境与配置Tomcat服务器
+    第四讲 JSP详解
+    第五讲 JSP详解 续
+    第六讲 JSP详解 续二
+    第七讲 Servlet精讲
+    第八讲 Servlet核心概念与原理
+    第九讲 Servlet深入剖析与JavaBean
+    第十讲 HttpSession、观察者模式与Listener详解
+    第十一讲 深度剖析Filter
+    第十二讲 客户化JSP标签详解
+    第十三讲 Servlet与JSP复习及作业精析
+    第十四讲 Struts2.1详述与MVC设计模式
+    第十五讲 Struts2.1实现MVC设计模式
+    第十六讲 Struts2.1配置文件详解
+    第十七讲 Struts2.1类型转换
+    第十八讲 分析Struts2.1源代码
+    第十九讲 Struts2.1输入校验与类型转换精析
+    第二十讲 Struts2.1输入校验源码剖析
+    第二十一讲 XWork对输入校验的支持，类型转换与输入校验总结
+    第二十二讲 Struts2.1国际化详解
+    第二十三讲.Struts2.1拦截器深度剖析
+    第二十四讲.Struts2.1文件上传详解
+    第二十五讲 详解JDBC
+    第二十六讲 JDBC应用实例剖析
+    第二十七讲 使用Servlet、JSP与JDBC实现数据库操纵
+    第二十八讲 Hibernate深入浅出、实体与过程详解
+    第二十九讲 Hibernate原理、API与设计详解
+    第三十讲 Struts2.1整合Hibernate详析
+    第三十一讲 Struts2.1整合Hibernate详析 续
+    第三十二讲 Hibernate深入详解
+    第三十三讲 Hibernate级联关系详解
+    第三十四讲 Hibernate级联关系详解 续
+    第三十五讲 Hibernate检索策略
+    第三十六讲 Hibernate拦截器、事务隔离级别与QBC
+    第三十七讲 Spring介绍、工厂方法模式详解
+    第三十八讲 Spring常用装配方式详解
+    第三十九讲 Java反射详解
+    第四十讲 Struts2.1与Spring整合详解
+    第四十一讲 代理模式与动态代理详解
+    第四十二讲 AOP详解
+    第四十三讲 Struts2.1、Hibernate3、Spring2.5整合
+    第四十四讲 Struts2.1、Hibernate3、Spring2.5整合 续一
+    第四十五讲 Struts2.1、Hibernate3、Spring2.5整合 续二
+    第四十六讲 Struts2.1、Hibernate3、Spring2.5整合 续三
+    第四十七讲 培训总结
+    中国人民银行企培视频.源代码.zip
+*** servlet
+    Core Servlet and JSP 2Edition>
+    More Servlets and Java Server Pages
+*** javabean
+*** ssh
+*** EJB
+    Enterprise JavaBeans， 3nd Edition
+    Mastering Enterprise Java Beans Third Edition
+*** higher
+    Refactoring: Improving the Design of Existing Code
+    Effective Java
+    Design Patterns
+    Expert One-on-One J2EE Design and Development (Programmer to Programmer)
+* java
+** type
+*** boolean
+*** char
+*** byte
+*** short
+*** int
+*** long
+*** float
+*** double
+** class
+*** member 类成员
+**** field
+**** method
+**** nested class/interface
+*** 类修饰符
+**** public 若无，则包内
+**** abstract
+**** final
+**** strict floating point
+* j2ee
+** Q
+*** 增删改查、更新字段接口及restful调用
+*** 对象的xml、json封装与解封
+*** 后台定时任务
+*** 事务
+*** 日志处理
+*** 调用其它webservice接口
+** Q2
+*** test
+*** 缓存
+** wsdl 网络服务描述语言 (Web Services Description Language)
+   WSDL 是基于 XML 的用于描述 Web Services 以及如何访问 Web Services 的语言
+*** xml
+*** structure
+元素    定义
+**** <portType>      web service 执行的操作
+     它可描述一个 web service、可被执行的操作，以及相关的消息。
+     可以把 <portType> 元素比作传统编程语言中的一个函数库（或一个模块、或一个类）
+**** <message>       web service 使用的消息
+     定义一个操作的数据元素。
+每个消息均由一个或多个部件组成。可以把这些部件比作传统编程语言中一个函数调用的参数。
+**** <types> web service 使用的数据类型
+     定义 web service 使用的数据类型。
+为了最大程度的平台中立性，WSDL 使用 XML Schema 语法来定义数据类型。
+**** <binding>       web service 使用的通信协议
+为每个端口定义消息格式和协议细节
+
+
+<definitions>
+
+<types>
+   definition of types........
+</types>
+
+<message>
+   definition of a message....
+</message>
+
+<portType>
+   definition of a port.......
+</portType>
+
+<binding>
+   definition of a binding....
+</binding>
+
+</definitions>
+
+**** 可包含其它的元素，比如 extension 元素，以及一个 service 元素，此元素可把若干个 web services 的定义组合在一个单一的 WSDL 文档中
+*** 实例
+这是某个 WSDL 文档的简化的片段：
+<message name="getTermRequest">
+   <part name="term" type="xs:string"/>
+</message>
+
+<message name="getTermResponse">
+   <part name="value" type="xs:string"/>
+</message>
+
+<portType name="glossaryTerms">
+  <operation name="getTerm">
+        <input message="getTermRequest"/>
+        <output message="getTermResponse"/>
+  </operation>
+</portType>
+在这个例子中，<portType> 元素把 "glossaryTerms" 定义为某个端口的名称，把 "getTerm" 定义为某个操作的名称。
+操作 "getTerm" 拥有一个名为 "getTermRequest" 的输入消息，以及一个名为 "getTermResponse" 的输出消息。
+<message> 元素可定义每个消息的部件，以及相关联的数据类型。
+对比传统的编程，glossaryTerms 是一个函数库，而 "getTerm" 是带有输入参数 "getTermRequest" 和返回参数 getTermResponse 的一个函数。
+
+*** 完整语法
+<wsdl:definitions name="nmtoken"? targetNamespace="uri">
+
+    <import namespace="uri" location="uri"/> *
+
+    <wsdl:documentation .... /> ?
+
+    <wsdl:types> ?
+        <wsdl:documentation .... /> ?
+        <xsd:schema .... /> *
+    </wsdl:types>
+
+    <wsdl:message name="ncname"> *
+        <wsdl:documentation .... /> ?
+        <part name="ncname" element="qname"? type="qname"?/> *
+    </wsdl:message>
+
+    <wsdl:portType name="ncname"> *
+        <wsdl:documentation .... /> ?
+        <wsdl:operation name="ncname"> *
+            <wsdl:documentation .... /> ?
+            <wsdl:input message="qname"> ?
+                <wsdl:documentation .... /> ?
+            </wsdl:input>
+            <wsdl:output message="qname"> ?
+                <wsdl:documentation .... /> ?
+            </wsdl:output>
+            <wsdl:fault name="ncname" message="qname"> *
+                <wsdl:documentation .... /> ?
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:serviceType name="ncname"> *
+        <wsdl:portType name="qname"/> +
+    </wsdl:serviceType>
+
+    <wsdl:binding name="ncname" type="qname"> *
+        <wsdl:documentation .... /> ?
+        <-- binding details --> *
+        <wsdl:operation name="ncname"> *
+            <wsdl:documentation .... /> ?
+            <-- binding details --> *
+            <wsdl:input> ?
+                <wsdl:documentation .... /> ?
+                <-- binding details -->
+            </wsdl:input>
+            <wsdl:output> ?
+                <wsdl:documentation .... /> ?
+                <-- binding details --> *
+            </wsdl:output>
+            <wsdl:fault name="ncname"> *
+                <wsdl:documentation .... /> ?
+                <-- binding details --> *
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="ncname" serviceType="qname"> *
+        <wsdl:documentation .... /> ?
+        <wsdl:port name="ncname" binding="qname"> *
+            <wsdl:documentation .... /> ?
+            <-- address details -->
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>
+
+*** resource
+**** eclipse webservice  http://wenku.baidu.com/view/184f677202768e9951e73846.html
+** jsp
+*** web.xml
+**** icon元素
+icon元素用来指定GIF格式或JPEG格式的小图标(16×16)或大图标(32×32)的文件名。
+
+<!ELEMENT icon (small-icon?, large-icon?)>
+<!ELEMENT small-icon (#PCDATA)>
+<!ELEMENT large-icon (#PCDATA)>
+
+icon元素包括两个可选的子元素：small-icon子元素和large-icon子元素。文件名是Web应用归档文件(WAR)的根的相对路径。
+部署描述符并没有使用icon元素。但是，如果使用XML工具编辑部署描述符，XML编辑器可以使用icon元素。
+
+**** display-name元素
+如果使用工具编辑部署描述符，display-name元素包含的就是XML编辑器显示的名称。
+
+<!ELEMENT display-name (#PCDATA)>
+
+部署描述符：<display-name>Online Store Application</display-name>
+
+**** description元素
+可以使用description元素来提供有关部署描述符的信息。XML编辑器可以使用description元素的值。
+
+<!ELEMENT description (#PCDATA)>
+
+**** distributable元素
+可以使用distributable元素来告诉servlet/JSP容器，编写将在分布式Web容器中部署的应用：
+
+<!ELEMENT distributable EMPTY>
+
+部署描述符：<distributable/>
+
+**** context-param元素
+context-param元素含有一对参数名和参数值，用作应用的servlet上下文初始化参数。参数名在整个Web应用中必须是惟一的。
+
+<!ELEMENT context-param (param-name, param-value, description?)>
+<!ELEMENT param-name (#PCDATA)>
+<!ELEMENT param-value (#PCDATA)>
+<!ELEMENT description (#PCDATA)>
+
+param-name 子元素包含有参数名，而param-value子元素包含的是参数值。作为选择，可用description子元素来描述参数。
+
+有效部署描述符：
+<context-param>
+    <param-name>period</param-name>
+    <param-value>3600000</param-value>
+    <description>定时器延迟时间</param-value>
+</context-param>
+
+**** filter元素
+filter元素用于指定Web容器中的过滤器。在请求和响应对象被 servlet 处理之前或之后，可以使用过滤器对这两个对象进行操作。利用下一节介绍的filter-mapping元素，过滤器被映射到一个servlet或一个URL模式。这个过滤器的filter元素和filter-mapping元素必须具有相同的名称。
+
+<!ELEMENT filter (icon?, filter-name, display-name?, description?, filter-class, init-param*)>
+<!ELEMENT filter-name (#PCDATA)>
+<!ELEMENT filter-class (#PCDATA)>
+
+icon、display-name和description元素的用法和上一节介绍的用法相同。init-param元素与context-param元素具有相同的元素描述符。filter-name元素用来定义过滤器的名称，该名称在整个应用中都必须是惟一的。filter-class元素指定过滤器类的完全限定的名称。
+
+部署描述符：
+<filter>
+    <filter-name>webwork</filter-name>
+    <filter-class>com.webwork.dispatcher.WebworkFilterDispatcher</filter-class>
+    <init-param>
+      <param-name>username</param-name>
+      <param-value>yefei</param-value>
+    </init-param>
+</filter>
+
+**** filter-mapping元素
+filter-mapping 元素用来声明Web应用中的过滤器映射。过滤器可被映射到一个servlet或一个URL模式。将过滤器映射到一个servlet中会造成过滤器作用于servlet上（即把每个请求（由通配符指定）都发送到该 servlet 上）。将过滤器映射到一个URL模式中则可以将过滤器应用于任何资源，只要该资源的URL与URL模式匹配。过滤是按照部署描述符的filter-mapping元素出现的顺序执行的。
+
+<!ELEMENT filter-mapping (filter-name, (url-pattern | servlet-name))>
+<!ELEMENT filter-name (#PCDATA)>
+<!ELEMENT url-pattern (#PCDATA)>
+<!ELEMENT servlet-name (#PCDATA)>
+
+filter-name值必须对应filter元素中声明的其中一个过滤器名称。
+
+部署描述符：
+<filter-mapping>
+    <filter-name>webwork</filter-name>
+    <url-pattern>*.do</url-pattern>
+</filter-mapping>
+<filter-mapping>
+    <filter-name>webwork</filter-name>
+    <servlet-name>webServlet</servlet-name>
+</filter-mapping>
+
+**** listener元素
+listener元素用来注册一个监听器类，可以在Web应用中包含该类。使用listener元素，可以收到事件什么时候发生以及用什么作为响应的通知。
+
+<!ELEMENT listener (listener-class)>
+<!ELEMENT listener-class (#PCDATA)>
+
+部署描述符：
+<listener>
+    <listener-class>com.huawei.netforce.timer.tfTimer</listener-class>
+</listener>
+
+**** servlet元素
+servlet元素用来声明一个servlet。
+
+<!ELEMENT servlet (icon?, servlet-name, display-name?, description?, (servlet-class|jsp-file), init-param*, load-on-startup?, run-as?, security-role-ref*)>
+
+<!ELEMENT servlet-name (#PCDATA)>
+<!ELEMENT servlet-class (#PCDATA)>
+<!ELEMENT jsp-file (#PCDATA)>
+<!ELEMENT init-param (param-name, param-value, description?)>
+<!ELEMENT load-on-startup (#PCDATA)>
+<!ELEMENT run-as (description?, role-name)>
+<!ELEMENT role-name (#PCDATA)>
+
+icon、display-name和description元素的用法和上一节介绍的用法相同。init-param元素与context-param元素具有相同的元素描述符。可以使用init-param子元素将初始化参数名和参数值传递给servlet。
+
+(1)、servlet-name、servlet-class和jsp-file元素
+    servlet元素必须包含servlet-name元素和servlet-class元素或jsp-file元素其中一个。
+描述如下：
+    servlet-name 元素用来定义servlet的名称，该名称在整个应用中必须是惟一的。
+    servlet-class 元素用来指定servlet的完全限定的名称。
+    jsp-file 元素用来指定应用中JSP文件的完整路径。这个完整路径必须由a/开始。
+
+(2)、load-on-startup元素
+    当启动Web容器时，用 load-on-startup 元素自动将servlet加入内存。加载servlet就意味着实例化这个servlet，并调用它的init方法。可以使用这个元素来避免第一个servlet请求的响应因为servlet载入内存所导致的任何延迟。如果load-on-startup 元素存在，而且也指定了jsp-file元素，则JSP文件会被重新编译成servlet，同时产生的servlet也被载入内存。
+    load-on-startup 元素的内容可以为空，或者是一个整数。这个值表示由Web容器载入内存的顺序。举个例子，如果有两个servlet元素都含有load-on-startup子元素，则load-on-startup子元素值较小的servlet将先被加载。如果load-on-startup子元素值为空或负值，则由Web容器决定什么时候加载servlet。如果两个servlet的load-on-startup子元素值相同，则由Web容器决定先加载哪一个servlet。
+
+(3)、run-as元素
+    如果定义了run-as元素，它会重写用于调用Web应用中servlet所设定的Enterprise JavaBean(EJB)的安全身份。Role-name是为当前Web应用定义的一个安全角色的名称。
+
+(4)、security-role-ref元素
+    在servlet代码编程中访问用户和角色，使用javax.servlet.http.HttpServletRequest.isUserInRole(String role)方法。字符串role被映射到嵌套在一个WEB应用程序部署描述符的<servlet>声明上的<security-role-ref>元素里的<role-name>元素提供的名字上。<role-link>元素映射到一个定义在WEB应用程序描述符的<security-role>元素的<role-name>上。security-role-ref元素的描述如下：
+
+<!ELEMENT security-role-ref (description?, role-name, role-link)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT role-name (#PCDATA)>
+<!ELEMENT role-link (#PCDATA)>
+
+role-link元素用来将安全角色引用链接到已定义的安全角色。role-link元素必须含有已经在security-role元素中定义的一个安全角色的名称。
+
+部署描述符：
+  <servlet>
+    <servlet-name>webworkServlet</servlet-name>
+    <servlet-class>com.huawei.netforce.WebworkServlet</servlet-class>
+    <init-param>
+        <param-name>inputCls</param-name>
+        <param-value>RunJob</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+    <security-role-ref>
+        <role-name>manager</role-name>
+        <role-link>sdctc</role-link>
+    </security-role-ref>
+  </servlet>
+  ...
+  <security-role>
+    <role-name>sdctc</role-name>
+  </security-role>
+
+**** servlet-mapping元素
+    servlet-mapping 元素将URL模式映射到某个servlet。
+
+<!ELEMENT servlet-mapping (servlet-name, url-pattern)>
+<!ELEMENT servlet-name (#PCDATA)>
+<!ELEMENT url-pattern (#PCDATA)>
+
+部署描述符：
+<servlet-mapping>
+    <servlet-name>webwork</servlet-name>
+    <url-pattern>*.action</url-pattern>
+</servlet-mapping>
+
+**** session-config元素
+    session-config元素为Web应用中的javax.servlet.http.HttpSession对象定义参数。
+
+<!ELEMENT session-config (session-timeout?)>
+<!ELEMENT session-timeout (#PCDATA)>
+
+session-timeout元素用来指定默认的会话超时时间间隔，以分钟为单位。该元素值必须为整数。如果session-timeout元素的值为零或负数，则表示会话将永远不会超时。
+
+下面是一个部署描述符，在用户最近访问HttpSession对象30分钟后，HttpSession对象默认为无效：
+
+<session-config>
+    <session-timeout>30</session-timeout>
+</session-config>
+
+**** mime-mapping元素
+    mime-mapping元素将mime类型映射到扩展名。
+
+<!ELEMENT mime-mapping (extension, mime-type)>
+<!ELEMENT extension (#PCDATA)>
+<!ELEMENT mime-type (#PCDATA)>
+
+extension元素用来描述扩展名。mime-type元素则为MIME类型。
+
+部署描述符将扩展名txt映射为text/plain：
+
+<mime-mapping>
+    <extension>txt</extension>
+    <mime-type>text/plain</mime-type>
+</mime-mapping>
+
+**** welcome-file-list元素
+    当用户在浏览器中输入的URL不包含某个servlet名或JSP页面时，welcome-file-list元素可指定显示的默认文件。
+
+<!ELEMENT welcome-file-list (welcome-file+)>
+<!ELEMENT welcome-file (#PCDATA)>
+
+    假设用户在浏览器的地址框中输入 http://host/webAppPrefix/directoryName/ 这样的包含一个目录名但没有包含文件名的URL，用户能得到一个目录表？一个错误？还是标准文件的内容？如果得到标准文件内容，是index.html、index.jsp、default.html、default.htm 或别的什么东西呢？welcome-file-list元素及其辅助的welcome-file元素解决了这个模糊的问题。
+    welcome-file子元素用于指定默认文件的名称。welcome-file-list元素可以包含一个或多个welcome-file子元素。如果在第一个welcome-file元素中没有找到指定的文件，Web容器就会尝试显示第二个，以此类推。如果两者都没有找到，则结果有赖于所用的服务器（如一个目录列表）。
+
+<welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+</welcome-file-list>
+
+如果用户键入的URL不包含servlet名称、JSP页面或其他资源，则不会在应用目录中找到main.html文件，这时就会显示jsp目录下的welcome.jsp文件
+
+**** error-page元素
+    error-page元素用于将一段错误代码或一个异常类型映射到Web应用中的资源路径，从而在产生特殊的HTTP错误或指定的Java异常时，将显示相关的资源。
+
+<!ELEMENT error-page ((error-code | exception-type), location)>
+<!ELEMENT error-code (#PCDATA)>
+<!ELEMENT exception-type (#PCDATA)>
+<!ELEMENT location (#PCDATA)>
+
+    error-code元素包含HTTP错误代码。exception-type是Java异常类型的完全限定的名称。location元素是Web应用中的资源相对于应用目录的路径。location的值必须从/开始。
+
+举个例子，每次产生HTTP 404错误代码时，下面的部署描述符可使Web容器显示error404.html页面：
+
+<error-page>
+    <error-code>404</error-code>
+    <location>/error404.html</location>
+</error-page>
+
+**** taglib元素
+    taglib元素描述JSP定制标记库。
+
+<!ELEMENT taglib (taglib-uri, taglib-location)>
+<!ELEMENT taglib-uri (#PCDATA)>
+<!ELEMENT taglib-location (#PCDATA)>
+
+    taglib-uri 元素是用于Web应用中的标记库的URI。taglib-uri元素的值与WEB-INF目录相对应。
+    taglib-location 元素包含一个位置，其中可以找到标记库的标记库描述符(TLD)文件
+
+**** resource-env-ref元素
+    可以使用resource-env-ref元素来指定对管理对象的servlet引用的声明，该对象与servlet环境中的资源相关联。
+
+<!ELEMENT resource-env-ref (description?, resource-env-ref-name, resource-env-ref-type)>
+<!ELEMENT resource-env-ref-name (#PCDATA)>
+<!ELEMENT resource-env-ref-type (#PCDATA)>
+
+    resource-env-ref-name 元素是资源环境引用的名称，其值为servlet代码中使用的环境的入口名称。该名称是一个与java:comp/env相对应的Java命名和目录接口(JNDI)名称，该名称在整个Web应用中必须是惟一的
+
+**** resource-ref元素
+    resource-ref元素用于指定对外部资源的servlet引用的声明。
+
+<!ELEMENT resource-ref (description?, res-ref-name, res-type, res-auth, res-sharing-scope?)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT res-ref-name (#PCDATA)>
+<!ELEMENT res-type (#PCDATA)>
+<!ELEMENT res-auth (#PCDATA)>
+<!ELEMENT res-sharing-scope (#PCDATA)>
+
+resource-ref子元素的描述如下：
+    (1)、res-ref-name 是资源工厂引用名的名称。该名称是一个与java:comp/env上下文相对应的JNDI名称，并且在整个Web应用中必须是惟一的。
+    (2)、res-auth 表明：servlet代码通过编程注册到资源管理器，或者是容器将代表servlet注册到资源管理器。该元素的值必须为Application或Container。
+    (3)、res-sharing-scope 表明：是否可以共享通过给定资源管理器连接工厂引用获得的连接。该元素的值必须为Shareable(默认值)或Unshareable
+
+**** security-constraint元素
+    部署描述符中的security-constraint元素允许不通过编程就可以限制对某个资源的访问。
+
+<!ELEMENT security-constraint (display-name?, web-resource-collection+, auth-constraint?, user-data-constraint?)>
+<!ELEMENT display-name (#PCDATA)>
+<!ELEMENT web-resource-collection (web-resource-name, description?, url-pattern*, http-method*)>
+<!ELEMENT auth-constraint (description?, role-name*)>
+<!ELEMENT user-data-constraint (description?, transport-guarantee)>
+
+(1)、web-resource-collection元素标识需要限制访问的资源子集。在web-resource-collection元素中，可以定义URL模式和HTTP方法。如果不存在HTTP方法，就将安全约束应用于所有的方法。
+
+<!ELEMENT web-resource-collection (web-resource-name, description?, url-pattern*, http-method*)>
+<!ELEMENT web-resource-name (#PCDATA)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT url-pattern (#PCDATA)>
+<!ELEMENT http-method (#PCDATA)>
+
+web-resource-name是与受保护资源相关联的名称。http-method元素可被赋予一个HTTP方法，比如GET和POST。
+
+(2)、auth-constraint元素用于指定可以访问该资源集合的用户角色。如果没有指定auth-constraint元素，就将安全约束应用于所有角色。
+
+<!ELEMENT auth-constraint (description?, role-name*)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT role-name (#PCDATA)>
+
+role-name元素包含安全角色的名称。
+
+(3)、user-data-constraint元素用来显示怎样保护在客户端和Web容器之间传递的数据。
+
+<!ELEMENT user-data-constraint (description?, transport-guarantee)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT transport-guarantee (#PCDATA)>
+
+transport-guarantee元素必须具有如下的某个值：
+    (1)、NONE，这意味着应用不需要传输保证。
+    (2)、INTEGRAL，意味着服务器和客户端之间的数据必须以某种方式发送，而且在传送中不能改变。
+    (3)、CONFIDENTIAL，这意味着传输的数据必须是加密的数据。
+
+在大多数情况下，安全套接字层(SSL)用于INTEGRAL或CONFIDENTIAL
+
+**** login-config元素
+    login-config元素用来指定所使用的验证方法、领域名和表单验证机制所需的特性。
+
+<!ELEMENT login-config (auth-method?, realm-name?, form-login-config?)>
+<!ELEMENT auth-method (#PCDATA)>
+<!ELEMENT realm-name (#PCDATA)>
+<!ELEMENT form-login-config (form-login-page, form-error-page)>
+
+login-config子元素的描述如下：
+    (1)、auth-method：指定验证方法。它的值为下面的一个：BASIC、DIGEST、FORM或 CLIENT-CERT，分别代表基本、摘要、基于表单、客户端的鉴别。
+      BASIC：
+        Basic认证用WEB浏览器显示用户名/密码对话框。这个用户名和密码通过域被认证。
+      FORM：
+        基于Form的认证要求返回一个包含用户名和密码的HTML表单。从表单元素返回的字段必须是j_username和j_password，action属性必须是j_security_check（Servlet规范定义由容器负责实现的Servlet）。下面是使用FORM认证的HTML代码示例：
+        <form method="POST" action="j_security_check">
+          <input type="text" name="j_username">
+          <input type="password" name="j_password">
+        </form>
+        用来产生HTML表单的资源可能是一个HTML页面，一个JSP，或一个servlet。使用<form-login-page>元素来定义这个资源。
+        当提供login页面服务时，就会建立HTTP会话对象。因此，当认证成功后在页面调用session.isNew()方法会返回FALSE。
+      CLIENT-CERT：
+        使用客户端证书来进行认证请求。更多信息参考配置SSL协议。
+    (2)、realm-name：指定HTTP Basic验证中使用的领域名。
+    (3)、form-login-config：指定基于表单的登录中应该使用的登录页面和出错页面。如果没有使用基于表单的验证，则忽略这些元素。这个元素的定义如下，其中form-login-page用于指定显示登录页面的资源路径， form-error-page则用于指定用户登录失败时显示出错页面的资源路径。这两个页面路径都必须以a/开始，并与应用目录相对应。
+
+<!ELEMENT form-login-config (form-login-page, form-error-page)>
+<!ELEMENT form-login-page (#PCDATA)>
+<!ELEMENT form-error-page (#PCDATA)>
+
+**** security-role元素
+    security-role元素指定用于安全约束中的安全角色的声明。
+
+<!ELEMENT security-role (description?, role-name)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT role-name (#PCDATA)>
+
+**** env-entry元素
+    env-entry元素用于指定应用环境入口。
+
+<!ELEMENT env-entry (description?, env-entry-name, env-entry-value?, env-entry-type)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT env-entry-name (#PCDATA)>
+<!ELEMENT env-entry-value (#PCDATA)>
+<!ELEMENT env-entry-type (#PCDATA)>
+
+env-entry-name元素包含Web应用环境入口的名称。该名称是一个与java:comp/env相对应的JNDI名称，并且在整个应用中必须是惟一的。
+
+env-entry-value元素包含Web应用环境入口的值。该值必须是一个字符串类型的值，并且对于指定类型的构造函数是有效的，该函数获得一个String参数；或者对于java.lang.Character是有效的，java.lang.Character对象是一个字符。
+
+env-entry-type元素包含环境入口值的完全限定的Java类型，该环境入口值是Web应用代码所期望的。这个env-entry-type元素的值必须是如下之一：
+    java.lang.Boolean
+    java.lang.Byte
+    java.lang.Character
+    java.lang.String
+    java.lang.Short
+    java.lang.Integer
+    java.lang.Long
+    java.lang.Float
+    java.lang.Double
+
+**** ejb-ref元素
+    ejb-ref元素用于指定EJB的home接口的引用。
+
+<!ELEMENT ejb-ref (description?, ejb-ref-name, ejb-ref-type, home, remote, ejb-link?)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT ejb-ref-name (#PCDATA)>
+<!ELEMENT ejb-ref-type (#PCDATA)>
+<!ELEMENT home (#PCDATA)>
+<!ELEMENT remote (#PCDATA)>
+<!ELEMENT ejb-link (#PCDATA)>
+
+    ejb-ref-name 包含EJB引用的名称。EJB引用是servlet环境中的一个入口，它与java:comp/env相对应。这个名称在Web应用中必须是惟一的。为求一致性，推荐您的ejb-ref-name元素名称以ejb/开始。
+
+    ejb-ref-name元素包含引用的EJB的期望类型。这个值必须是Entity或Session。
+
+    home元素包含EJB的home接口的完全限定的名称。remote元素包含EJB的remote接口的完全限定的名称。
+
+    ejb-ref 或 ejb-local-ref 元素中用到的ejb-link元素可指定EJB 引用被链接到另一个EJB。Ejb-link元素的值必须是同一个J2EE应用单元中某个EJB的ejb-name。Ejb-link元素中的名称可以由指定ejb-jar的路径名组成，该ejb-jar包含引用的EJB。目标bean的名称添加在后面，用字符a# 与路径名分隔。路径名与包含引用EJB的Web应用的WAR相对应。这就允许我们惟一标识具有相同ejb-name的多个企业bean
+
+**** ejb-local-ref元素
+    ejb-local-ref元素用于声明对EJB的本地home的引用。
+
+<!ELEMENT ejb-local-ref (description?, ejb-ref-name, ejb-ref-type, local-home, local, ejb-link?)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT ejb-ref-name (#PCDATA)>
+<!ELEMENT ejb-ref-type (#PCDATA)>
+<!ELEMENT local-home (#PCDATA)>
+<!ELEMENT local (#PCDATA)>
+<!ELEMENT ejb-link (#PCDATA)>
+
+    local元素包含EJB本地接口的完全限定的名称。Local-home元素包含EJB本地home接口的完全限定的名称
+
+元素内容模型：
+
+内容模型        示例
+空：无子元素或字符数据  <!ELEMENT qname EMPTY>
+纯文本：只有字符数据，无子元素  <!ELEMENT qname #PCDATA>
+开放：任何合适的XML     <!ELEMENT qname ANY>
+混和：只有字符数据，其中缀有零个或多个qn1和qn2子元素（任何顺序）        <!ELEMENT qname (#PCDATA|qn1|qn2)*>
+纯元素：只有reg-exp描述的子元素，并且子元素之间没有非空白字符   <!ELEMENT qname (reg-exp)>
+出现次数：
+
+最小次数        最大次数        含义    表达式
+0       1        非强制不可重复  head?
+1       1        强制不可重复    head
+0       unbounded        非强制可重复    head*
+1       unbounded        强制可重复      head+
+
+*** server.xml
+**** server:
+          1、port 指定一个端口，这个端口负责监听关闭tomcat的请求
+          2、shutdown 指定向端口发送的命令字符串
+**** service:
+          1、name 指定service的名字
+**** Connector (表示客户端和service之间的连接)：
+          1、port 指定服务器端要创建的端口号，并在这个断口监听来自客户端的请求
+          2、minProcessors 服务器启动时创建的处理请求的线程数
+          3、maxProcessors 最大可以创建的处理请求的线程数
+          4、enableLookups 如果为true，则可以通过调用request.getRemoteHost()进行DNS查
+询来得到远程客户端的实际主机名，若为false则不进行DNS查询，而是返回其ip
+地址
+          5、redirectPort 指定服务器正在处理http请求时收到了一个SSL传输请求后重定向的
+端口号
+          6、acceptCount 指定当所有可以使用的处理请求的线程数都被使用时，可以放到处理
+队列中的请求数，超过这个数的请求将不予处理
+          7、connectionTimeout 指定超时的时间数(以毫秒为单位)
+**** Engine (表示指定service中的请求处理机，接收和处理来自Connector的请求)：
+          1、defaultHost 指定缺省的处理请求的主机名，它至少与其中的一个host元素的name
+属性值是一样的
+**** Context (表示一个web应用程序)：
+          1、docBase 应用程序的路径或者是WAR文件存放的路径
+          2、path 表示此web应用程序的url的前缀，这样请求的url为
+http://localhost:8080/path/****
+          3、reloadable 这个属性非常重要，如果为true，则tomcat会自动检测应用程序的
+/WEB-INF/lib 和/WEB-INF/classes目录的变化，自动装载新的应用程序，我们可
+以在不重起tomcat的情况下改变应用程序
+**** host (表示一个虚拟主机)：
+          1、name 指定主机名
+          2、appBase 应用程序基本目录，即存放应用程序的目录
+          3、unpackWARs 如果为true，则tomcat会自动将WAR文件解压，否则不解压，直接
+从WAR文件中运行应用程序
+**** Logger (表示日志，调试和错误信息)：
+          1、className 指定logger使用的类名，此类必须实现org.apache.catalina.Logger 接口
+          2、prefix 指定log文件的前缀
+          3、suffix 指定log文件的后缀
+          4、timestamp 如果为true，则log文件名中要加入时间，如下
+例:localhost_log.2001-10-04.txt
+**** Realm (表示存放用户名，密码及role的数据库)：
+          1、className 指定Realm使用的类名，此类必须实现org.apache.catalina.Realm接口
+**** Valve (功能与Logger差不多，其prefix和suffix属性解释和Logger 中的一样)：
+          1、className 指定Valve使用的类名，如用org.apache.catalina.valves.AccessLogValve
+类可以记录应用程序的访问信息
+**** directory（指定log文件存放的位置）：
+    1、pattern 有两个值，common方式记录远程主机名或ip地址，用户名，日期，第一行
+请求的字符串，HTTP响应代码，发送的字节数。combined方式比common方式记
+录的值更多
+
+** 名词
+*** POJO 简单的Java对象（Plain Old Java Objects）实际就是普通JavaBeans
+*** DAO DataAccessObject 数据访问对象

@@ -1,0 +1,25 @@
+* soft
+** thinksns
+*** Q
+**** TODO 看不到都有哪些用户在线
+Rex(19218916)  16:50:04
+第一个 看不到都有哪些用户在线
+**** TODO 后台管理： 控制面板中添加不了用户群
+Rex(19218916)  16:51:20
+在后台管理的控制面板中 添加不了用户群  估计是源代码有问题
+**** TODO 登录框： 放在上部，一行
+**** TODO 登录页上部通栏图片：轮播
+* gjg
+** sale analytics
+*** base
+8    code
+9    name
+
+13   id
+14   sdt  date4 + hour5
+15    edt
+16   total
+*** sale
+    code
+    bdt
+    number

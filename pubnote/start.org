@@ -1,0 +1,17 @@
+* comp
+** debian/ubuntu
+*** install
+*** shell
+*** 
+** ruby
+*** 
+** rails
+** sinatra
+http://www.sinatrarb.com/intro.html
+http://rubysource.com/just-do-it-learn-sinatra-i/
+** padrino
+http://rubysource.com/just-do-it-learn-sinatra-i/
+** 
+* acc
+* en
+* art

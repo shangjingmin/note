@@ -1,0 +1,250 @@
+
+#+OPTIONS: ^:{}
+
+* Normandy_pre
+http://192.168.2.4/norpreheat/norpreheat.html
+
+http://solr.tianji.com:8983/solr/collection_company/select?q=name:天际网&wt=xml&start=0&amp;rows=50
+** release note
+*** java_solr config
+*** css liujuan yaoleixia
+** tools
+*** format rank
+a = $normandy_corp.members(with_scores: true)
+ar1 = []
+a.each{|r| nc = Normandy::NormandyCorp.find_by_corp_id(r.first.to_i); ar1 << [r.first, r.last, nc.try(:corp_id), nc.likes_count] unless nc.try(:likes_count) == r.last.to_i}
+a.each{|r| nc = Normandy::NormandyCorp.find_by_corp_id(r.first.to_i); $normandy_corp[r.first] = nc.try(:likes_count) unless nc.try(:likes_count) == r.last.to_i}
+ar2 = []
+a2 = $normandy_corp.members(with_scores: true)
+a2.each{|r| nc = Normandy::NormandyCorp.find_by_corp_id(r.first.to_i); ar2 << [r.first, r.last, nc.try(:corp_id), nc.likes_count] unless nc.try(:likes_count) == r.last.to_i}
+** Q/A
+*** 公司id获取及新建公司 Normandy::NormandyCorp.init_corp(corp_name) 返回公司id
+*** 参赛后的处理： normandy_corps.contestants_count ?直接回填 or 调函数 or init_corp中处理
+*** invite：弹窗; 需要支持公司id已有/无 ?cid=xxx   ?cname=xxx
+*** corp name validate: 暂时仅为不可为空
+*** 活动URL的设计
+
+** model
+*** normandy_corps: 参赛公司: 需要提供用户参赛后的回调方法（参赛人数）
+belongs_to :corp;
+has_many :participants;
+has_many :recommends;
+
+|-------------------+------+--------+----------+--------------|
+| 字段名            | 类型 | 默认值 | 中文     | 备注         |
+|-------------------+------+--------+----------+--------------|
+| id                | i    |        |          |              |
+| created_at        | dt   |        |          |              |
+| updated_at        | dt   |        |          |              |
+|-------------------+------+--------+----------+--------------|
+| corp_id           | i    |        | 公司id   |              |
+| likes_count       | i    |      0 | 人气数   |              |
+| contestants_count | i    |      0 | 参赛人数 |              |
+|-------------------+------+--------+----------+--------------|
+| name              | s    |        | 公司名称 | 公司信息冗余 |
+| industry_id       | i    |        |          |              |
+| staffers_count    | i    |        |          |              |
+| logo              | s    |        |          |              |
+| description       | s    |        |          |              |
+|-------------------+------+--------+----------+--------------|
+
+排序根据likes_count,在redis中实现
+
+rails g model nmd_corp corp_id:integer likes_count:integer contestants_count:integer
+*** normandy_likes 喜欢
+|------------+------+--------+------------+------|
+| 字段名     | 类型 | 默认值 | 中文       | 备注 |
+|------------+------+--------+------------+------|
+| id         | i    |        |            |      |
+| created_at | dt   |        |            |      |
+| updated_at | dt   |        |            |      |
+|------------+------+--------+------------+------|
+| corp_id    | i    |        | 公司id     |      |
+| user_id    | i    |        | 参赛用户id |      |
+| request_ip | s    |        | IP         |      |
+|------------+------+--------+------------+------|
+
+rails g model normandy::normandy_likes corp_id:integer user_id:integer
+
+*** nmd_participants 参赛者  normandy_contestants
+belongs_to :corp;
+belongs_to :recommend;
+
+belongs_to :user;
+|----------------+------+--------+------------+------|
+| 字段名         | 类型 | 默认值 | 中文       | 备注 |
+|----------------+------+--------+------------+------|
+| corp_id        | i    |        | 公司id     |      |
+| user_id        | i    |        | 参赛用户id |      |
+|----------------+------+--------+------------+------|
+| source_id      | i    |        | 来源id     |      |
+| source_type    | s    |        | 来源类型   |      |
+| recommender_id | i    |        | 推荐人id   |      |
+
+rails g model nmd_participant corp_id:integer user_id:integer source_id:integer source_type:string recommender_id:integer
+
+*** nmd_recommendations 推荐记录 normandy_invites
+belongs_to :corp;
+has_one :participant;
+
+belongs_to :recommend, :class_name => "User";
+belongs_to :recommended, :class_name => "User";
+|----------------+------+--------+----------+------------------------------|
+| 字段名         | 类型 | 默认值 | 中文     | 备注                         |
+|----------------+------+--------+----------+------------------------------|
+| corp_id        | i    |        | 公司id   |                              |
+| recommender_id | i    |        | 推荐人id |                              |
+| user_id        | i    |        | 参赛者id |                              |
+| token          | s    |        | 推荐标识 |                              |
+|----------------+------+--------+----------+------------------------------|
+| name           | s    |        |          |                              |
+| email          | s    |        |          |                              |
+| phone          | s    |        |          |                              |
+| title          | s    |        | 邮件标题 |                              |
+| content        | s    |        | 邮件内容 |                              |
+| yours          | s    |        | 邀请人   | 用户已登录，默认为登录人姓名 |
+
+rails g model nmd_recommendation corp_id:integer recommender_id:integer user_id:integer token:string name:string email:string phone:string title:string content:string yours:string
+
+** function_pre
+index: q; industry
+search: 创建新公司; call recomend
+like: like record; call recommend
+*** index (dong)
+**** company list
+**** right top list
+**** search
+**** 添加新公司提示 ？公司新建原流程要求必须注册
+*** top 100 (dong)
+*** recommand ？使用GA统计热门公司 ？是否有后续步骤，如告诉推荐者进度
+**** form
+**** token
+**** email
+**** recommand register URL: 需要确定直接调用注册链接还是通过单独链接重定向到注册
+**** register user id rewrite
+*** share to weibo
+*** register
+*** add new corp (dong)
+*** admin (zhu/dong)
+**** 公司likes数排行 (zhu)
+**** new corp：(dong) 与正常注册公司区分 
+* Normandy
+PK页     http://192.168.2.83/tianji_nmd/pk.php
+http://192.168.2.83/tianji_nmd/pk_login.php
+公司主页 http://192.168.2.4/new_companies/companyBack/cp_Homes.php
+公司动页 http://192.168.2.4/new_companies/companyBack/cp_Active.php
+
+
+http://192.168.2.83/tianji_nmd/index.php
+http://192.168.2.83/tianji_nmd/index_two.php
+http://192.168.2.83/tianji_nmd/pk_index3.php
+
+** redis object
+
+*** sortedset
+r.length
+r.expire(1) # second
+**** 增：r[:corp_id] = score
+**** 删：r.delete(:corp_id)
+**** 改：
+r[:corp_id] = score
+r.increment(:corp_id) r.incr(:corp_id) r.incr(:corp_id, 4)
+r.decrement(:corp_id)
+
+r.unionstore(r.key, r1)
+**** 查：
+r[0..2]
+r[0,2]
+r[:corp_id] r.score(:corp_id) # score
+r.rank(:corp_id)
+r.revrank(:corp_id)
+r.revrankge(0,2)
+r.members r.members(with_scores: true)
+r.members.reverse
+
+r.member?(:corp_id)
+** model
+*** normandy_votes 投票记录
+|            |   |   |          |           |
+|------------+---+---+----------+-----------|
+| voter_id   | i |   | 投票人   |           |
+| user_id    | i |   | 参赛者   |           |
+| corp_id    | i |   | 参赛公司 |           |
+| request_ip | s |   | IP       |           |
+| from_type  | s |   | 来源     | weibo/web |
+
+rails g model normandy_vote voter_id:integer user_id:integer corp_id:integer from_type:string
+*** normandy_everydays 每日统计
+|                        |        |   |            |              |
+|------------------------+--------+---+------------+--------------|
+| item_id                |        |   | 对象id     |              |
+| item_type              |        |   | 对象类型   | 用户/公司    |
+| date                   | string |   | 日期串     |              |
+| votes_count            |        | 0 | 总票数     |              |
+| position               |        | 0 | 排行       | 总/行业/地区 |
+| rise_votes_count       |        | 0 | 当日票数   |              |
+| rise_position          |        | 0 | 排行上升数 |              |
+| industry_position      |        | 0 |            |              |
+| rise_industry_position |        | 0 |            |              |
+| area_position          |        | 0 |            |              |
+| rise_area_position     |        | 0 |            |              |
+
+
+rails g model normandy_everyday rank_id:integer rank_type:string date:string votes_count:integer total_votes_count:integer position:integer rise_position:integer
+
+*** redis: real-time rank rank expire in 3days; users/companies/same-industry/same-area;？update this scores when new vote
+normandy_rank: + date + [industry/area:type_id] + :users/corps
+
+normandy_rank:20130416:users
+normandy_rank:20130416:corps
+normandy_rank:20130416:industry:1:users 
+normandy_rank:20130416:industry:1:corps
+normandy_rank:20130416:area:12:users
+normandy_rank:20130416:area:12:corps
+
+
+| key              | member      | score       |   |   |
+|------------------+-------------+-------------+---+---|
+| user_#{date}     | user_id     | votes_count |   |   |
+| company_#{date}  | company_id  | votes_count |   |   |
+| industry_#{date} | industry_id | votes_count |   |   |
+| area_#{date}     | area_id     | votes_count |   |   |
+
+** function
+rankd 3个维度：（人/公司、实时/每日、总/行业/地区）
+数据分析：我投了谁（人/公司）、谁投了它（人/公司）、你可能喜欢谁（人/公司）
+*** index
+**** pk： girls/boys  pk配对规则 人/公司的人
+**** top： 职位/公司
+**** hot/new people/company： 分享
+**** 注册引导
+**** search：公司（参赛人员）
+*** dashboard
+**** self
+***** profile： desc
+***** 拉票： 谁 为谁 通过什么渠道（email/weibo/wechat）
+***** 多个照片
+***** rank：global/industry/area 每天得票数/图表
+***** people I like
+***** who support the same as I
+***** who vote you
+***** my company(companies)
+***** who support the save company
+***** people you may like 
+**** voter
+***** top girl you like
+***** girl you liked ups
+***** you may like
+***** my company
+***** girls in your contact
+***** top person rank
+***** top company rank
+***** you may want support company
+***** you liked
+***** who support the same company
+**** tianji member
+*** register
+**** 引导
+**** 弹框注册
+**** 简版注册
+*** company page
