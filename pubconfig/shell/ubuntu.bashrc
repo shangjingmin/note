@@ -1,11 +1,3 @@
-# # 引用通用bashrc配置文件, 请在.bashrc中做以下设置以正确引用文件
-# export JAVA_HOME=/usr/java/jdk1.7.0_10
-# export UBUNTU_BASHRC_SHELL=${HOME}/nethd/self/public/shell
-# . "$UBUNTU_BASHRC_SHELL/ubuntu.bashrc"
-# export UBUNTU_PRJ="/home/prj" # $HOME/nethd
-# . "$UBUNTU_BASHRC_SHELL/ubuntu_prj.bashrc"
-
-
 # export JRE_HOME=${JAVA_HOME}/jre
 # export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
 # export PATH=${JAVA_HOME}/bin:$PATH
