@@ -248,3 +248,24 @@ rankd 3个维度：（人/公司、实时/每日、总/行业/地区）
 **** 弹框注册
 **** 简版注册
 *** company page
+** power script
+*** clear data
+Account.all.each{|r| r.update_attribute(:gender, ['f', 'm'].sample) if r.gender.blank?}
+Normandy::NormandyVote.delete_all && Normandy::NormandyCorp.delete_all && NormandyContestant.delete_all && NormandyContestantMongo.delete_all
+$cache.delete_matched("normandy_rank*")
+*** corp normandy check
+# 参赛者 与 有参赛公司
+cont = {}
+NormandyContestant.select("corp_id, count(*) acount").where(status: 3).group("corp_id").map{|r| cont[r.corp_id] = r.acount}
+c = {}
+Normandy::NormandyCorp.all.map{|r| c[r.corp_id] = r.contestants_count}
+
+removed = c.keys - cont.keys
+un_in_c = cont.keys - c.keys
+
+uneqls = cont.collect{|k, v| k unless v == c[k]}.compact
+
+uneqls.each{|r| a = Normandy::NormandyCorp.find_by_corp_id(r); a.contestants_count = cont[r]; a.save}
+
+removed.each{|r| a = Normandy::NormandyCorp.find_by_corp_id(r); a.contestants_count = 0; a.save}
+

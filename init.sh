@@ -1,5 +1,9 @@
 # repos/          : net disk data
-# repos_work/     : work dir for net disk data
+
+# note/           : notebook  git clone ../repos/selfsjm/note
+# note/prj
+# note/config
+# note/life
 
 # sec/            : secret data dir
 # local_soft/     : 
@@ -14,12 +18,12 @@ mkdir -p ~/nethd/repos/selfsjm
 
 mkdir -p ~/nethd/repos_work/
 
-git clone ~/nethd/repos/selfsjm/Yunio/note ~/nethd/repos_work/selfsjm_note
+git clone ~/nethd/repos/selfsjm/note ~/nethd/note
 
 # config
 # in .bashrc
-# . "$HOME/nethd/repos_work/selfsjm_note/pubconfig/shell/sjm.bashrc"
+# . "$HOME/nethd/note/pubconfig/shell/sjm.bashrc"
 
 # /etc/profile
-# . "~/nethd/repos_work/selfsjm_note/pubconfig/shell/sjm.profile"
+# . "~/nethd/note/pubconfig/shell/sjm.profile"
 
