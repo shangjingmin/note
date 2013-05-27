@@ -6,7 +6,7 @@
 # note/life
 
 # sec/            : secret data dir
-# local_soft/     : 
+# local_soft/     :
 # local_app_data/ :
 # pubsoft/        : public software, ex: goagent
 
