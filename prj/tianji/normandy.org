@@ -129,15 +129,19 @@ like: like record; call recommend
 **** 公司likes数排行 (zhu)
 **** new corp：(dong) 与正常注册公司区分 
 * Normandy
-PK页     http://192.168.2.83/tianji_nmd/pk.php
-http://192.168.2.83/tianji_nmd/pk_login.php
 公司主页 http://192.168.2.4/new_companies/companyBack/cp_Homes.php
 公司动页 http://192.168.2.4/new_companies/companyBack/cp_Active.php
+rank: http://192.168.2.4/norpreheat_List/hotcompany.html
+search: http://192.168.2.4/norpreheat_List/searchResult.html
+        http://192.168.2.4/norpreheat_List/noresult.html
 
 
+PK页     http://192.168.2.83/tianji_nmd/pk.php
+http://192.168.2.83/tianji_nmd/pk_login.php
 http://192.168.2.83/tianji_nmd/index.php
 http://192.168.2.83/tianji_nmd/index_two.php
 http://192.168.2.83/tianji_nmd/pk_index3.php
+
 
 ** redis object
 
