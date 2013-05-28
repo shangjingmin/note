@@ -157,6 +157,14 @@ fi
    sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com A8A515F046D7E7CF
    sudo apt-get update
    sudo apt-get install pac # ssh 登录管理
+
+** 解压zip文件乱码
+在Ubuntu下使用unzip解压Widnows环境下生成的zip文件，会发生文件名或者目录名乱码现象，解决办法是使用 7-zip和convmv。
+安装7-zip和convmv：
+sudo apt-get install convmv p7zip-full
+解压zip文件：
+LANG=C 7z p zip_file
+convmv -f gbk -t utf8 -r --notest *
 ** 较大
    sudo apt-get install openjdk-6-jre
    sudo apt-get install stardict # dictionary copy to /usr/share/stardict/dic
