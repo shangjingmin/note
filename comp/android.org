@@ -1,0 +1,5 @@
+* emacs IDE
+** sdk download: http://developer.android.com/sdk/index.html#ExistingIDE
+解压到： ~/nethd/local_soft/android-sdk-linux
+** env: sudo apt-get install openjdk ant ia32-libs
+** cmd: android update sdk
