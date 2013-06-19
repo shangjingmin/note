@@ -22,4 +22,4 @@ alias gfw_goagent='python ~/nethd/pubsoft/wall/goagent/local/proxy.py > ~/tmp/go
 alias log_gfw_goagent='tail -f ~/tmp/goagent.log'
 
 # android
-PATH=$PATH:$HOME/program/android-sdk/tools
+PATH=$PATH:$HOME/nethd/local_soft/android-sdk-linux/tools
