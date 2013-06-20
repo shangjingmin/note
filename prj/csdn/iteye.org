@@ -1,0 +1,310 @@
+* ITeye
+** 频道
+*** 首页
+**** TODO http://stat.iteye.com 什么作用？
+    <%= render :partial => '/layouts/javaeye_stat' %>
+*** 资讯 /news/:id-:slug_url
+*** 精华 /essences/:id-:slug_url
+**** 论坛精华
+**** 博文推荐
+**** 名家访谈
+**** 特约稿件
+**** 精选文摘
+*** 论坛 /topic/:id
+*** 问答 /problems/:id
+*** 博客 /blog/:id  --> selfsite.iteye.com/blog/:id
+*** 群组 groupsite.group.iteye.com
+**** 讨论 groupsite.group.iteye.com/group/topic/:id
+**** 专栏 groupsite.group.iteye.com/group/wiki/:id-:name
+**** 相册 groupsite.group.iteye.com/group/album
+**** 共享 groupsite.group.iteye.com/group/share    http://dl.iteye.com/topics/download/020d847e-a727-3e88-acd3-34052700baf8
+*** 招聘
+**** 推荐公司 /click/:id
+**** 猎头职位 /jobs/:id
+**** 推荐职位 /jobs/:id
+**** 招聘论坛 /job/topic/:id
+**** 最新职位 /jobs/:id
+*** 搜索
+** support 权限可管理、一个功能可出现在多个组、同一功能不同组权限范围不同
+*** 编辑后台：
+**** 资讯频道
+**** 精华频道
+**** 兼职编辑管理
+**** 电子杂志
+**** 社区专家
+**** 推荐标签
+**** 标签管理
+**** 缓存清理
+*** 运营后台：
+**** 用户管理 ?需要哪些功能
+**** 社区专家 experts_operator
+**** 高级会员
+**** 前台管理员 web_admin ?功能拆分（删除用户、前台管理员列表、i资讯编辑列表、Reporter列表）
+**** 推荐标签 whole_categories_operator
+**** 标签管理 tags_operator
+**** 群发短信
+**** 短信监控
+**** 群组管理
+**** 问答计时器
+**** 发布公告
+**** 论坛监控 topics_operator
+**** 回帖监控 topic_comments
+**** 缓存清理 cache_operator
+**** 管理日志
+*** 审核后台：
+**** 用户管理(用户名，博客名，用户头像)  users_auditor
+**** 相册监控(博客，群组) pictures
+**** 插图监控(论坛，博客) attachment_pictures
+**** 附件监控(论坛，博客，群组) attachments
+**** 短信监控 messages_auditor
+**** 资讯评论
+**** 精华评论
+**** 博客监控
+**** 博客评论监控
+**** 刷博用户
+**** 论坛监控
+**** 回帖监控
+**** 提问监控
+**** 回答监控
+**** 群组帖子
+**** 群组回帖
+**** 群组专栏
+**** 群组专栏评论
+**** 缓存清理
+**** 审核日志
+**** 图片查询
+*** 广告后台：
+**** 广告发布
+**** 企业会员
+**** 简历搜索
+**** 缓存清理
+*** 系统后台：
+**** IP黑名单
+**** 销毁用户
+**** 权限管理 = 管理员管理
+* Q/A
+** sitemap
+*** DONE test
+    CLOSED: [2011-07-18 一 14:39]
+    topics                  o|  |
+    blogs                   |o  |
+    problems                o|  |
+    news                    o|  |
+    essences                |o  |
+    group                   |o  |
+    group_topic             o|  |
+    group_wiki              |o  |
+    news_category           o|  |
+    blog_category           o|  |
+    essence_type            o|  |
+    problem_category        o|  |
+    news_tag                o|  |
+    essences_tag            |o  |
+    blog_tag                |o  |
+    problem_tag             o|  |
+*** DONE 原有（论坛、博客、问答），修改（博客），增加（资讯、精华、群组、群组讨论、群组专栏），待完成（群组最终页、资讯/精华/博客/问答中的分类/tag），不处理（群组共享、群组相册、招聘、搜索）
+    CLOSED: [2011-07-14 四 11:12]
+原有站点地图：
+    论坛：http://www.iteye.com/topic/:id
+    博客：http://:domain.iteye.com/blog/:id    :domain为博客所属用户的个性子域名
+    问答：http://www.iteye.com/problems/:id
+增加站点地图：
+    资讯：http://www.iteye.com/news/:id,
+    精华：http://www.iteye.com/essences/:id,
+    群组：http://:domain.group.iteye.com
+    群组讨论：http://:domain.group.iteye.com/group/topic/:id
+    群组专栏：http://:domain.group.iteye.com/group/wiki/:id
+    资讯分类：http://www.iteye.com/news/category/:urlname
+    博客分类：http://www.iteye.com/blogs/category/:urlname
+    精华分类：http://www.iteye.com/essences/:Essence::ESSENCE_TYPE[i].last
+    问答分类：http://www.iteye.com/problems/tags/:urlname   :urlname为Forum.urlname
+    问答tag：http://www.iteye.com/problems/tags/:urlname   :urlname为SysTag.urlname
+    资讯/精华/博客中的tag：http://www.iteye.com/:types/tag/:urlname :urlname为WholeTag.urlname
+不必加入站点地图：（群组共享、群组相册、招聘、搜索）
+**** news
+www.iteye.com/news/category/:urlname     WholeCategory.all
+www.iteye.com/news/tag/:name
+ActsAsTaggableOn::Tagging.find(:all,
+:select => "count(tag_id) as counter, wt.name", :order => "counter desc", :group => "tag_id",
+:joins => "left join whole_tags as wt on wt.id=tag_id",
+:conditions => "wt.category_id>0 and taggable_type = 'News'")
+
+
+ActsAsTaggableOn::Tagging.count(:joins => "left join whole_tags as wt on wt.id=tag_id", :conditions => "(wt.category_id>0 or wt.alias_id>0) and taggable_type='News'", :select => "distinct wt.id")},
+
+ActsAsTaggableOn::Tagging.find(:all,
+:conditions => "(category_id>0 or alias_id>0) and "
+)
+
+www.iteye.com/essences/:url      name, url = Essence::ESSENCE_TYPE[type_value] ESSENCE_TYPE = [%w(名家访谈 interview), %w(特约稿件 commission), %w(论坛精华 forum), %w(博文推荐 blog), %w(精选文摘 digest)]
+www.iteye.com/essences/tag/:name
+
+/blogs/category/:urlname WholeCategory.all
+/blogs/tag/:name
+
+/problems/tags/:name
+
+*** DONE 对链接是否有要求，如：xml：http://www.iteye.com/blog/630029 自动跳转到 http://dqqmq.iteye.com/blog/630029 ： 使用跳转后的最终url
+    CLOSED: [2011-07-12 二 15:59]
+*** DONE 精选文摘是从外部抓取的rss，加入sitemap是否有影响 : 无其它影响
+    CLOSED: [2011-07-12 二 15:59]
+*** DONE scripts中的输出信息使用什么合适： puts  logger.debug : 可使用puts，不必单独记录
+    CLOSED: [2011-07-12 二 16:00]
+*** DONE 群组中的专栏如何增加数据？(专栏页右侧有发表文章链接)； 取值范围是否合适：  :conditions => ["group_id not in (?)", Group::HIDDEN_GROUP_IDS] ？（需要过滤隐藏群组）； id后是否需要加上name？（要使用有意义的链接）
+    CLOSED: [2011-07-14 四 10:01]
+
+** support
+**** DONE 缓存清理：广告后台只清理广告缓存（招聘、猎头）；编辑和运营后台的广告缓存如何分【不区分】
+     CLOSED: [2011-07-28 四 10:56]
+**** DONE 兼职编辑：即原来的编辑管理；原 资讯编辑列表、Reporter列表 对应现在的什么功能【列在编辑后台】
+     CLOSED: [2011-07-28 四 11:08]
+**** DONE 用户管理界面和功能： 运营后台--用户管理【沿用当前页面】；审核后台--用户管理（用户名、博客名、用户头像）【列表列出】、系统后台--销毁用户
+     CLOSED: [2011-07-29 五 13:52]
+**** DONE 主题监控权限是否拥有评论监控权，如 论坛监控 是否包含 回帖监控【各自分开】
+     CLOSED: [2011-07-28 四 11:23]
+**** DONE 权限设置中如何区分同名功能：加分组名？【按分组列，勾选分组选择组内全部，否则可单独设置】
+     CLOSED: [2011-07-28 四 15:19]
+**** DONE 未实现功能：相册监控、插图监控、附件监控、图片查询 : 仅加相册监控
+     CLOSED: [2011-08-15 一 16:09]
+**** DONE 文摘 【不放在后台管理】
+     CLOSED: [2011-07-28 四 13:07]
+
+**** DONE 第一封邮件疑问  日期:         Wed, 3 Aug 2011 15:12:08 +0800
+     CLOSED: [2011-08-05 五 13:37]
+
+资讯搜索：
+C4 加入楼层（否则不知道是那一层） RE: 无法实现
+N5 不知道...是什么意思  RE：是表情
+U3 查询回复修改为查询资讯评论 ！！操作链接过长导致换为两行 RE：审核屏幕大，不必担心，可固定长度列使用固定长度
+
+论坛主贴查询：
+D3、用户列加入一个『查询论坛文章』 RE：将原“查询用户文章” 改为 “查询论坛文章”，功能还是设置用户为条件
+
+Diteye用户审核页面完全无效，页面变形 RE：审核监控--用户管理，上部的分页跟下面table header重叠了 : 原因（float后导致html流忽略，下面内容使用clear来解决这个问题）
+W用户单独锁定的接口没有了 RE：是指运营监控中用户管理（只需解锁锁定功能），的原来的哪个功能（删除、锁定、解锁在一个页面，输入用户名进行操作的界面？）
+
+D锁定用户提示页：各数字链接跳转到哪儿 RE：到后台页，若无权限可提示  ？ 到网站搜索页（未全包括，如论坛回复无单独搜索），后台对应管理页？（可能无权限），还是单独提供
+
+**** DONE 代码重构
+     CLOSED: [2011-08-05 五 14:51]
+D原评论审核：图片评论？ PictureComment  故未删除support下的comment.rhtml
+
+U special_topic的取代
+
+D application_helper
+D application_controller
+
+**** TODO 更改前端路由名称： essences --> magazine
+***** essences_path  essences_url
+***** essence_path essence_url
+***** "/essences" "/essence"
+***** grep
+gresjm@ubuntu:/media/projects/javaeye3$ git grep -i essences_path
+app/controllers/essences_controller.rb:    redirect_to essences_path
+app/views/essences/_leftside.html.erb:      <li <%= 'class="select"' if params[:urlname].blank? %>><%= link_to '全部精华', essences_path, :id=>'all' %></li>
+app/views/essences/category.html.erb:  <%= link_to '精华频道', essences_path %> <span class="arrow">&rarr;</span>
+app/views/essences/new.rhtml:<% form_for @essence, :url => essences_path, :html => { :id => "news_form", :multipart => true} do |f| -%>
+app/views/essences/search.html.erb:  <%= link_to "精华搜索", search_essences_path %>
+app/views/essences/type_list.html.erb:    <%= link_to '精华频道', essences_path %> <span class="arrow">&rarr;</span>
+sjm@ubuntu:/media/projects/javaeye3$ git grep -i essences_url
+app/views/support/essences/index.html.erb:  <% form_tag batch_support_essences_url(:filter => params[:filter]) do %>
+sjm@ubuntu:/media/projects/javaeye3$ git grep -i essence_path
+app/controllers/essence_cards_controller.rb:    redirect_to (essence_path @essence)
+app/controllers/essence_cards_controller.rb:    redirect_to (essence_path @essence)
+app/controllers/essence_cards_controller.rb:    redirect_to (essence_path @essence)
+app/controllers/essence_cards_controller.rb:    redirect_to (essence_path @essence)
+app/controllers/essence_cards_controller.rb:    redirect_to (essence_path @essence)
+app/controllers/essences_controller.rb:    redirect_to (essence_path @essence)
+app/controllers/support/essence_comments_controller.rb:    redirect_to support_essence_path(@essence)
+app/helpers/application_helper.rb:        result << " 评论了精华文章 #{link_to essence.title, essence_path(essence) << '#comments'}"
+app/helpers/blog/index_helper.rb:      link_to '已被推荐为精华', essence_path(blog.commendation)
+app/views/essences/edit.rhtml:  <%= link_to "编辑精华", edit_essence_path(@essence) %>
+app/views/essences/edit.rhtml:<%form_for @essence, :url => essence_path(@essence), :html => {:id => "news_form", :multipart => true} do |f| -%>
+app/views/essences/show.rhtml:          <%= link_to image_tag("blog/btn_edit.png", :alt => "编辑"), edit_essence_path(@essence), :title => "编辑" %>
+app/views/essences/show.rhtml:        <%= link_to image_tag("blog/btn_delete.png", :alt => "删除"), essence_path(@essence), :method => :delete, :confirm => "您确定要删
+app/views/essences/show.rhtml:        您发布的精华需要通过ITeye网站的审批，管理员会在一天之内进行审批，请您耐心等待 <br />在精华被审批通过之前，您可以点击“<%= link_to "
+app/views/essences/show.rhtml:      <%= link_to "批准", approve_essence_path(@essence), :method => :post unless @essence.status == 'approved' %>
+app/views/essences/show.rhtml:      <% form_for :essence, :url => reject_essence_path(@essence) do |f|%>
+...skipping...
+app/controllers/essence_cards_controller.rb:    redirect_to (essence_path @essence)
+app/controllers/essence_cards_controller.rb:    redirect_to (essence_path @essence)
+app/controllers/essence_cards_controller.rb:    redirect_to (essence_path @essence)
+app/controllers/essence_cards_controller.rb:    redirect_to (essence_path @essence)
+app/controllers/essence_cards_controller.rb:    redirect_to (essence_path @essence)
+app/controllers/essences_controller.rb:    redirect_to (essence_path @essence)
+app/controllers/support/essence_comments_controller.rb:    redirect_to support_essence_path(@essence)
+app/helpers/application_helper.rb:        result << " 评论了精华文章 #{link_to essence.title, essence_path(essence) << '#comments'}"
+app/helpers/blog/index_helper.rb:      link_to '已被推荐为精华', essence_path(blog.commendation)
+app/views/essences/edit.rhtml:  <%= link_to "编辑精华", edit_essence_path(@essence) %>
+app/views/essences/edit.rhtml:<%form_for @essence, :url => essence_path(@essence), :html => {:id => "news_form", :multipart => true} do |f| -%>
+app/views/essences/show.rhtml:          <%= link_to image_tag("blog/btn_edit.png", :alt => "编辑"), edit_essence_path(@essence), :title => "编辑" %>
+app/views/essences/show.rhtml:        <%= link_to image_tag("blog/btn_delete.png", :alt => "删除"), essence_path(@essence), :method => :delete, :confirm => "您确定要删
+app/views/essences/show.rhtml:        您发布的精华需要通过ITeye网站的审批，管理员会在一天之内进行审批，请您耐心等待 <br />在精华被审批通过之前，您可以点击“<%= link_to "
+app/views/essences/show.rhtml:      <%= link_to "批准", approve_essence_path(@essence), :method => :post unless @essence.status == 'approved' %>
+app/views/essences/show.rhtml:      <% form_for :essence, :url => reject_essence_path(@essence) do |f|%>
+sjm@ubuntu:/media/projects/javaeye3$ git grep -i essence_url
+app/helpers/news_helper.rb:  def inner_essence_url(essence)
+app/views/essences/_form.rhtml:    <%= inner_essence_url @essence %>
+app/views/essences/show.rhtml:        <span><%= favorite_link(current_user, essence_url(@essence), @essence.title, "收藏") %></span>
+sjm@ubuntu:/media/projects/javaeye3$ git grep -i '/essence'
+app/controllers/essence_comments_controller.rb:        render :partial => "/essences/comment", :locals => { :comment => @comment }
+app/helpers/application_helper.rb:    "<a href='#{"http://#{DEFAULT_SITE_DOMAIN}" if options[:with_domain]}/essences/#{essence.id}#{"-#{essence.slug_url}" unless essenc
+app/helpers/application_helper.rb:      ["精华",comment.essence.whole_category.name, "<a href='/essences/#{comment.essence.id}-#{comment.essence.slug_url}#comments' tar
+app/models/essence_logo.rb:  has_attachment :content_type => :image, :max_size => 10.megabytes, :path_prefix => 'public/upload/logo/essence', :resize_to => '120x120', :
+app/views/essence_cards/edit.rhtml:  <%= link_to '访谈频道', '/essences' %> <span class="arrow">&rarr;</span>
+app/views/essence_cards/edit.rhtml:  <%= link_to "#{@essence.whole_category.name}访谈", "/essences/category/#{@essence.whole_category.urlname}" %>
+app/views/essence_cards/edit.rhtml:  <%= link_to @essence.title, "/essences/#{@essence.id}-#{@essence.whole_category.urlname}" %>
+app/views/essence_cards/new.rhtml:  <%= link_to '精华频道', '/essence' %> <span class="arrow">&rarr;</span>
+app/views/essence_cards/new.rhtml:  <%= link_to "#{@essence.whole_category.name}精华", "/essences/category/#{@essence.whole_category.urlname}" %>
+app/views/essence_cards/new.rhtml:  <%= link_to @essence.title, "/essences/#{@essence.id}-#{@essence.whole_category.urlname}" %>
+app/views/essences/_essence.html.erb:        <span class="comment"><a href='/essences/<%= essence.id %><%= "-#{essence.slug_url}" unless essence.slug_url.blank? %>#comm
+app/views/essences/_leftside.html.erb:          <%= link_to name, "/essences/#{url}", {:id => url} %>
+app/views/essences/_my_essence.html.erb:    <span class="category"><%= link_to "[#{my_essence.whole_category.name}]", "/essences/category/#{my_essence.whole_category.ur
+app/views/essences/_rightside.html.erb:        <li><%= link_to cat.name, "/essences/category/#{cat.urlname}"%></li>
+app/views/essences/_search.html.erb:  <% form_tag "/essences/search", :method => 'get' do -%>
+app/views/essences/_search.html.erb:      <%= link_to image_tag("news/new_news.gif"), "/essences/new", :title => "我来发布精华" %>&nbsp;&nbsp;&nbsp;&nbsp;
+app/views/essences/_search.html.erb:      <%= link_to image_tag("news/my_essence.gif"), "/essences/my", :title => "我的精华" %>
+app/views/essences/edit.rhtml:  <%= link_to '精华频道', "/essences" %>
+app/views/essences/index.rhtml:@rss_url = 'rss/essences'
+app/views/essences/monthly.html.erb:  <%= link_to '精华频道', '/essences' %> <span class="arrow">&rarr;</span>
+app/views/essences/monthly.html.erb:      <div class="left"><%= link_to pdf.title, "/essences/download_pdf/#{pdf.id}", :title => "点击下载" %></div>
+app/views/essences/my.html.erb:  <%= link_to '精华频道', '/essences' %> <span class="arrow">&rarr;</span>
+app/views/essences/my.html.erb:  <%= link_to "我的精华", '/essences/my' %>
+app/views/essences/new.rhtml:  <%= link_to '精华频道', "/essences" %>
+app/views/essences/new.rhtml:  <%= link_to "推荐精华", '/essences/new' %>
+app/views/essences/pick_blog.html.erb:      <% form_tag "/essences/#{@blog.id}/pick_blog_create", :onsubmit => "return false;", :id => "pick_form" do -%>
+app/views/essences/pick_blog.html.erb:        new Ajax.Request("/essences/<%=@blog.id%>/pick_blog_create", {
+app/views/essences/pick_blog.html.erb:          $('favorite_form_wrapper').replace('<div id="favorite_form_success"><%= image_tag "icon_success_lrg.gif" %>推荐成功，您
+app/views/essences/search.html.erb:  <%= link_to '精华频道', "/essences" %>
+app/views/essences/show.rhtml:  <%= link_to '精华频道', '/essences' %> <span class="arrow">&rarr;</span>
+app/views/essences/show.rhtml:  <%= link_to "#{@essence.whole_category.name}", "/essences/category/#{@essence.whole_category.urlname}" %>
+app/views/essences/show.rhtml:      <div id="news_icon"><a href="/essences/category/<%= @essence.whole_category.urlname %>" title="查看<%= @essence.whole_category.name
+app/views/essences/tag.html.erb:  <%= link_to '精华频道', '/essences' %> <span class="arrow">&rarr;</span>
+app/views/rss/essences.html.erb:      url = "http://#{DEFAULT_SITE_DOMAIN}/essences/#{essence.id}#{"-#{essence.slug_url}" unless essence.slug_url.blank?}" -%>
+app/views/rss/essences.html.erb:        <guid isPermaLink="false"><%= "http://#{DEFAULT_SITE_DOMAIN}/essences/#{essence.id}" %></guid>
+app/views/system_notices/essence_approve.rhtml:您推荐的<%= essence.type_name %>  <%= "[url=http://#{DEFAULT_SITE_DOMAIN}/essences/#{essence.id}]#{essence.title}[/url]"
+app/views/system_notices/essence_approve_author.rhtml:您发表的文章 <%= "[url=#{essence.essence_type == 3 ? "http://#{essence.author.name}.#{DEFAULT_ROOT_DOMAIN}/blog/#{
+app/views/system_notices/essence_reject.rhtml:您发表的<%= essence.type_name %>  <%= "[url=http://#{DEFAULT_SITE_DOMAIN}/essences/#{essence.id}]#{essence.title}[/url]" %
+config/routes.rb:  map.essences_category '/essences/category/:urlname', :controller => 'essences', :action => 'category'
+config/routes.rb:  map.essences_tag '/essences/tag/:urlname', :controller => 'essences', :action => 'tag', :requirements => { :urlname => /.+/ }
+config/routes.rb:  #map.essences_category_type '/essences/category/:category_urlname/:urlname', :controller => 'essences', :action => 'type_list', :urlname => /intervie
+config/routes.rb:  map.rss_essences_type '/rss/essences/:urlname', :controller => 'rss', :action => 'essences_type'
+data/administrator_roles.yml:    - /support/essences/index
+data/administrator_roles.yml:    - /support/essences/batch
+data/administrator_roles.yml:    - /support/essences/comments
+script/g_sitemap.rb:           format 'http://www.%s/essences/%s-%s', DEFAULT_ROOT_DOMAIN, self.id, URI.escape(self.slug_url.to_s)
+script/g_sitemap.rb:           format 'http://www.%s/essences/%s', DEFAULT_ROOT_DOMAIN, Essence::ESSENCE_TYPE[self.id].try(:last)
+script/g_sitemap.rb:        format('http://www.%s/essences/tag/%s', DEFAULT_ROOT_DOMAIN, URI.escape(self.name)),
+script/g_sitemap.rb:        format('http://www.%s/essences/category/%s', DEFAULT_ROOT_DOMAIN, URI.escape(self.urlname)),
+script/generate_sitemap.rb:        "http://www.#{top_domain}/essences/#{record.id}" + (record.slug_url.blank? ? "" : "-#{record.slug_url}")
+script/generate_sitemap.rb:        "http://www.#{top_domain}/essences/#{Essence::ESSENCE_TYPE[record.id].try(:last)}"
+script/generate_sitemap.rb:        "http://www.#{top_domain}/essences/tag/#{record.name}"
+(END)
+
+* Design
+** common name scope
+   viewable: 前台可见
+   : 自己可见
+   ：后台管理可见
+
+

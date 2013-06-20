@@ -1,0 +1,15 @@
+* ror
+** FIXED 对象关系中联合主键的处理问题？ ：可不使用内置管理方法，直接定义： referer=  referer
+   CLOSED: [2011-06-24 五 17:46]
+   如何在essence中限定类型
+  #essence.rb
+  belongs_to :topic
+  belongs_to :feed, :foreign_key => "topic_id" # TODO:该处有复合主键问题，essence_type=4时才有所属文摘
+
+  #topic.rb
+  has_one :essence, :dependent => :destroy, :conditions => "essence_type <> 4"
+
+  e = Essence.find(9)
+  e.feed   #应该：若essence_type=4,则返回对应feed，否则nil
+  e.topic  #同理
+

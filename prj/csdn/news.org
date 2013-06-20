@@ -1,0 +1,95 @@
+* iteye
+** news
+   news_branch
+*** function
+**** 资讯 news\news_comments
+***** 发布
+      已登录# && 非新用户
+***** 编辑
+***** 删除
+***** 查看
+***** 评论
+***** 通过：support
+***** 拒绝
+***** 我的
+***** 频道首页
+**** 访谈 interview\interview_frags\interview_comments
+     发布：user.edit_level > 0
+**** 精华 digest pick_topics
+     发布：user.edit_level > 0, 论坛帖子中：推荐为精华
+     首页：?只看摘要 查看全文
+*** env
+**** DiggableModel
+***** table column: digg_users  digg  bury
+***** model: include DiggableModel
+***** DiggableModel: digged_by?  digged_by bury_by
+***** controller:
+  def digg
+    if admin_of?('news')
+      @news.increment!(:digg)
+    else
+      @news.digg_by(current_user) if !@news.digged_by?(current_user)
+    end
+    respond_to do |format|
+      format.js {
+        render :update do |page|
+          page.replace "d#{@news.id}", digg_box(@news)
+          page.replace "digg_bottom", digg_box_bottom(@news) if params[:bottom]
+        end
+      }
+      format.json {
+        render :json => "{digg_count : #{@news.digg}}"
+      }
+    end
+  end
+
+  def bury
+    if admin_of?('news')
+      @news.increment!(:bury)
+    else
+      @news.bury_by(current_user) if !@news.digged_by?(current_user)
+    end
+    respond_to do |format|
+      format.js {
+        render :update do |page|
+          page.replace "d#{@news.id}", digg_box(@news)
+          page.replace "digg_bottom", digg_box_bottom(@news) if params[:bottom]
+        end
+      }
+      format.json {
+        render :json => "{bury_count : #{@news.bury}}"
+      }
+    end
+  end
+
+**** AttachableModel
+     attachements: attach_to_id attach_type
+
+     has_many :attachments, :foreign_key => "attach_to_id", :conditions => "attach_type = '#{model.class_name}'"
+     attachment_fu: validates_as_attachment
+**** FullTextSearch
+**** bbcode
+**** syntaxhighlighter
+**** tinymce
+**** cache/chache_fu
+**** DomainDispatcher
+**** HARMONY_REGEXP
+**** RedisIpFirewall
+**** AuthenticationSystem
+***** login_required
+***** authorized?
+  # news_controller
+  def authorized?
+    %w(new create digg bury my_news download_pdf).include?(action_name) || (%w(destroy check approve reject new_from_topic).include?(action_name) && admin?) || (%w(edit update).include?(action_name) && @news.editable_by?(current_user))
+  end
+***** login_by_token
+****** base64
+       Base64编码要求把3个8位字节（3*8=24）转化为4个6位的字节（4*6=24），之后在6位的前面补两个0，形成8位一个字节的形式。
+       email传输中使用了该方法
+**** cache sweeper
+**** act_as_taggable
+**** act_as_cache
+**** Message
+**** tag系统
+*** dev
+**** data: pick_topics.news_type in (1,2,3), 0 will error

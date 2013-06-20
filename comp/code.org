@@ -1,0 +1,109 @@
+* code
+** lisp
+   以下路径为我自己写的一些代码：https://github.com/slimcn/emacs_config/tree/master/package/slimcn
+** ruby
+*** 通用库文件
+抽取的通用方法库，现在只有5个方法，后面会随时增加：https://github.com/slimcn/rorappbase/blob/master/lib/lim_common.rb
+*** ruby代码片段
+**** yield的使用
+  # rake任务，可生成各式html片段
+  desc "生成促销信息：列表形式,11条"
+  task :generate_cuxiao_inc_limit => :environment do
+      generate_cuxiao_inc_limit 'beijing/inc/cuxiao_li_11.inc', 11 do |node| # 生成饭庄需要的打折促销信息
+      <<li_span
+        <li><a title="#{node.find_first('title').content}" href="/cuxiao/#{node.find_first('actionid').content}/" target="_blank">#{String.truncate_u(node.find_first('title').content,22)}</a></li>
+li_span
+      end
+  end
+
+  # 生成给定条数的促销信息记录，数据源从xml接口抓取
+  def generate_cuxiao_inc_limit file_name, rec_count=5
+    rec_count ||= 5
+    rec_limit = rec_count-1
+    source_url = "http://beijing.fantong.com/inc/new_cuxiaoLink.xml"
+    require "open-uri"
+    require 'libxml'
+    include LibXML
+    puts "生成促销信息片段文件:#{rec_count}条，生成时间#{DateTime.now}, 数据源：#{source_url}"
+    parser = XML::Parser.string((open URI.encode(source_url)).read)
+    doc = parser.parse
+    html=''
+    nodes=doc.find('//result/info')
+    0.upto(rec_limit) do |i|
+      node=nodes[i]
+      html << yield(node)
+    end
+    html= FileUtil.utf82gbk(html)
+    FileUtil.writefile(FantongConstant::WEB_ALL_ROOT+file_name,html) unless html.blank?
+  end
+
+  # 转换编码，由utf8转为gbk
+  def LimCommon.utf82gbk str
+    conv = Iconv.new("GBK", "utf-8")
+    result = conv.iconv(html)
+    result << conv.iconv(nil)
+    conv.close
+    return result
+  end
+**** 散列参数
+  # 将hash参数转换为url参数串
+  #   基本hash参数/跳过参数/是否保留空值/附加字串
+  #   example: hash_to_query_params hash_params, :except => ["sign", "sign_type", "key", "email"], :keep_blank => false, :attach => req_params["key"]
+  def self.hash_to_query_params cki, opts = {}
+    # 初始化变量
+    hash_params ||= {}
+    opts[:except] ||= []
+    opts[:keep_blank] ||= false
+    opts[:attach] ||= ""
+
+    tmp_cki = cki.clone # clone hash，以免改变原值
+    tmp_cki.delete_if{ |k, v| v.blank?} if !opts[:keep_blank]
+    tmp_cki.delete_if{ |k, v| opts[:except].include?(k)} if opts[:except]
+    keys = tmp_cki.keys
+    keys.sort!
+    result=""
+    keys.each do |key|
+      result << (result.blank? ? "" : "&") << key
+      result << '='
+      result << tmp_cki[key].to_s
+    end
+    return result + (opts[:attach] ? opts[:attach].to_s : "")
+  end
+
+  # 获得签名, 暂时只支持md5
+  def self.get_sign str, opts ={}
+    opts[:stype] ||= "md5"
+    result = ""
+    if opts[:stype].eql?("md5")
+      require 'digest/md5'
+      result=Digest::MD5.hexdigest(str)
+    end
+    return result
+  end
+
+**** other
+  # 清理hash
+  #   hash_param: 待处理的hash
+  #   hash_key: hash键列表
+  #   clear_blank: 是否清理空值
+  def LimCommon.clear_hash hash_param, hash_key=[], clean_blank = true
+    hash_param.delete_if { |k, v| (!(hash_key.blank? || hash_key.member?(k))) || (clean_blank && v.blank?) }
+  end
+
+  # 哈希转换为字符串
+  def LimCommon.hash_to_str hash_param, join_char="&", join_char_key_value="=", filter_blank=true
+    join_char = "" unless join_char
+    join_char_key_value = "" unless join_char_key_value
+    res = ""
+    hash_param.each do |key, value|
+      tmp_str = (value.blank? ? "" : (key.to_s+join_char_key_value+value.to_s)) unless (value.blank? && filter_blank)
+      res += (res.blank? ? "" : join_char) + tmp_str unless tmp_str.blank?
+    end
+    return res
+  end
+
+*** rorappbase
+https://github.com/slimcn/rorappbase
+该项目目标是提供基本的应用框架，包括登录验证、权限、工作流等。
+提供了一些交互功能的实现：各种input方式、jqGrid的数据展示。
+

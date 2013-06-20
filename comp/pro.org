@@ -1,0 +1,102 @@
+* 项目功能
+** user 用户
+*** obj
+**** users
+   name:string email:string password_digest:string signature:string inviter_id:integer invitation_quota:integer
+   token:string admin:boolean certified:boolean notification:string
+
+      t.string   :name
+      t.string   :email
+      t.string   :password_digest
+      t.string   :signature
+      t.integer  :invitation_quota, :default => 0
+      t.string   :token
+      t.boolean  :admin,            :default => false
+      t.boolean  :certified
+      t.string   :notification,     :default => "immediately"
+      t.integer  :inviter_id
+**** tokens
+     token:string email:string inviter_id:integer member_id:integer type:string
+
+      t.string   :token
+      t.string   :email
+      t.integer  :inviter_id
+      t.integer  :member_id
+      t.string   :type
+**** activation < token
+**** invitation < token
+*** login 登录
+*** register 注册
+*** activity 激活
+*** profile 个人中心
+*** logout 登出
+*** password 找回密码
+*** invite 邀请注册
+*** members 会员列表\会员展示页
+** sns
+*** friends
+*** groups
+*** categories
+** activity
+*** setting
+**** logged?
+** notification
+*** setting
+**** notificate?
+**** filter
+** topic
+*** obj
+**** posts
+**** category
+**** topics Post.topic_id = null
+**** categories_topics
+*** topics
+**** all
+**** my topics
+**** my posts
+*** categories
+*** user center
+**** self topics
+**** self posts
+* css
+** bootstrap https://github.com/twitter/bootstrap
+
+* admin cmdn--admin
+** 1 gem 'client_side_validations'
+** 2 CSS:
+app/assets/stylesheets/admin.css
+app/assets/stylesheets/bootstrap-1.1.1.min.css #https://github.com/twitter/bootstrap
+** 3 JS:  app/assets/javascripts/admin.js
+** 4 layout: app/views/layouts/admin.html.erb # 设置头部息及链接
+** 5 controller
+   Admin::BaseController < ApplicationController
+   Admin::MembersController < Admin::BaseController # 其它类继承BaseControllerl类
+** 6 route 设置参考
+
+  namespace :admin do
+    root :to => "dashboard#index"
+    resources :topic_categories
+    resources :platforms
+    resources :roles
+    resources :industries
+    resources :invitations do
+      collection do
+        get :batch
+        post :batch, :action => :create_batch
+      end
+    end
+    resources :members, :only => [:index, :show] do
+      member do
+        get :invitation_quota
+        put :set_invitation_quota
+        get :edit_name
+        put :set_name
+        get :invited_members
+        get :invitations
+        put :toggle_certified
+      end
+      collection do
+        get :search
+      end
+    end
+  end

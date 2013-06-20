@@ -1,0 +1,249 @@
+* blog
+** blog import
+*** csdn
+**** http://blog.csdn.net/ithzhang/default.aspx?PageNumber=1
+**** http://blog.csdn.net/ithzhang/article/list/1
+**** http://www.cnblogs.com/slimcn/services/metaweblog.aspx
+**** alter table `blog_categories` convert to character set utf8 collate utf8_swedish_ci;
+
+  [4;36;1mBlogCategory Load (0.0ms)[0m   [0;1mMysql::Error: Illegal mix of collations (latin1_swedish_ci,IMPLICIT) and (utf8_general_ci,COERCIBLE) for operation '=': SELECT * FROM `blog_categories` WHERE (`blog_categories`.`user_id` = 537044 AND `blog_categories`.`name` = '[网站分类]Html/Css') LIMIT 1[0m
+* ip_firewall
+** redis
+   http://redis.io/
+   http://baike.baidu.com/view/4595959.htm
+   [[http://timyang.net/data/redis-misunderstanding/][Redis几个认识误区]]
+   [[http://www.docin.com/p-189464848.html][Redis学习笔记]]
+
+   http://jimneath.org/2011/03/24/using-redis-with-ruby-on-rails.html
+** memcached
+** benchmark
+*** 用Benchmark测试不同ruby代码的运行速度
+    http://www.cslog.cn/Content/ruby_benchmark/
+    如果比较功能相同的几组代码的运行速度, 可以使用ruby语言里的Benchmark模块.
+(开始前 设置中文环境, $KCODE = ‘u’)
+比如, 连接两个字串, 如:
+str1 = "中国"
+str2 = "一定强!!!"
+
+可以使用+
+?> str1 + str2
+=> "中国一定强!!!"
+也可使用
+>> "#{str1}#{str2}"
+=> "中国一定强!!!"
+还可以使用<<
+>> str1 << str2
+=> "中国一定强!!!"
+(注意这种方法会改变str1的值,
+>> str1
+=> "中国一定强!!!")
+
+如果想要知道这三种方法哪一个速度更快, 就可以使用Benchmark比较.
+先定义三个不同的方法:
+
+def joined_by_plus(str_a, str_b)
+    500000.times do; str_a.dup + str_b; end
+end
+
+def joined_by_uniting(str_a, str_b)
+    500000.times do; "#{str_a.dup}#{str_b}"; end
+end
+
+def joined_by_adding(str_a, str_b)
+    500000.times do; str_a.dup << str_b; end
+end
+
+因为这三种方法速度都很快, 比较一次的时间很难分出上下, 所以每种方法都做500000次.
+因为<< 会改变变量, 所以在第三个方法中使用了str_a.dup, 备份出一个str_a来测试, 其它二个方法虽然从理论上不须要这个dup, 但为了时间上的公平, 也给它们加上了.
+
+下面是测试代码:
+require ‘benchmark’
+
+Benchmark.bmbm(10) do |t|
+  t.report(‘加号连接’) { joined_by_plus(str1, str2) }
+  t.report(‘放进引号’) { joined_by_uniting(str1, str2)}
+  t.report(‘使用<<’) { joined_by_adding(str1, str2)}
+end
+
+bmbm是Benchmark的测试方法, 这是双重测试, 用来提高精确度. 里面参数10用来调节标签在结果里的显示占位宽度, 不对结果产生影响.
+report(‘加号连接’)里的参数是为相应测试的标签名, 用来区别测试结果.
+
+下面就是结果:
+
+Rehearsal ————————————————
+加号连接   1.800000   0.580000   2.380000 (  2.435614)
+放进引号   2.080000   0.590000   2.670000 (  2.706669)
+使用<<       2.000000   0.580000   2.580000 (  2.635540)
+————————————— total: 7.630000sec
+
+                   user     system      total        real
+加号连接   1.810000   0.600000   2.410000 (  2.476613)
+放进引号   2.050000   0.600000   2.650000 (  2.656080)
+使用<<       1.960000   0.600000   2.560000 (  2.567434)
+
+因为使用了bmbm方式, 所以会有两个结果, 第一个是演习结果, 第二个是真实结果.  如果使用bm方法, 将只会有一组结果.
+结果有user时间, 系统时间, 总时间和实际花费的时间. 单位为秒.
+
+从结果可以看出, 使用+连接两个字串时速度最快, 而放进引号的方法最慢. 不过从结果也可以看出即使进行500000执行的结果也相差在0.3秒之内, 平时换用问题不大.
+
+看来不是这一次, 希望下次你在自己的Benchmark试验中, 会发现给你的程序带来巨大速度提供的代码.
+* javaeye3 project  专栏+圈子+维客 --> 群组
+** git repo: git clone -b preview git@git.csdn.net:javaeye_repo/javaeye3.git
+** ruby=ree-1.8.7 rails=2.3.4 gem<1.6
+** mysql
+   gem install mysql
+** fcgi
+   sudo apt-get install libfcgi-dev
+   gem install fcgi
+   # 若安装出错，重新安装前手工删除对应gem文件夹
+
+*** sudo /sbin/start-stop-daemon --quiet --start --pidfile /var/run/lighttpd.pid --exec /usr/local/lighttpd/sbin/lighttpd -- -f /etc/lighttpd/lighttpd.conf 2
+*** /usr/local/bin/spawn-fcgi -s /tmp/php-fastcgi.sock -f /tmp/php-fastcgi.sock -u lighttpd -g lighttpd -C 10 -P /var/run/spawn-fcgi.pid
+
+sudo apt-get install libfcgi-dev libfcgi0ldbl
+gem install fcgi
+sudo apt-get install apache2 apache2.2-common libapache2-mod-fastcgi # apache2
+
+ * To install Apache 2 development headers:
+   Please run apt-get install apache2-prefork-dev as root.
+
+ * To install Apache Portable Runtime (APR) development headers:
+   Please run apt-get install libapr1-dev as root.
+
+ * To install Apache Portable Runtime Utility (APU) development headers:
+   Please run apt-get install libaprutil1-dev as root.
+
+  sudo apt-get install libapr1-dev libaprutil1-dev
+
+/home/sjm/programs/ree/bin/passenger-install-apache2-module
+
+
+sudo apt-get update
+sudo apt-get install libpcre3 libpcre3-dev
+
+你可能还需要安装
+sudo apt-get install openssl libssl-dev
+
+** memcached -v=1
+sudo apt-get install libmemcached-dev libsasl2-dev libmemcached-dbg
+gem install memcached
+
+** nokogiri
+gem install nokogiri
+
+
+* 20110503 搭建环境：系统、应用程序、项目、文件签字
+** mail.csdn.net  shangjm  csdnshangjm  客户端：shangjm@csdn.net  mail.csdn.net
+** jira.csdn.net  shangjm  csdnshangjm
+** rtx: 商敬民 csdnshangjm
+** iteye
+   search test: 192.168.4.97
+* rails_best_practice
+** url
+   http://rails-bestpractices.com/
+   http://rdoc.rails-bestpractices.com/
+   http://www.slideshare.net/flyerhzm/rails-best-practices-7409659
+   https://github.com/flyerhzm/rails_best_practices
+   http://programmingzen.com/2011/04/20/review-of-rails-best-practices/
+
+** nodes NODE_TYPES = [:call, :defn, :defs, :if, :class, :lasgn, :iasgn, :ivar, :lvar, :block, :iter, :const]
+*** sexp 分析工具 节点类型
+    http://rubydoc.info/gems/ParseTree/3.0.7/RawParseTree
+*** Rspec \ Cucumber
+**** BDD
+     什么是行为驱动开发（Behaviour Driven Development，简称BDD），BDD是一种融合了可接受性测试驱动计划（Acceptance Test Driven Planning），域驱动设计（Domain Driven Design）以及测试驱动开发（Test Driven Development，简称TDD）的敏捷开发模型。RSpec为BDD开发提供TDD支持。
+**** rspec install
+** gem dev
+   http://www.jiangmiao.org/blog/639.html
+*** 2、gem的基本文件布局
+文件名  类别    描述
+gemspec 文件    gem的规范说明。
+lib     文件夹  用于lib文件的存放
+bin     文件夹  可执行文件
+ext     文件夹  c/c++源文件
+tests   文件夹  单元测试文件
+*** 3、gemspec文件规范常用项
+名称    类别    缺省    描述
+name    String          gem名称
+*version        String          版本号
+*date   Time    Time.now        Gem创建日期
+*platform       String  Gem::Platform::Ruby     gems所使用的平台
+*summary        String          gem描述
+*require_paths  Array   ["lib"] 用于require调用时的默认路径
+files   Array           gems所包含的文件
+*** 4、编译
+gem build gemspec文件
+*** 5、安装
+gem install 生成的gem
+*** 6、测试
+    require 'rubygems'
+    require 'hello'
+    puts hello
+
+** example
+*** 多虚拟属性的抽象
+    单纯代码级的抽象
+    业务方面的抽象
+**** before
+  def self.hot_topics(forum_id, limit = 9)
+    Topic.find_all_by_forum_id(forum_id, :conditions => "status_flag <> 'hidden' and status_flag <> 'delete' and (status_flag = 'good' or status_flag = 'mid' or posts_count > 5 or view_count > 150)", :order => "created_at desc", :limit => limit)
+  end
+
+  def self.hot_topics_for_new_board(forum_id = 48, limit = 9)
+    Topic.find_all_by_forum_id(forum_id, :conditions => "status_flag <> 'hidden' and status_flag <> 'delete' and (status_flag = 'good' or status_flag = 'mid' or posts_count > 3 or view_count > 100)", :order => "created_at desc", :limit => limit)
+  end
+**** after
+  def hot_find(forum_id, limit, params)
+    params[:posts_count] ||= 3
+    params[:view_count] ||= 100
+    Topic.find_all_by_forum_id(forum_id, :conditions => "status_flag <> 'hidden' and status_flag <> 'delete' and \
+      (status_flag = 'good' or status_flag = 'mid' or posts_count > #{params[:posts_count]} or view_count > #{params[:view_count]})",
+      :order => "created_at desc", :limit => limit)
+  end
+
+  def self.hot_topic(forum_id, limit = 9)
+    hot_find(forum_id, limit, :posts_count=>3, :view_count=>100)
+  end
+
+  def self.hot_topics_for_new_board(forum_id, limit = 9)
+    hot_find(forum_id, limit, :posts_count=>5, :view_count=>150)
+  end
+*** view：
+    index: frame
+    _content: pieces
+    helper:
+** bug
+*** plugin can't works: runner.rb:load_plugin_reviews: plugins = $LOAD_PATH[0]+'/'+plugins
+    无法找到相对路径位置
+172            plugins = "rails_best_practices/plugins/reviews"
+173            plugins = $LOAD_PATH[0] + '/' + plugins
+*** plugin config: plugins中的自定义规则均起作用，不受配置文件束缚
+** review
+   plugins自定义规则可以生效；
+   插件涉及到rspec、sexp(s-expression)
+   自定义时，需要对代码结构进行总结，还需要熟悉sexp访问接口（lib/rails_best_practices/core/visitable_sexp.rb）
+* report
+** 201106
+前端页面：
+    调整编辑列表页面；
+    调整精华最终页的样式和广告位置；
+    删除文摘/feed前端代码
+
+后台管理：
+    标签管理增加按分类查询功能；增加设置分类/别名时的ajax效果；
+    推荐标签：改为分类管理，并增加分类描述、分类排序字段；
+    增加公告管理；
+    增加后台管理布局文件；调整后台管理代码到support下
+** 201105
+研究rails_best_practice功能及自定义规则
+ip_firewall插件抽取，比较原实现方式与hiredis-rb性能，结论原实现方式性能优于hiredis-rb，但后者功能封装更完善
+
+javaeye后台管理：
+  管理员管理取消删除功能
+  增加功能：推荐标签、编辑管理
+
+资讯和精华频道：
+  频道首页左侧栏：增加编辑列表、精华分类导航；
+  频道首页右侧栏：增加最新评论
+  资讯频道一级分类页和二级tag页：修改为三栏布局
+

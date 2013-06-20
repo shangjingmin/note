@@ -1,0 +1,44 @@
+* ItEye
+** support
+*** function
+*** env
+*** dev
+*** ??model/Advert::AD_TYPE_LOCATION 作用
+**** 调整路径
+     待调整
+     所有相关路径调用位置: (.rb .rhtml .html.erb)   advert --> support_advert  ‘/advert ---> path函数 "/advert --> path函数
+     更改路径：data/administrator_roles.yml route controller view
+
+***** 待调整路径
+- name: 广告管理 D
+    - /adverts/*
+
+- name: 社区专家管理 D
+    - /experts/*
+
+- name: 文摘管理
+    - /feeds/approve
+    - /feeds/deny
+    - /articles/to_news
+    - /articles/to_essence
+    - /articles/reject
+    - /articles/preview
+    - /articles/approve
+
+- name: 群组管理
+  popedom: groups
+  actions:
+    - /groups/approve
+    - /groups/destroy
+
+- name: 管理员管理 D
+  popedom: admin
+  actions:
+    - /administrators/*
+
+
+***** article
+****** support/article
+****** support/article/preview to_news to_essences
+***** feed
+****** support/feeds  destroy

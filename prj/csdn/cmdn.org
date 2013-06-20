@@ -1,0 +1,8 @@
+* CMDN
+** channel
+** admin
+* Q/A
+** DONE 后台--平台列表  url_slug : url_slug与平台图片样式关联，更改需要由研发人员修改样式表和图片
+   CLOSED: [2011-09-02 五 13:25]
+   platform_logos.png,
+   url_slug要小写： content.css: .my_platform .iphone{background-position:0 -29px;}
