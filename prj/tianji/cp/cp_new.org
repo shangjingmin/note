@@ -563,3 +563,10 @@ Completed 200 OK in 57ms (Views: 42.2 ms | Mysql: 0.0 ms | Mongo: 12.0 ms | Redi
   MOPED: 127.0.0.1:27017 QUERY        database=tianji collection=corps selector={"$query"=>{"cp_logo_file_name"=>nil, "cp_status"=>6}, "$orderby"=>{"staffers_count"=>-1}} flags=[:slave_ok] limit=9 skip=0 batch_size=nil fields=nil (4.8103ms)
 
 
+* pinyin
+a = Corp.where("name like '%猎%' or name like '%术%'").count
+puts "totals: #{a}"
+puts Time.now
+Corp.where("name like '%猎%' or name like '%术%'").find_each{|c| c.update_abbrev(true) rescue puts "erro: corp.id = #{c.id}"}
+puts Time.now
+

@@ -1279,3 +1279,25 @@ $arrl[i], $arrl[j] = $arrl[j], $arrl[i]
 **** rails
 **** bundle
 
+* soft
+** ubuntu nginx passenger
+*** gem install passenger passenger-install-nginx-module
+*** 配置 /opt/nginx/conf/nginx.conf
+
+server {
+  listen 80;
+  server_name localhost;
+  root /opt/redmine/redmine-2.1/public; ##一定要到public
+  passenger_enabled on;
+  passenger_min_instances 3;  # <- Keeps app alive so it always loads fast
+  client_max_body_size 100M;  # <- Allow files up to 100MB to be uploaded
+}
+
+*** 创建nginx启动脚步
+
+wget -O init-deb.sh http://library.linode.com/assets/660-init-deb.sh
+sudo mv init-deb.sh /etc/init.d/nginx
+sudo chmod +x /etc/init.d/nginx
+sudo /usr/sbin/update-rc.d -f nginx defaults
+
+*** sudo service nginx start

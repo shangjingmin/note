@@ -36,7 +36,7 @@ gsettings set com.canonical.Unity.Panel systray-whitelist "['all']"
    sudo apt-get install mysql-client mysql-workbench mongodb sqlite3 redis-server mysql-workbench  memcached nodejs libmysqlclient-dev libreadline-dev libsqlite3-dev libxml2-dev libxslt-dev libcurl4-gnutls-dev g++ libssl-dev curl  git bzr gitk qgit autoconf automake libgtk2.0-dev libxpm-dev libjpeg-dev libgif-dev libtiff4-dev texinfo
 
    # ror lib dependence
-   sudo apt-get install libmysqlclient-dev libreadline-dev libsqlite3-dev libxml2-dev libxslt-dev libcurl4-gnutls-dev g++ libssl-dev libpq-dev # libpq-dev
+   sudo apt-get install libmysqlclient-dev libreadline-dev libsqlite3-dev libxml2-dev libxslt-dev libcurl4-gnutls-dev g++ libssl-dev libpq-dev libmagickwand-dev
    sudo apt-get install imagemagick # 图片工具
    sudo apt-get install exuberant-ctags # 增强的ctags ctags-exuberant -a -e -f TAGS --languages=Ruby --tag-relative -R app config lib vendor ~/.rvm/rubies/default/lib/ruby/gems/1.9/gems ~/.rvm/src/ruby-1.9.3-p194
    gem install rtags # ruby tags, need >=0.89, using:  rtags `find ./app ./config ./db/ ./lib ./vendor ~/.rvm/gems/ruby-1.9.3-p392/gems/ ~/.rvm/src/ruby-1.9.3-p392/ -name *.rb | grep -v _darcs`
@@ -226,6 +226,33 @@ sudo make install
 #添加路径
 cd /usr/local
 sudo cp emacs23.2/bin/* bin/
+
+
+** media
+
+*** ape http://www.webupd8.org/2011/12/lossless-audio-split-tools-updates.html
+sudo add-apt-repository ppa:flacon/ppa
+sudo apt-get update
+sudo apt-get install flacon
+
+*** mplayer-vaapi  http://www.linuxidc.com/Linux/2012-11/74916.htm
+ Intel GPUs ( Intel HD Graphics ， G45 和之后的)
+
+    sudo apt-get install i965-va-driver
+
+ 
+AMD Radeon GPUs（你需要安装proprietary drivers）
+
+    sudo apt-get install xvba-va-driver
+
+Ubuntu安装MPlayer（VA-API支持）
+
+Ubuntu官方源中的Mplayer不支持VA-API，
+Ubuntu 12.10, 12.04 or 11.10用户可以通过下面的命令安装支持ＶＡ-API的Mplayer.
+
+    sudo add-apt-repository ppa:sander-vangrieken/vaapi 
+    sudo apt-get update 
+    sudo apt-get install mplayer-vaapi
 
 
 ** 需人工值守
