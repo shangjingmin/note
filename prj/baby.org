@@ -1,0 +1,8 @@
+* bblog
+** fields
+dt
+category: 睡/哭/奶/药/尿/拉/洗澡/摸药
+quantity
+scene
+event
+remark
