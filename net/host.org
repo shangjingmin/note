@@ -1,0 +1,16 @@
+* host
+
+** https://openshift.redhat.com
+*** r
+Associated with job 'r-build' in Jenkins server.
+Job URL: https://jenkins-sjm.rhcloud.com/job/r-build/
+Jenkins client 1.4 has been added to: r
+
+Jenkins created successfully.  Please make note of these credentials:
+   User: admin
+   Password: hMXh1kPG3G4Z
+Note:  You can change your password at: https://jenkins-sjm.rhcloud.com/me/configure
+
+Your application is now building with Jenkins.
+
+** 
