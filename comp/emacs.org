@@ -1,0 +1,15 @@
+* emacs
+** org
+*** TODO todo list <2013-07-30 二 08:01>  [2013-07-30 二 08:02]
+*** TODO dates and times
+C-c C-d
+C-c C-s
+*** TODO headline
+*** TODO publish
+*** TODO table
+*** TODO tag                                                      :@person:
+C-c C-q
+** dict
+*** 
+
+** 

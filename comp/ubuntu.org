@@ -4,7 +4,7 @@ gconftool --type boolean -s /desktop/ibus/panel/show_icon_on_systray true
 gconftool --type boolean -s /desktop/ibus/panel/show true
 gsettings set com.canonical.Unity.Panel systray-whitelist "['all']"
    # system
-   sudo apt-get install unrar stardict curl gnome-shell gnome-tweak-tool synergy quicksynergy
+   sudo apt-get install unrar stardict sdcv curl gnome-shell gnome-tweak-tool synergy quicksynergy
    sudo apt-get install ibus-pinyin ibus-pinyin-db-android
    sudo apt-get install hardinfo
    # vc
