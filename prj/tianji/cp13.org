@@ -34,8 +34,9 @@
 | regions       |   |   |   | 地区     | <= 5   |   | 将单字段数据写入关联表 |
 | email_domains |   |   |   | 邮箱后缀 | 可多个 |   |                        |
 
-**** TODO remove default from migration and set in model            :@job:
-DEADLINE: <2013-08-02 五 -1d>
+**** DONE remove default from migration and set in model            :@job:
+CLOSED: [2013-08-07 三 17:50] DEADLINE: <2013-08-02 五 -1d>
+- State "DONE"       from "TODO"       [2013-08-07 三 17:50]
 *** corp_descriptions 公司介绍
 | 字段名  | 类型    | limit | 默认值 | <10>中文 | <10> 备注 |
 |---------+---------+-------+--------+----------+-----------|
@@ -85,7 +86,9 @@ rails g model corp_template corp_id:integer category:string photo_file_name:stri
 | is_shown | boolean |       | true   | 是否显示     |                                |
 rails g model corp_navigation corp_id:integer href:string label:string position:integer is_shown:boolean
 
-***** TODO 后台编辑及添加
+***** DONE 后台编辑及添加
+CLOSED: [2013-08-01 四 16:31]
+- State "DONE"       from "TODO"       [2013-08-01 四 16:31]
 - State "TODO"       from ""           [2013-07-31 三 12:14]
 
 ***** TODO 前台展示
@@ -103,7 +106,9 @@ rails g model corp_navigation corp_id:integer href:string label:string position:
 
 rails g model corp_navigation_page corp_navitation_id:integer category:string title:string content:text
 
-***** TODO 后台编辑及保存
+***** DONE 后台编辑及保存
+CLOSED: [2013-08-07 三 17:51]
+- State "DONE"       from "TODO"       [2013-08-07 三 17:51]
 - State "TODO"       from ""           [2013-07-31 三 12:16]
 
 ***** TODO 对应路由的展示处理
