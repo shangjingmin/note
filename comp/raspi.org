@@ -1,11 +1,14 @@
 * raspberry pi
 ** pi must
-*** pi
-*** power
+*** pi http://item.taobao.com/item.htm?spm=a1z0d.1.1000638.30.JoNA97&id=21433912601
+*** box http://item.taobao.com/item.htm?spm=a1z0d.1.1000638.23.JoNA97&id=21793104079
+*** usb hub: http://www.amazon.cn/mn/detailApp?_encoding=UTF8&tag=boxz-23&linkCode=as2&asin=b00aji0jyk&camp=0&creative=0&creativeASIN=b00aji0jyk
+*** power 
 *** power line
-*** sd card
-*** VGA / HDMI / DVI
+*** sd card http://item.jd.com/849298.html
+http://item.jd.com/557910.html
+*** VGA / HDMI / DVI http://item.taobao.com/item.htm?spm=a230r.1.10.77.Zdmaeo&id=18146663485
 *** shell
 ** pi others
 *** cool board
-*** wifi card
+*** wifi card http://item.jd.com/202530.html
