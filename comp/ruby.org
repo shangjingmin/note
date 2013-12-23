@@ -412,6 +412,8 @@ map.connect ':controller/:action/:id.:format'
 ** ?
 * TODO sinatra
 http://www.sinatrarb.com/intro.html
+** routes
+** templates
 * TODO padrino
 http://www.padrinorb.com/guides
 * questions

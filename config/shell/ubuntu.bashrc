@@ -16,6 +16,13 @@ alias es='export LANG=en_US.UTF-8 && emacs --daemon'
 alias enw='emacs -nw'
 alias enwq='emacs -nw -q'
 alias eq='emacs -nw -q'
+alias dev_mongo_start='sudo rm /var/lib/mongodb/mongod.lock ; sudo mongod -f /etc/mongodb.conf &'
+
+alias ec_init='emacsclient -c ~/.emacs.d/init &'
+alias ec_note='emacsclient -c ~/nethd/note &'
+alias ec_prj='emacsclient -c ~/nethd/prj &'
+
+alias ec_tj='emacsclient -c ~/nethd/tianji/tianjicom'
 
 #gwf
 alias gfw_goagent='python ~/nethd/pubsoft/wall/goagent/local/proxy.py > ~/tmp/goagent.log 2>&1 &'

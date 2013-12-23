@@ -1,33 +1,34 @@
-* tianji
+* tianji 10.40.9.60 tianji tianji
 ** cpv1.0-0711
 *** Questions
 **** 初步设计，对遗漏部分，还需要补充
 *** corps 公司
-| 字段名                | 类型    | limit | 默认值 | <10>中文       | <10> 备注         | 变更标识 | 变更说明       |
-|-----------------------+---------+-------+--------+----------------+-------------------+----------+----------------|
-| name                  | string  |       |        | 名称           |                   |          |                |
-| nature                | integer |       |        | 性质           |                   |          |                |
-| size                  | integer |       |        | 规模           |                   |          |                |
-| address               | string  |       |        | 地址           |                   |          |                |
-| description           | string  |       |        | 介绍（截字）   |                   |          |                |
-| website               | string  |       |        | 网址           |                   |          |                |
-| logo_file_name        | string  |       |        | logo           |                   |          |                |
-| square_logo_file_name | string  |       |        | feed_logo      |                   | n        |                |
-| abbrev                | string  |       |        | 拼音           |                   |          |                |
-|-----------------------+---------+-------+--------+----------------+-------------------+----------+----------------|
-| is_company_page       | boolean |       |  false | 是否有公司主页 |                   | n        |                |
-| is_attested           | boolean |       |  false | 是否已认证     | 已有邮箱后缀      | n        |                |
-|-----------------------+---------+-------+--------+----------------+-------------------+----------+----------------|
-| user_id               | integer |       |        | 管理员id       |                   |          | 复制cp_user_id |
-| secondary_domain      | string  |       |        | 二级域名       |                   | n        |                |
-| aliases               |         |       |        | 别名           | 最多3个，逗号分割 | n        |                |
-|-----------------------+---------+-------+--------+----------------+-------------------+----------+----------------|
-| open_jobs_count       | integer |       |      0 | 职位数         |                   |          | 从雇员表中更新 |
-| views_count           | integer |       |      0 | 浏览数         |                   |          |                |
-| staffers_count        | integer |       |      0 | 雇员数         |                   |          |                |
-| followers_count       | integer |       |      0 | 关注数         |                   |          |                |
-|-----------------------+---------+-------+--------+----------------+-------------------+----------+----------------|
-| custom_pages_count    | integer |       |      0 | 自定义页面数   |                   | n        |                |
+| 字段名                                          | 类型    | limit | 默认值 | <10>中文       | <10> 备注         | 变更标识 | 变更说明          |
+|-------------------------------------------------+---------+-------+--------+----------------+-------------------+----------+-------------------|
+| name                                            | string  |       |        | 名称           |                   |          |                   |
+| nature                                          | integer |       |        | 性质           |                   |          |                   |
+| size                                            | integer |       |        | 规模           |                   |          |                   |
+| address                                         | string  |       |        | 地址           |                   |          |                   |
+| description                                     | string  |       |        | 介绍（截字）   |                   |          |                   |
+| website                                         | string  |       |        | 网址           |                   |          |                   |
+| cp_logo_file_name(logo_file_name)               | string  |       |        | logo           |                   |          |                   |
+| cp_square_logo_file_name(square_logo_file_name) | string  |       |        | feed_logo      |                   | n        |                   |
+| abbrev                                          | string  |       |        | 拼音           |                   |          |                   |
+|-------------------------------------------------+---------+-------+--------+----------------+-------------------+----------+-------------------|
+| is_company_page                                 | boolean |       |  false | 是否有公司主页 |                   | n        |                   |
+| is_attested                                     | boolean |       |  false | 是否已认证     | 已有邮箱后缀      | n        |                   |
+| is_top                                          | boolean |       |        | 是否为500强    |                   |          |                   |
+|-------------------------------------------------+---------+-------+--------+----------------+-------------------+----------+-------------------|
+| cp_manager_id(user_id)                          | integer |       |        | 管理员id       |                   |          | 复制cp_manager_id |
+| secondary_domain                                | string  |       |        | 二级域名       |                   | n        |                   |
+| aliases                                         |         |       |        | 别名           | 最多3个，逗号分割 | n        |                   |
+|-------------------------------------------------+---------+-------+--------+----------------+-------------------+----------+-------------------|
+| open_jobs_count                                 | integer |       |      0 | 职位数         |                   |          | 从雇员表中更新    |
+| views_count                                     | integer |       |      0 | 浏览数         |                   |          |                   |
+| staffers_count                                  | integer |       |      0 | 雇员数         |                   |          |                   |
+| followers_count                                 | integer |       |      0 | 关注数         |                   |          |                   |
+|-------------------------------------------------+---------+-------+--------+----------------+-------------------+----------+-------------------|
+| category                                        | string  |       |        | 来源           |                   | u        | 招聘端需要        |
 
 **** 一对多数据 关联corp_enumerations 必要时才做冗余
 | industries    |   |   |   | 行业     | <= 5   |   | 将单字段数据写入关联表 |
@@ -45,13 +46,13 @@ CLOSED: [2013-08-07 三 17:50] DEADLINE: <2013-08-02 五 -1d>
 
 *** corp_enumerations 公司基础信息附属表 email_domain/industry/region
 对邮箱后缀，认为是已审核通过的邮箱
-| 字段名      | 类型    | limit | 默认值 | <10>中文 | <10> 备注                    |
-|-------------+---------+-------+--------+----------+------------------------------|
-| corp_id     | integer |       |        | 公司id   |                              |
-| category    | string  |       |        | 分类     | email_domain/industry/region |
-| enum_value  | string  |       |        | 附属值   | 值/城市                      |
-| enum_value1 | string  |       |        | 附属值1  | 省                           |
-| enum_value2 | string  |       |        | 附属值2  | 国家                         |
+| 字段名      | 类型    | limit | 默认值 | <10>中文 | <10> 备注                          |
+|-------------+---------+-------+--------+----------+------------------------------------|
+| corp_id     | integer |       |        | 公司id   |                                    |
+| category    | integer |       |        | 分类     | 1:email_domain;2:industry;3:region |
+| enum_value  | string  |       |        | 附属值   | 值/城市/二级行业                   |
+| enum_value1 | string  |       |        | 附属值1  | 省/一级行业                        |
+| enum_value2 | string  |       |        | 附属值2  | 国家                               |
 
 *** count相关
 **** corp_followers 关注
@@ -72,9 +73,13 @@ CLOSED: [2013-08-07 三 17:50] DEADLINE: <2013-08-02 五 -1d>
 | top_higher    | integer |       |        | 顶部高度 |                                       |
 | is_fixed      | integer |       |        | 是否固定 |                                       |
 rails g model corp_template corp_id:integer category:string photo_file_name:string top_higher:integer is_fixed:integer
-***** TODO 前端所需图片格式及设置
+***** DONE 前端所需图片格式及设置
+CLOSED: [2013-08-23 五 11:26]
+- State "DONE"       from "TODO"       [2013-08-23 五 11:26]
 - State "TODO"       from ""           [2013-07-31 三 12:18]
-***** TODO 后台设置存储
+***** DONE 后台设置存储
+CLOSED: [2013-08-23 五 11:26]
+- State "DONE"       from "TODO"       [2013-08-23 五 11:26]
 - State "TODO"       from ""           [2013-07-31 三 12:19]
 **** corp_navigations 导航： 首页/在招职位/雇员分析/自定义页面1-5
 | 字段名   | 类型    | limit | 默认值 | <10>中文     | <10> 备注                      |
@@ -91,9 +96,13 @@ CLOSED: [2013-08-01 四 16:31]
 - State "DONE"       from "TODO"       [2013-08-01 四 16:31]
 - State "TODO"       from ""           [2013-07-31 三 12:14]
 
-***** TODO 前台展示
+***** DONE 前台展示
+CLOSED: [2013-08-26 一 10:05]
+- State "DONE"       from "TODO"       [2013-08-26 一 10:05]
 - State "TODO"       from ""           [2013-07-31 三 12:15]
-***** TODO 路由处理
+***** DONE 路由处理
+CLOSED: [2013-08-26 一 10:05]
+- State "DONE"       from "TODO"       [2013-08-26 一 10:05]
 - State "TODO"       from "DONE"       [2013-07-31 三 12:15]
 
 **** corp_navigation_pages自定义页面
@@ -111,6 +120,271 @@ CLOSED: [2013-08-07 三 17:51]
 - State "DONE"       from "TODO"       [2013-08-07 三 17:51]
 - State "TODO"       from ""           [2013-07-31 三 12:16]
 
-***** TODO 对应路由的展示处理
+***** DONE 对应路由的展示处理
+CLOSED: [2013-08-26 一 10:05]
+- State "DONE"       from "TODO"       [2013-08-26 一 10:05]
 - State "TODO"       from ""           [2013-07-31 三 12:17]
+*** 创建
+*** 公司单页
+*** 公司管理后台：公司审核、今日动态、热门动态
+*** 认领
+*** 雇员认证
+*** 公司资料修改及审核
+*** 雇员分析
+*** 公司动态及后台feed
+*** frontpage
+http://192.168.3.4/new_companies/homepage/cloudCompany1.php    //经历中有云公司1     
+http://192.168.3.4/new_companies/homepage/cloudCompany2.php    //经历中无云公司2     
+http://192.168.3.4/new_companies/homepage/companyExper.php     //完善在该公司的经历  
+http://192.168.3.4/new_companies/homepage/informationForm.php  //填写公司资料        
+http://192.168.3.4/new_companies/homepage/employeeEmail.php    //雇员邮箱认证一   //雇员邮箱认证二   
+http://192.168.3.4/new_companies/homepage/emailSuccess.php     //邮箱验证成功  //公司添加成功        
+
+http://192.168.3.4/new_companies/homepage/qemployeeEmail.php   //前台雇员邮箱验证                   
+http://192.168.3.4/new_companies/homepage/qemailSuccess.php    //前台雇员审核   //前台雇员认证成功   
+http://192.168.3.4/new_companies/homepage/qcompanyExper.php    //前台完善在该公司的公司经历         
+http://192.168.3.4/new_companies/homepage/confirmidentity.php  //确认身份                           
+http://192.168.3.4/new_companies/homepage/confirmidentity1.php  //确认身份2                        
+http://192.168.3.4/new_companies/homepage/confirmidentity3.php   //确认身份3                       
+http://192.168.9.4/new_companies/homepage/renliemailSuccess.php  //前台等待审核认领                 
+
+不能点击className btnqdNo
+
+http://192.168.3.4/new_companies/homepage/concercompany.php    我关注的公司
+http://192.168.3.4/new_companies/homepage/ResumeTemplate.php    我关注的简历模板
+http://192.168.3.4/new_companies/homepage/SearchTemplates.php   找公司
+192.168.3.4/new_companies/homepage/SimpleTemplates.php  我的公司简版
+192.168.3.4/new_companies/homepage/Employees.php        雇员分析
+http://192.168.3.4/new_companies/homepage/editCompany.php   编辑公司
+http://192.168.3.4/new_companies/homepage/editCompanyLog.php  编辑公司LOG
+
+http://192.168.3.4/new_companies/homepage/index.php 背景定制
+<div id="container_index">
+<input id="bkId" type="text" value="fixed body_bg.png bodybgbj.jpg auto">
+
+*** Q_fp
+**** 认领：确认身份： 提交时确认官方代表需勾选；后台验证的错误如何提示
+http://192.168.3.4/new_companies/homepage/confirmidentity.php
+
+http://localhost:3000/corps/huicongwang/claim/email
+**** 雇员认证： 后台错误的提示
+http://192.168.3.4/new_companies/homepage/qemployeeEmail.php
+
+http://localhost:3000/corps/keruiguoji/employee/verify/email
+
+*** email test
+
+
+[CorpClaim.last, CorpVerifyEmployee.last].each{|c| c.update_attribute(:email, "a#{Time.now.to_i}@test.com"); c.update_attribute(:approved, 6); c.update_attribute(:approved, 2)}
+
+c = CorpClaim.last
+c.update_attribute(:email, "a#{Time.now.to_i}@test.com");
+c.update_attribute(:approved, 6);
+c.update_attribute(:approved, 2)
+
+c = CorpVerifyEmployee.last
+c.update_attribute(:email, "a#{Time.now.to_i}@test.com");
+c.update_attribute(:approved, 6);
+c.update_attribute(:approved, 2)
+
+*** mini corp card
+参考mini_profile实现的公司名片，请将自己需要显示名片的部分改为link_to_corp调用
+**** ApplicationHelper#link_to_corp
+参考link_to_user
+**** app/views/corps/base/_mini_corp_card.html.erb
+公司名片的触发： a[data-cid]
 *** TODO job接口
+** cp1.1 11
+*** unlogin
+http://192.168.3.201/new_companies/homepage/homecompany.php
+** cp1.2 2013.12.09
+*** java api
+**** DONE how to call in development and no proxy: http://10.40.9.53
+CLOSED: [2013-12-09 Mon 14:31]
+- State "DONE"       from "TODO"       [2013-12-09 Mon 14:31]
+- State "TODO"       from ""           [2013-12-09 Mon 11:24]
+  
+java_jobs: http://10.40.9.53
+
+**** DONE is the same host as before for position and recruiting: same
+CLOSED: [2013-12-09 Mon 14:32]
+- State "DONE"       from "TODO"       [2013-12-09 Mon 14:32]
+- State "TODO"       from ""           [2013-12-09 Mon 11:25]
+
+**** DONE function select and show? : http://image.tianji.com/tjs/dropBox/html/demo.html
+CLOSED: [2013-12-09 Mon 17:35]
+- State "DONE"       from "TODO"       [2013-12-09 Mon 17:35]
+- State "TODO"       from ""           [2013-12-09 Mon 16:56]
+
+http://image.tianji.com/tjs/dropBox/html/demo.html
+
+http://image.tianji.com/tjs/msPickMap/html/replaceName1.html
+*** java url
+**** DONE 职位搜索页面 http://job.tianji.com/career/search?keyword=关键字
+CLOSED: [2013-12-09 Mon 17:37]
+- State "DONE"       from "TODO"       [2013-12-09 Mon 17:37]
+**** DONE 发布职位：http://job.tianji.com/career/recruiter/position/publish
+CLOSED: [2013-12-09 Mon 17:37]
+- State "DONE"       from "TODO"       [2013-12-09 Mon 17:37]
+- State "TODO"       from ""           [2013-12-09 Mon 11:24]
+*** TODO pubsub
+- State "TODO"       from ""           [2013-12-09 Mon 15:02]
+Hi 敬民：
+
+发布职位事件 http://wiki.tianji.com/java/pubsub#A.2BdShiN1PRXgOATE9NTotO9g-
+职位下线事件 http://wiki.tianji.com/java/pubsub#A.2BgExPTU4Lfr9Oi072-
+
+James
+
+
+*** db
+**** db/migrate/20131202012946_create_corp_job_promulgators.rb
+(172.6ms)  CREATE TABLE `corp_job_promulgators` (`id` int(11) DEFAULT NULL auto_increment PRIMARY KEY, `corp_id` int(11), `user_ids` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) 
+(179.6ms)  CREATE INDEX `index_corp_job_promulgators_on_corp_id` ON `corp_job_promulgators` (`corp_id`)
+(108.0ms)  INSERT INTO `schema_migrations` (`version`) VALUES ('20131202012946')
+
+**** db/migrate/20131212072040_add_note_to_media_ads.rb
+   (971.1ms)  ALTER TABLE `media_ads` ADD `note` varchar(255)
+   (108.0ms)  INSERT INTO `schema_migrations` (`version`) VALUES ('20131212072040')
+
+*** rake: rake corp:init_corp_open_jobs_count # lib/tasks/corp_open_jobs_count_init.rake
+RAILS_ENV=integ bundle exec rake corp:init_corp_open_jobs_count > log/init_corp_open_jobs_count_rake.log
+
+starting...2013-12-11 15:58:45
+= starting ids(163--5331) 2013-12-11 15:58:46
+== doing 0/1000 2013-12-11 15:58:46
+== doing 100/1000 2013-12-11 15:59:02
+== doing 200/1000 2013-12-11 15:59:11
+== doing 300/1000 2013-12-11 15:59:22
+== doing 400/1000 2013-12-11 15:59:31
+== doing 500/1000 2013-12-11 15:59:41
+== doing 600/1000 2013-12-11 15:59:53
+== doing 700/1000 2013-12-11 16:00:01
+== doing 800/1000 2013-12-11 16:00:10
+== doing 900/1000 2013-12-11 16:00:20
+= end ids(163--5331) 2013-12-11 16:00:33
+= starting ids(5337--12441) 2013-12-11 16:00:33
+== doing 0/1000 2013-12-11 16:00:33
+== doing 100/1000 2013-12-11 16:00:43
+== doing 200/1000 2013-12-11 16:00:51
+== doing 300/1000 2013-12-11 16:01:01
+== doing 400/1000 2013-12-11 16:01:10
+== doing 500/1000 2013-12-11 16:01:19
+== doing 600/1000 2013-12-11 16:01:30
+== doing 700/1000 2013-12-11 16:01:39
+== doing 800/1000 2013-12-11 16:01:46
+== doing 900/1000 2013-12-11 16:01:56
+= end ids(5337--12441) 2013-12-11 16:02:05
+= starting ids(12443--16249) 2013-12-11 16:02:06
+== doing 0/1000 2013-12-11 16:02:06
+== doing 100/1000 2013-12-11 16:02:16
+== doing 200/1000 2013-12-11 16:02:23
+== doing 300/1000 2013-12-11 16:02:33
+== doing 400/1000 2013-12-11 16:02:44
+== doing 500/1000 2013-12-11 16:02:55
+== doing 600/1000 2013-12-11 16:03:04
+== doing 700/1000 2013-12-11 16:03:15
+== doing 800/1000 2013-12-11 16:03:24
+== doing 900/1000 2013-12-11 16:03:33
+= end ids(12443--16249) 2013-12-11 16:03:44
+= starting ids(16250--19149) 2013-12-11 16:03:45
+== doing 0/1000 2013-12-11 16:03:45
+== doing 100/1000 2013-12-11 16:03:56
+== doing 200/1000 2013-12-11 16:04:07
+== doing 300/1000 2013-12-11 16:04:15
+== doing 400/1000 2013-12-11 16:04:25
+== doing 500/1000 2013-12-11 16:04:34
+== doing 600/1000 2013-12-11 16:04:43
+== doing 700/1000 2013-12-11 16:04:54
+== doing 800/1000 2013-12-11 16:05:02
+== doing 900/1000 2013-12-11 16:05:13
+= end ids(16250--19149) 2013-12-11 16:05:23
+= starting ids(19155--25945) 2013-12-11 16:05:23
+== doing 0/1000 2013-12-11 16:05:23
+== doing 100/1000 2013-12-11 16:05:34
+== doing 200/1000 2013-12-11 16:05:45
+== doing 300/1000 2013-12-11 16:05:53
+== doing 400/1000 2013-12-11 16:06:07
+== doing 500/1000 2013-12-11 16:06:16
+== doing 600/1000 2013-12-11 16:06:30
+== doing 700/1000 2013-12-11 16:06:41
+== doing 800/1000 2013-12-11 16:06:50
+== doing 900/1000 2013-12-11 16:07:04
+= end ids(19155--25945) 2013-12-11 16:07:14
+= starting ids(25947--37441) 2013-12-11 16:07:15
+== doing 0/1000 2013-12-11 16:07:15
+== doing 100/1000 2013-12-11 16:07:24
+== doing 200/1000 2013-12-11 16:07:35
+== doing 300/1000 2013-12-11 16:07:46
+== doing 400/1000 2013-12-11 16:07:55
+== doing 500/1000 2013-12-11 16:08:05
+== doing 600/1000 2013-12-11 16:08:14
+== doing 700/1000 2013-12-11 16:08:24
+== doing 800/1000 2013-12-11 16:08:38
+== doing 900/1000 2013-12-11 16:08:50
+= end ids(25947--37441) 2013-12-11 16:09:03
+= starting ids(37444--750742) 2013-12-11 16:09:04
+== doing 0/1000 2013-12-11 16:09:04
+== doing 100/1000 2013-12-11 16:09:19
+== doing 200/1000 2013-12-11 16:09:31
+== doing 300/1000 2013-12-11 16:09:43
+== doing 400/1000 2013-12-11 16:09:58
+== doing 500/1000 2013-12-11 16:10:17
+== doing 600/1000 2013-12-11 16:10:37
+== doing 700/1000 2013-12-11 16:10:57
+== doing 800/1000 2013-12-11 16:11:15
+== doing 900/1000 2013-12-11 16:11:37
+= end ids(37444--750742) 2013-12-11 16:11:54
+= starting ids(750782--760576) 2013-12-11 16:11:55
+== doing 0/1000 2013-12-11 16:11:55
+== doing 100/1000 2013-12-11 16:12:15
+== doing 200/1000 2013-12-11 16:12:31
+== doing 300/1000 2013-12-11 16:12:45
+== doing 400/1000 2013-12-11 16:13:03
+== doing 500/1000 2013-12-11 16:13:22
+== doing 600/1000 2013-12-11 16:13:46
+== doing 700/1000 2013-12-11 16:14:08
+== doing 800/1000 2013-12-11 16:14:38
+== doing 900/1000 2013-12-11 16:14:56
+= end ids(750782--760576) 2013-12-11 16:15:14
+= starting ids(760612--763126) 2013-12-11 16:15:14
+== doing 0/1000 2013-12-11 16:15:14
+== doing 100/1000 2013-12-11 16:15:27
+== doing 200/1000 2013-12-11 16:15:37
+== doing 300/1000 2013-12-11 16:15:47
+== doing 400/1000 2013-12-11 16:15:59
+== doing 500/1000 2013-12-11 16:16:11
+== doing 600/1000 2013-12-11 16:16:21
+== doing 700/1000 2013-12-11 16:16:33
+== doing 800/1000 2013-12-11 16:16:44
+== doing 900/1000 2013-12-11 16:16:57
+= end ids(760612--763126) 2013-12-11 16:17:09
+= starting ids(763127--5805595) 2013-12-11 16:17:09
+== doing 0/382 2013-12-11 16:17:09
+== doing 100/382 2013-12-11 16:17:23
+== doing 200/382 2013-12-11 16:17:39
+== doing 300/382 2013-12-11 16:17:51
+= end ids(763127--5805595) 2013-12-11 16:18:04
+end...2013-12-11 16:18:04
+
+*** model: Corp#sync_open_jobs_count
+
+*** front page
+**** 在招职位页 http://192.168.3.4/new_companies/homepage/jobRecruitment.php
+no data: http://192.168.3.4/new_companies/homepage/jobRecruitment.php
+**** 职位 http://192.168.3.4/new_companies/homepage/homecompany.php
+
+
+*** test 65498@yahoo.com.cn http://job.tianji.com/career/cs/account/index/1,@inservice
+	
+商敬民 16:37:15	
+    招聘职位审核操作的用户名和密码 以及链接 是什么，我需要测下职位数变化的订阅服务
+
+吕朋-prd 16:38:04	
+    好。 	
+
+吕朋-prd 16:39:00	
+    65498@yahoo.com.cn 123456 	
+
+吕朋-prd 16:39:06	
+    http://job.tianji.com/career/cs/account/index/1,@inservice 	

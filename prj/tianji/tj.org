@@ -1183,6 +1183,7 @@ qa 已经使用 java的qa api了， 如果要正常登录的话
 **** ruby1.9.3
 **** mongodb、redis
 **** gem: 最新
+*** 211.151.73.237 workup.tianji.com
 ** sec
 *** 500k数据
 内网 192.168.1.160
