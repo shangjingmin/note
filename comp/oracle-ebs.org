@@ -1,0 +1,110 @@
+* oracle ebs
+3.熟悉Oracle EBS体系结构，以及Oracle EBS重要相关表结构，掌握Oracle数据库及PL/SQL知识，具有Form Builder 和 Report builder的二次开发经验，具有Java及OAF开发经验者优先；
+** huafen
+涉及企业的核心业务过程，诸如财务、采购、库存、销售、计划、生产制造等范畴，对应SAP R/3的主要内容（FI/MM/PP/SD /CO），属于BACK-OFFICE的应用范畴，SAP将它划入ERP；属于人力资源管理范畴，包括人事、培训、工资管理等等，SAP将之名曰HRM；属于FRONT-OFFICE的应用范畴，主要是“客户相关”，涉及客户关系管理的内容，包括市场营销、销售管理、售后服务、渠道管理、电话或网上销售等等，SAP将它划入CRM；涉及买卖双方的业务协同、网上应用，主要是“供应商相关”的内容，SAP将它划入SCM（关于此点，各方的习惯与差别较大）；关于供应商资格认证、管理考核等等，涉及供应商关系管理的内容，SAP将它划入SRM；关于产品研发过程管理，涉及产品生命周期的内容，SAP将它划入PLM（或PDM）；相对于上述主要涉及“业务过程管理”（联机事务处理OLTP）的范畴，主要针对业务过程的结果进行数据分析（联机数据分析OLAP）的应用软件，则名曰BIS（商务智能分析）或EPM（企业绩效分析）
+** module
+*** Oracle EBS各模块名称：
+**** 财务系统模块:
+Oracle 总帐管理（GL）General ledger
+Oracle 应付帐管理（AP）Accounts payable
+Oracle 固定资产管理（FA）fixed assets; capital assets; permanent assets
+Oracle 应收帐管理（AR）account receivable
+Oracle 现金管理（CE）
+项目会计（PA）Project Accountant
+财务分析（OFA）Financial analysis
+**** 分销系统模块:
+库存管理（INV）inventory; stocks; reserves
+采购管理（PUR）purchase
+销售定单管理（OE）
+销售&市场管理（SM）Sales& Market management
+销售补偿管理（SC）Sales compensation
+Oracle售后服务管理（SR）
+Oracle销售分析（OSA）Sales analysis
+**** 制造系统模块:
+Oracle计划管理（MPS/MRP）Master Production Schedule主生产计划；Material Requirement Planning 物料需求计划
+Oracle能力计划管理（CAP）Capacity planning
+Oracle制造数据管理（BOM）Bill of Material物料清单
+Oracle车间生产管理（WIP）Working In Process在制品或流水线
+Oracle成本管理（CST）cost
+Oracle项目制造（PJM) Project manufacturing
+Oracle质量管理（QM) Quality manage
+**** 其他系统模块:
+Oracle设备管理（EM）Equipment management
+Oracle人事管理（HR）
+Oracle薪金管理（PAYROLL）PAYROLL薪水、工资、工资单
+Oracle系统管理（SYSTEM ADMIN）
+Oracle预警（ALT）alert警戒、警报
+Oracle多维数据分析/商业智能系统 （OLAP/BIS）Oracle OLAP 是一个内嵌在 OracleDatabase 11g 中的世界一流水平的多维分析引擎。Oracle OLAP 多维数据集使用简单的 SQL 查询提供高级计算 — 以思维速度的响应时间生成查询结果。将 OLAP 多维数据集部署为物化视图时，可以直接利用这一出色的查询性能 — 增强了对详细关系表的概要查询能力。BIS 是Business intelligence system
+Oracle桌面集成（ADI）Desktop integration
+** table
+*** AR 应收
+
+应收事务处理相关表
+SELECT * FROM ar.ar_batches_all;                  --事务处理批
+SELECT * FROM ar.ra_customer_trx_all;            --应收事务头/发票头
+SELECT * FROM ra.ra_customer_trx_lines_all;     --应收事务行项目/发票行
+SELECT * FROM ra.ra_cust_trx_line_gl_dist_all;--应收事务分配行/发票分配
+SELECT * FROM ar.ar_payment_schedules_all;      --收款计划/发票调整
+
+收款相关表
+SELECT * FROM ar.ar_cash_receipts_all;             --收款表
+SELECT * FROM ar.ar_cash_receipt_history_all;    --收款历史表
+SELECT * FROM ar.ar_distributions_all;             --收款分配表/付款计划
+SELECT * FROM ar.ar_misc_cash_distributions_all;--杂项历史记录分配表
+SELECT * FROM ar.ar_receivable_applications_all;--收款核销表
+
+Subledger accounting 子分类账
+SELECT * FROM ar_adjustments_all;  --会计分录
+SELECT * FROM xla.xla_events;       --会计事件表
+SELECT * FROM xla.xla_transaction_entites; --事务处理表
+SELECT * FROM xla.xla_ae_headers;   --子分类帐日记账头
+SELECT * FROM xla.xla_ae_lines;      --子分类帐日记账行
+SELECT * FROM xla.xla_distributions_link;  --子分类帐日记帐行关联表
+SELECT * FROM xla.xla_events_error;         --会计事件错误提示表
+
+接口相关表 应收临时表
+SELECT * FROM ar.ra_interface_lines_all;              --应收接口行表
+SELECT * FROM ar.ra_interface_distributions_all;  --应收接口分配行表
+接口相关表 收款临时表
+SELECT * FROM ar. ar_interim_cash_receipts_all;   --收款标准接口
+
+主数据相关表/视图
+SELECT * FROM apps.po_vendors;             --客户
+SELECT * FROM apps.po_vendor_sites_all;     --客户地点
+SELECT * FROM ap.ap_bank_branches_all;        --银行
+SELECT * FROM ap.ap_bank_accounts_all;        --银行账户
+SELECT * FROM ap.ap_bank_account_uses_all; --银行账户使用表
+SELECT * FROM apps.gl_period_statuses_v;    --期间，取期间视图
+SELECT * FROM apps.hr_operating_units;        --业务实体视图
+
+税相关表
+SELECT * FROM zx_lines_det_factors; --税决定因素表
+SELECT * FROM zx_lines; --税行
+注：应收模块税仅含这个表。
+ra_customer_trx_all 应收发票
+发票编号：customer_trx _id
+客户收单方编号：bill_to_site_use_id
+销售员编号：primary_sales_id
+reference是Oracle提供的外部编号输入框，但是由于版本问题和长度(<=30)，不建议用户使用，如果要使用外部编号，请使用说明性弹性域。
+ra_customer_trx_lines_all 应收发票行、明细信息
+行号：line_id
+物料编号：inventory_item_id –-可以为空，比如非物料的服务
+开票数量：quantity_invoice
+行类型：line_type –-发票行一般有两种类型（item一般/tax税）
+本行金额：extend_price
+注意：税行是隐藏行，所以至少会有两行
+ar_cash_receipts_all 收款情况表
+还包含了非收款信息
+内部code：cash_receipt_id
+收款号：receipt_number
+收款日期：receipt_date
+总额：amount
+类型：receipt_type --现金/杂项（Cash/Misc）
+本位币计算金额：functional_amount
+ar_receivable_applications_all核销关系表
+UI上为receipts，核销关系不是一一对应，也不是一次核销100%，UI上右下方的Application按钮
+发票编号：applied_customer_trx_id
+发票行编号：applied_customer_trx_line_id
+状态：status –-app表示核销；unapp表示未核销
+匹配金额：amount_applied
+注意：红冲收款报表时间跨月的问题；必须联查ar_cash_receipts_all和ap_cash_receipt_history_all。
