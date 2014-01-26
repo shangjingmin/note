@@ -1,3 +1,7 @@
+mkdir -p ~/nethd ~/nethd/sec ~/nethd/local_soft ~/nethd/tmp ~/nethd/note
+mkdir -p ~/nethd/prj ~/nethd/book
+
+
 #!/bin/sh
 
 base_path="~/nethd"
