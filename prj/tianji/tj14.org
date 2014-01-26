@@ -1,0 +1,86 @@
+* tianji2014
+** corp seo: url change to chinese name
+** corp site map: 20140109
+*** fp: http://192.168.3.4/new_companies/homepage/companyList.html
+*** run: 
+root@web1.env-40-9.dev.tianji.com:/tianji/web/current# RAILS_ENV=integ rake sitemap:generate_corp_site_map > s1.txt
+
+root@web1.env-40-9.dev.tianji.com:/tianji/web/current# cat s1.txt 
+total records: 9379 2014-01-15 10:09:17
+== starting 0*501... 2014-01-15 10:09:17
+== starting 1*501... 2014-01-15 10:09:17
+== starting 2*501... 2014-01-15 10:09:17
+== starting 3*501... 2014-01-15 10:09:18
+== starting 4*501... 2014-01-15 10:09:18
+== starting 5*501... 2014-01-15 10:09:18
+== starting 6*501... 2014-01-15 10:09:18
+== starting 7*501... 2014-01-15 10:09:18
+== starting 8*501... 2014-01-15 10:09:18
+== starting 9*501... 2014-01-15 10:09:19
+== starting 10*501... 2014-01-15 10:09:19
+== starting 11*501... 2014-01-15 10:09:19
+== starting 12*501... 2014-01-15 10:09:19
+== starting 13*501... 2014-01-15 10:09:19
+== starting 14*501... 2014-01-15 10:09:19
+== starting 15*501... 2014-01-15 10:09:19
+== starting 16*501... 2014-01-15 10:09:19
+== starting 17*501... 2014-01-15 10:09:19
+== starting 18*501... 2014-01-15 10:09:19
+= get data end 2014-01-15 10:09:19
+= writing erb starting 2014-01-15 10:09:19
+= writing erb B-1.html 2014-01-15 10:09:19
+= writing erb B-2.html 2014-01-15 10:09:19
+= writing erb B-3.html 2014-01-15 10:09:19
+= writing erb B-4.html 2014-01-15 10:09:19
+= writing erb B-5.html 2014-01-15 10:09:20
+= writing erb H-1.html 2014-01-15 10:09:20
+= writing erb H-2.html 2014-01-15 10:09:20
+= writing erb D-1.html 2014-01-15 10:09:20
+= writing erb J-1.html 2014-01-15 10:09:20
+= writing erb X-1.html 2014-01-15 10:09:20
+= writing erb S-1.html 2014-01-15 10:09:20
+= writing erb S-2.html 2014-01-15 10:09:20
+= writing erb S-3.html 2014-01-15 10:09:20
+= writing erb S-4.html 2014-01-15 10:09:20
+= writing erb T-1.html 2014-01-15 10:09:20
+= writing erb W-1.html 2014-01-15 10:09:20
+= writing erb V-1.html 2014-01-15 10:09:20
+= writing erb Z-1.html 2014-01-15 10:09:20
+= writing erb Z-2.html 2014-01-15 10:09:20
+= writing erb G-1.html 2014-01-15 10:09:20
+= writing erb G-2.html 2014-01-15 10:09:20
+= writing erb L-1.html 2014-01-15 10:09:20
+= writing erb Y-1.html 2014-01-15 10:09:20
+= writing erb C-1.html 2014-01-15 10:09:20
+= writing erb F-1.html 2014-01-15 10:09:20
+= writing erb M-1.html 2014-01-15 10:09:20
+= writing erb Q-1.html 2014-01-15 10:09:20
+= writing erb K-1.html 2014-01-15 10:09:20
+= writing erb E-1.html 2014-01-15 10:09:20
+= writing erb R-1.html 2014-01-15 10:09:20
+= writing erb N-1.html 2014-01-15 10:09:20
+= writing erb A-1.html 2014-01-15 10:09:20
+= writing erb P-1.html 2014-01-15 10:09:20
+= writing erb I-1.html 2014-01-15 10:09:20
+= writing erb O-1.html 2014-01-15 10:09:20
+= writing erb U-1.html 2014-01-15 10:09:20
+= write erb done 2014-01-15 10:09:20
+end 2014-01-15 10:09:20
+
+** corp1.2: merge corp 20140106
+*** common function
+*** merge
+*** split
+*** ?招聘的白名单
+*** 相关使用位置的修改
+雇员/粉丝/邮箱后缀
+**** 前台
+***** 可能认识的雇员、雇员职位分布、通过他们了解该公司、雇员擅长技能、雇员来自于、工作经验统计、男女比例、新入雇员、以往雇员、公司名片、公司搜索结果、公司名联想模块
+***** 被合并公司跳转
+**** 后台
+**** 雇员/粉丝改变：需要同时处理主公司和合并公司
+counter_cache字段不能更新： ActiveRecord::Base.connection.execute("update corps set followers_count = 4 where id = 162")
+**** 认证：自动通过的处理
+*** 外部接口：
+**** 公司搜索
+**** 公司雇员是否有开通招聘服务

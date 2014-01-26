@@ -108,3 +108,33 @@ UI上为receipts，核销关系不是一一对应，也不是一次核销100%，
 状态：status –-app表示核销；unapp表示未核销
 匹配金额：amount_applied
 注意：红冲收款报表时间跨月的问题；必须联查ar_cash_receipts_all和ap_cash_receipt_history_all。
+** oracle
+*** backup and restore
+*** inert/update/delete/select
+*** 
+** gainian
+*** org
+（一）业务组（BG）
+ 
+（二）法律实体（
+LE
+）
+ 
+（三）业务实体（
+OU
+）
+ 
+（四）库存组织（
+INV
+）
+ 
+（五）公司成本中心（
+Cost Center
+）
+ 
+（六）
+HR
+组织
+ 
+（七）多组织接入控制
+  

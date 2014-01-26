@@ -1,0 +1,15 @@
+* en
+** read
+*** Man Month Myth
+*** Joel on Software
+*** data structure
+*** 离散数学
+*** 操作系 统
+*** 计算机原理
+*** AngularJS
+** write
+*** blog
+*** Q/A
+** listen
+*** podcast
+*** 访谈

@@ -27,6 +27,7 @@ alias ec_tj='emacsclient -c ~/nethd/tianji/tianjicom'
 #gwf
 alias gfw_goagent='python ~/nethd/pubsoft/wall/goagent/local/proxy.py > ~/tmp/goagent.log 2>&1 &'
 alias log_gfw_goagent='tail -f ~/tmp/goagent.log'
+alias net_change_mac='sudo ifconfig eth0 down && sudo ifconfig eth0 hw ether e0:69:95:68:e7:ad && sudo ifconfig eth0 up'
 
 # android
 PATH=$PATH:$HOME/nethd/local_soft/android-sdk-linux/tools

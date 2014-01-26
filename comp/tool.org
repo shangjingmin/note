@@ -1,0 +1,15 @@
+* dir
+** nethd
+*** note
+**** sec
+**** job
+**** etc
+*** publish
+**** blog
+***** assets
+****** img
+****** js
+****** css
+***** tags
+**** job
+*** 

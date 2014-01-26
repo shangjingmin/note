@@ -1,0 +1,9 @@
+* shell
+** user/group
+*** TODO show
+- State "TODO"       from ""           [2014-01-10 Fri 11:05]
+*** TODO change
+- State "TODO"       from ""           [2014-01-10 Fri 11:06]
+*** TODO add
+- State "TODO"       from ""           [2014-01-10 Fri 11:06]
+useradd
