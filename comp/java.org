@@ -700,3 +700,27 @@ http://localhost:8080/path/****
 ** 名词
 *** POJO 简单的Java对象（Plain Old Java Objects）实际就是普通JavaBeans
 *** DAO DataAccessObject 数据访问对象
+* tool
+** myeclipse
+*** jbpm
+http://chenhbc.iteye.com/blog/1933150
+最近公司做项目，需要用到流程管理，于是立马想到了JBPM。
+
+开始在网上搜了Myeclipse的插件安装教程，都不太完整，于是自己找了些资料，安装成功后，现整理记录如下：
+
+ 
+
+截止到现在（2013-08-29）为止，JBPM6已经出来，不过还处于Beta版，所以下载了5.4版本。下载地址：http://sourceforge.net/projects/jbpm/files/
+
+文件比较大，534M ，下载完成后解压到电脑某一目录，如C：\JBPM
+
+找到jbpm-installer\lib目录下GEF-SDK-3.6.2.zip 和 org.drools.updatesite-5.5.0.Final-assembly.zip 两个压缩文件，这两个是Myeclipse的插件。
+
+新建一个Myeclipse插件目录，如：c:\MyeclipsePlugin
+
+在这之下在建两个文件夹，分别存放刚才的两个包，打开压缩文件，解压其中的features和plugins文件夹到刚创建的文件夹里。
+
+找到%MYECLIPSE_HOME%\MyEclipse 10\dropins，创建两个文件 jbpm.link  和 jbpm-sdk.link（名称随意，但得是link文件），打开，分别输入内容，path=刚创建的文件夹路径，如path=E:\\JavaTools\\EclipsePlugins\\jbpm5.4，
+
+然后 重启Myeclipse，会提示插件安装成功，现在点击New-others，可以看到创建jbpm的模版。
+* other

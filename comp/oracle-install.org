@@ -1,0 +1,272 @@
+
+* install ubuntu12.04 x64
+http://gemsofprogramming.wordpress.com/2013/09/19/installing-oracle-12c-on-ubuntu-12-04-64-bit-a-hard-journey-but-its-worth-it/
+
+export LANG=zh_CN.UTF-8
+
+sudo apt-get install automake autotools-dev binutils bzip2 elfutils expat gawk gcc gcc-multilib g++-multilib ia32-libs ksh less lesstif2 lesstif2-dev lib32z1 libaio1 libaio-dev libc6-dev libc6-dev-i386 libc6-i386 libelf-dev libltdl-dev libmotif4 libodbcinstq4-1 libpth-dev libpthread-stubs0 libpthread-stubs0-dev libstdc++5 lsb-cxx make openssh-server pdksh rlwrap rpm sysstat unixodbc unixodbc-dev unzip x11-utils zlibc 
+
+sudo groupadd oinstall
+sudo groupadd dba
+sudo useradd -g oinstall -G dba  -d /opt/oracle -s /bin/bash oracle
+sudo passwd oracle
+
+# /etc/sysctl.conf
+fs.aio-max-nr = 65536
+fs.file-max = 389863
+kernel.shmall = 2097152kernel.shmmax = 33554432
+kernel.shmmni = 4096kernel.sem = 250 32000 32 128 
+
+net.ipv4.ip_local_port_range = 32768 61000
+
+net.core.rmem_default = 212992
+
+net.core.rmem_max = 212992
+
+net.core.wmem_default = 212992
+net.core.wmem_max = 212992
+
+sysctl –p
+
+#  /etc/security/limits.conf
+oracle              soft    nproc   2047
+
+oracle              hard    nproc   16384
+
+oracle              soft    nofile  1024
+
+oracle              hard    nofile  65536
+
+oracle              soft    stack   10240
+
+mkdir -p /usr/lib64
+ln  -s  /etc  /etc/rc.d
+ln  -s  /lib/x86_64-linux-gnu/libgcc_s.so.1  /lib64/
+ln  -s  /usr/bin/awk  /bin/awk
+ln  -s  /usr/bin/basename  /bin/basename
+ln  -s  /usr/bin/rpm  /bin/rpm
+ln  -s  /usr/lib/x86_64-linux-gnu/libpthread_nonshared.a  /usr/lib64/libpthread_nonshared.a
+ln  -s  /usr/lib/x86_64-linux-gnu/libc_nonshared.a  /usr/lib64/libc_nonshared.a
+ln  -s  /usr/lib/x86_64-linux-gnu/libstdc++.so.6  /lib64/
+ln  -s  /usr/lib/x86_64-linux-gnu/libstdc++.so.6  /usr/lib64/
+ln  -s  /usr/lib/x86_64-linux-gnu/libstdc++.so.5  /lib64/
+ln  -s  /usr/lib/x86_64-linux-gnu/libstdc++.so.5  /usr/lib64/
+
+echo ‘Red Hat Linux release 5’ > /etc/redhat-release
+
+* base
+** db
+$> sqlplus /nolog
+SQL> connect /as sysdba
+SQL> startup
+SQL> shutdown abort;
+** listen
+$>lsnrctl start
+$>lsnrctl stop
+** em
+SQL> exec DBMS_XDB_CONFIG.SETHTTPSPORT('5501');
+** backup
+exp c##test/test file=test.1.dmp directory=~/nethd
+imp fdais/fdais file=bakdb20100902.dmp directory=D:\baksql log=bakdb20100902.log
+** user and tablespace
+*** tablespace
+    create tablespace test
+      datafile '/home/s/nethd/local_soft/oracle/oradata/orcl/test.dbf'
+      size 10M
+      autoextend on
+      next 5M
+      maxsize 50M;
+
+   drop tablespace test
+*** user
+create user c##test identified by test default tablespace test;
+
+查看当前用户的角色
+select * from user_role_privs;
+select * from session_privs;
+查看当前用户的系统权限和表级权限
+select * from user_sys_privs;
+select * from user_tab_privs;
+查询用户表
+select name from dba_users;
+修改用户口令
+alter user "name" identified by "password";
+显示当前用户
+show user;
+*** grant
+grant connect, resource, dba to c##test;
+** charset
+   select userenv('language') from dual;
+*** change charset
+    s@s-hasee:~/nethd/note/comp$ sqlplus /nolog
+
+SQL*Plus: Release 12.1.0.1.0 Production on Tue Feb 4 11:40:01 2014
+
+Copyright (c) 1982, 2013, Oracle.  All rights reserved.
+
+SQL> conn /as sysdba
+Connected to an idle instance.
+SQL> startup mount
+ORACLE instance started.
+
+Total System Global Area 1219260416 bytes
+Fixed Size		    2287768 bytes
+Variable Size		  436209512 bytes
+Database Buffers	  771751936 bytes
+Redo Buffers		    9011200 bytes
+Database mounted.
+SQL> ALTER SYSTEM ENABLE RESTRICTED SESSION;  
+
+System altered.
+
+SQL> ALTER SYSTEM SET JOB_QUEUE_PROCESSES=0; 
+
+System altered.
+
+SQL> ALTER SYSTEM SET AQ_TM_PROCESSES=0; 
+
+System altered.
+
+SQL>  alter database open;
+
+Database altered.
+
+SQL> ALTER DATABASE CHARACTER SET ZHS16GBK;  
+ALTER DATABASE CHARACTER SET ZHS16GBK
+*
+ERROR at line 1:
+ORA-12712: new character set must be a superset of old character set
+
+
+SQL> ALTER DATABASE character set INTERNAL_USE ZHS16GBK; 
+
+Database altered.
+
+SQL> select * from v$nls_parameters;  
+
+PARAMETER
+----------------------------------------------------------------
+VALUE								     CON_ID
+---------------------------------------------------------------- ----------
+NLS_LANGUAGE
+AMERICAN								  0
+
+NLS_TERRITORY
+AMERICA 								  0
+
+NLS_CURRENCY
+$									  0
+
+
+PARAMETER
+----------------------------------------------------------------
+VALUE								     CON_ID
+---------------------------------------------------------------- ----------
+NLS_ISO_CURRENCY
+AMERICA 								  0
+
+NLS_NUMERIC_CHARACTERS
+.,									  0
+
+NLS_CALENDAR
+GREGORIAN								  0
+
+
+PARAMETER
+----------------------------------------------------------------
+VALUE								     CON_ID
+---------------------------------------------------------------- ----------
+NLS_DATE_FORMAT
+DD-MON-RR								  0
+
+NLS_DATE_LANGUAGE
+AMERICAN								  0
+
+NLS_CHARACTERSET
+ZHS16GBK								  0
+
+
+PARAMETER
+----------------------------------------------------------------
+VALUE								     CON_ID
+---------------------------------------------------------------- ----------
+NLS_SORT
+BINARY									  0
+
+NLS_TIME_FORMAT
+HH.MI.SSXFF AM								  0
+
+NLS_TIMESTAMP_FORMAT
+DD-MON-RR HH.MI.SSXFF AM						  0
+
+
+PARAMETER
+----------------------------------------------------------------
+VALUE								     CON_ID
+---------------------------------------------------------------- ----------
+NLS_TIME_TZ_FORMAT
+HH.MI.SSXFF AM TZR							  0
+
+NLS_TIMESTAMP_TZ_FORMAT
+DD-MON-RR HH.MI.SSXFF AM TZR						  0
+
+NLS_DUAL_CURRENCY
+$									  0
+
+
+PARAMETER
+----------------------------------------------------------------
+VALUE								     CON_ID
+---------------------------------------------------------------- ----------
+NLS_NCHAR_CHARACTERSET
+AL16UTF16								  0
+
+NLS_COMP
+BINARY									  0
+
+NLS_LENGTH_SEMANTICS
+BYTE									  0
+
+
+PARAMETER
+----------------------------------------------------------------
+VALUE								     CON_ID
+---------------------------------------------------------------- ----------
+NLS_NCHAR_CONV_EXCP
+FALSE									  0
+
+
+19 rows selected.
+
+SQL> select userenv('language') from dual;
+
+USERENV('LANGUAGE')
+----------------------------------------------------
+AMERICAN_AMERICA.ZHS16GBK
+
+SQL> shutdown immediate;
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+SQL> startup
+ORACLE instance started.
+
+Total System Global Area 1219260416 bytes
+Fixed Size		    2287768 bytes
+Variable Size		  436209512 bytes
+Database Buffers	  771751936 bytes
+Redo Buffers		    9011200 bytes
+Database mounted.
+Database opened.
+SQL> select userenv('language') from dual;
+
+USERENV('LANGUAGE')
+----------------------------------------------------
+AMERICAN_AMERICA.ZHS16GBK
+
+SQL> 
+** tools
+*** rlwrap sqlplus
+*** SQL>!oerr ora errid
+
+** dbs/tables/desc/select

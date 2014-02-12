@@ -1,0 +1,20 @@
+* data import
+s@hasee-s:/media/f/sjm/prj/henven$ imp c##test/test file=henven_oa_20140114bak.dmp 
+
+Import: Release 12.1.0.1.0 - Production on Sun Feb 2 22:39:05 2014
+
+Copyright (c) 1982, 2013, Oracle and/or its affiliates.  All rights reserved.
+
+
+Connected to: Oracle Database 12c Enterprise Edition Release 12.1.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Advanced Analytics and Real Application Testing options
+
+Export file created by EXPORT:V11.02.00 via conventional path
+
+Warning: the objects were exported by HENVEN, not by you
+
+import done in AL32UTF8 character set and AL16UTF16 NCHAR character set
+import server uses WE8MSWIN1252 character set (possible charset conversion)
+export client uses ZHS16GBK character set (possible charset conversion)
+IMP-00031: Must specify FULL=Y or provide FROMUSER/TOUSER or TABLES arguments
+IMP-00000: Import terminated unsuccessfully

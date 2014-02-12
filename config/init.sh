@@ -1,5 +1,15 @@
-mkdir -p ~/nethd ~/nethd/sec ~/nethd/local_soft ~/nethd/tmp ~/nethd/note
-mkdir -p ~/nethd/prj ~/nethd/book
+mkdir -p ~/nethd ~/nethd/sec ~/nethd/local_soft ~/nethd/appdata ~/nethd/tmp ~/nethd/note ~/nethd/pubsoft
+mkdir -p ~/nethd/prj ~/nethd/book ~/nethd/music
+
+ln -s ~/nethd/local_soft ~/local_soft
+ln -s ~/nethd/appdata ~/appdata
+ln -s ~/nethd/note ~/note
+ln -s ~/nethd/prj ~/prj
+ln -s ~/nethd/book ~/book
+ln -s ~/nethd/music ~/music
+
+# stardict
+sudo ln -sf /home/s/nethd/appdata/stardict_dic /usr/share/stardict/dic
 
 
 #!/bin/sh

@@ -8,13 +8,14 @@ gsettings set com.canonical.Unity.Panel systray-whitelist "['all']"
    sudo apt-get install ibus-pinyin ibus-pinyin-db-android
    sudo apt-get install hardinfo
    # vc
-   sudo apt-get install git bzr gitk qgit gitg
+   sudo apt-get install git bzr gitk qgit gitg cvs
 
    # human
-   # emacs
+   # emacs 
+#    sudo ln -s /home/s/nethd/local_soft/emacs/src/emacs /usr/bin
 #    sudo apt-get install ispell iamerican dictionaries-common mew
 #    echo "lang en" >> ~/.aspell.conf
-#    sudo apt-get install autoconf automake libgtk2.0-dev libxpm-dev libjpeg-dev libgif-dev libtiff4-dev texinfo libtool libncurses-dev
+#    sudo apt-get install autoconf automake  libgtk-3-dev  libxpm-dev libjpeg-dev libgif-dev libtiff4-dev texinfo libtool libncurses-dev
 #    ./autogen.sh
 #    ./configure --with-x-toolkit=gtk3  --with-xft
 #    make bootstrap
@@ -30,7 +31,10 @@ gsettings set com.canonical.Unity.Panel systray-whitelist "['all']"
    # auto
 #   sudo apt-get install sun-java6-jre sun-java6-jdk sun-java6-plugin
    sudo apt-get install emacs-snapshot
+   sudo add-apt-repository ppa:nilarimogard/webupd8
+   # sudo add-apt-repository ppa:webupd8team/gnome3
    sudo apt-get install gnome-shell-extensions gnome-shell-extensions-weather gnome-shell-system-monitor gnome-shell-extensions-gpaste gnome-shell-extensions-mediaplayer gnome-shell-classic-systray gnome-shell-message-notifier gnome-shell-extension-notesearch
+   sudo apt-get install gnome-shell-extensions-common gnome-shell-extensions-alternate-tab gnome-shell-extensions-alternative-status-menu gnome-shell-extensions-user-theme gnome-tweak-tool gnome-shell-extensions-workspace-indicator gnome-shell-extensions-apps-menu gnome-shell-extensions-drive-menu gnome-shell-extensions-system-monitor gnome-shell-extensions-places-menu gnome-shell-extensions-dock gnome-shell-extensions-native-window-placement gnome-shell-extensions-gajim gnome-shell-extensions-xrandr-indicator gnome-shell-extensions-windows-navigator gnome-shell-extensions-auto-move-windows
    sudo apt-get install keynav # tooles
    # DB
    sudo apt-get install mysql-client mysql-workbench mongodb sqlite3 redis-server mysql-workbench  memcached nodejs libmysqlclient-dev libreadline-dev libsqlite3-dev libxml2-dev libxslt-dev libcurl4-gnutls-dev g++ libssl-dev curl  git bzr gitk qgit autoconf automake libgtk2.0-dev libxpm-dev libjpeg-dev libgif-dev libtiff4-dev texinfo
