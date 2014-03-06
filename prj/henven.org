@@ -18,3 +18,8 @@ import server uses WE8MSWIN1252 character set (possible charset conversion)
 export client uses ZHS16GBK character set (possible charset conversion)
 IMP-00031: Must specify FULL=Y or provide FROMUSER/TOUSER or TABLES arguments
 IMP-00000: Import terminated unsuccessfully
+* workflow
+** activiti
+http://www.open-open.com/lib/view/open1350460225367.html
+
+http://wenku.baidu.com/link?url=DOnmdXXsudqdwBfw415CUUzZJf_EcxCZ5eylEbucl-PmTm_ezSVkI-oKDehZ3ZTg5vtBHWIkc9LzFOYp5LduN_bfxwT_P9xM6JeFJE4caGK

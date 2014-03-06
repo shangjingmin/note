@@ -21,3 +21,571 @@ db.corps.update({"category": {$in: ["51job", "dajie", "zhaopin", "fenzhi"]}, "us
 *** delete
 ** memcached
 ** redis
+** hadoop
+http://www.cnblogs.com/wayne1017/archive/2007/03/18/668768.html
+先说一下Hadoop的来龙去脉。谈到Hadoop就不得不提到Lucene和Nutch。首先，Lucene并不是一个应用程序，而是提供了一个纯Java的高性能全文索引引擎工具包，它可以方便的嵌入到各种实际应用中实现全文搜索/索引功能。Nutch是一个应用程序，是一个以Lucene为基础实现的搜索引擎应用，Lucene为Nutch提供了文本搜索和索引的API，Nutch不光有搜索的功能，还有数据抓取的功能。在nutch0.8.0版本之前，Hadoop还属于Nutch的一部分，而从nutch0.8.0开始，将其中实现的NDFS和MapReduce剥离出来成立一个新的开源项目，这就是Hadoop，而nutch0.8.0版本较之以前的Nutch在架构上有了根本性的变化，那就是完全构建在Hadoop的基础之上了。在Hadoop中实现了Google的GFS和MapReduce算法，使Hadoop成为了一个分布式的计算平台。
+   其实，Hadoop并不仅仅是一个用于存储的分布式文件系统，而是设计用来在由通用计算设备组成的大型集群上执行分布式应用的框架。
+
+*** HDFS
+master: namenode
+slave: datanode
+client: block to trans
+**** base
+***** HDFS文件读写流程
+
+在正式介绍HDFS小文件存储方案之前，我们先介绍一下当前HDFS上文件存取的基本流程。
+
+(1)  读文件流程
+
+1）client端发送读文件请求给namenode，如果文件不存在，返回错误信息，否则，将该文件对应的block及其所在datanode位置发送给client
+
+2） client收到文件位置信息后，与不同datanode建立socket连接并行获取数据。
+
+(2) 写文件流程
+
+1） client端发送写文件请求，namenode检查文件是否存在，如果已存在，直接返回错误信息，否则，发送给client一些可用datanode节点
+
+2） client将文件分块，并行存储到不同节点上datanode上，发送完成后，client同时发送信息给namenode和datanode
+
+3）  namenode收到的client信息后，发送确信信息给datanode
+
+4）  datanode同时收到namenode和datanode的确认信息后，提交写操作。
+**** small file
+http://dongxicheng.org/mapreduce/hdfs-small-files-solution/
+
+小文件是指文件size小于HDFS上block大小的文件
+***** question
+****** every file every block
+首先，在HDFS中，任何block，文件或者目录在内存中均以对象的形式存储，每个对象约占150byte，如果有1000 0000个小文件，每个文件占用一个block，则namenode大约需要2G空间。如果存储1亿个文件，则namenode需要20G空间（见参考资料[1][4][5]）。这样namenode内存容量严重制约了集群的扩展。
+****** get more small files: jump from one datanode to another frequently
+其次，访问大量小文件速度远远小于访问几个大文件。HDFS最初是为流式访问大文件开发的，如果访问大量小文件，需要不断的从一个datanode跳到另一个datanode，严重影响性能。
+****** one file one slot, more time to manage task
+最后，处理大量小文件速度远远小于处理同等大小的大文件的速度。每一个小文件要占用一个slot，而task启动将耗费大量时间甚至大部分时间都耗费在启动task和释放task上。
+
+***** archive HAV
+将多个小文件打包成一个HAR文件
+
+使用HAR时需要两点，第一，对小文件进行存档后，原文件并不会自动被删除，需要用户自己删除；第二，创建HAR文件的过程实际上是在运行一个mapreduce作业，因而需要有一个hadoop集群运行此命令。
+
+此外，HAR还有一些缺陷：第一，一旦创建，Archives便不可改变。要增加或移除里面的文件，必须重新创建归档文件。第二，要归档的文件名中不能有空格，否则会抛出异常，可以将空格用其他符号替换(使用-Dhar.space.replacement.enable=true 和-Dhar.space.replacement参数)。
+
+***** Sequence file
+由一系列的二进制key/value组成，如果为key小文件名，value为文件内容，则可以将大批小文件合并成一个大文件。
+
+该方案对于小文件的存取都比较自由，不限制用户和文件的多少，但是SequenceFile文件不能追加写入，适用于一次性写入大量小文件的操作。
+
+***** CombineFileInputFormat
+一种新的inputformat，用于将多个文件合并成一个单独的split，另外，它会考虑数据的存储位置。
+*** MapReduce
+http://www.mengyan.org/blog/archives/2006/11/15/138.html
+
+Map是把一组数据一对一的映射为另外的一组数据，其映射的规则由一个函数来指定，比如对[1, 2, 3, 4]进行乘2的映射就变成了[2, 4, 6, 8]。
+Reduce是对一组数据进行归约，这个归约的规则由一个函数指定，比如对[1, 2, 3, 4]进行求和的归约得到结果是10，而对它进行求积的归约结果是24。
+
+*** hbase
+
+*** ruby
+https://github.com/dallasmarlow/ruby-hdfs-cdh4
+
+https://github.com/kzk/webhdfs
+
+https://github.com/CompanyBook/massive_record/
+HBase ruby client
+
+*** install
+
+**** Setup newest Hadoop 2.x (2.2.0) on Ubuntu
+http://codesfusion.blogspot.com/2013/10/setup-hadoop-2x-220-on-ubuntu.html?m=1
+
+In this tutorial I am going to guide you through setting up hadoop 2.2.0 environment on Ubuntu.
+Prerequistive
+$ sudo apt-get install openjdk-7-jdk
+$ java -version
+java version "1.7.0_25"
+OpenJDK Runtime Environment (IcedTea 2.3.12) (7u25-2.3.12-4ubuntu3)
+OpenJDK 64-Bit Server VM (build 23.7-b01, mixed mode)
+$ cd /usr/lib/jvm
+$ ln -s java-7-openjdk-amd64 jdk
+
+$ sudo apt-get install openssh-server
+Add Hadoop Group and User
+$ sudo addgroup hadoop
+$ sudo adduser --ingroup hadoop hduser
+$ sudo adduser hduser sudo
+After user is created, re-login into ubuntu using hduser
+Setup SSH Certificate
+$ ssh-keygen -t rsa -P ''
+...
+Your identification has been saved in /home/hduser/.ssh/id_rsa.
+Your public key has been saved in /home/hduser/.ssh/id_rsa.pub.
+...
+$ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+$ ssh localhost
+
+Download Hadoop 2.2.0
+$ cd ~
+$ wget http://www.trieuvan.com/apache/hadoop/common/hadoop-2.2.0/hadoop-2.2.0.tar.gz
+$ sudo tar vxzf hadoop-2.2.0.tar.gz -C /usr/local
+$ cd /usr/local
+$ sudo mv hadoop-2.2.0 hadoop
+$ sudo chown -R hduser:hadoop hadoop
+Setup Hadoop Environment Variables
+$cd ~
+$vi .bashrc
+
+paste following to the end of the file
+
+#Hadoop variables
+export JAVA_HOME=/usr/lib/jvm/jdk/
+export HADOOP_INSTALL=/usr/local/hadoop
+export PATH=$PATH:$HADOOP_INSTALL/bin
+export PATH=$PATH:$HADOOP_INSTALL/sbin
+export HADOOP_MAPRED_HOME=$HADOOP_INSTALL
+export HADOOP_COMMON_HOME=$HADOOP_INSTALL
+export HADOOP_HDFS_HOME=$HADOOP_INSTALL
+export YARN_HOME=$HADOOP_INSTALL
+###end of paste
+
+$ cd /usr/local/hadoop/etc/hadoop
+$ vi hadoop-env.sh
+
+#modify JAVA_HOME
+export JAVA_HOME=/usr/lib/jvm/jdk/
+Re-login into Ubuntu using hdser and check hadoop version
+$ hadoop version
+Hadoop 2.2.0
+Subversion https://svn.apache.org/repos/asf/hadoop/common -r 1529768
+Compiled by hortonmu on 2013-10-07T06:28Z
+Compiled with protoc 2.5.0
+From source with checksum 79e53ce7994d1628b240f09af91e1af4
+This command was run using /usr/local/hadoop-2.2.0/share/hadoop/common/hadoop-common-2.2.0.jar
+At this point, hadoop is installed.
+Configure Hadoop
+$ cd /usr/local/hadoop/etc/hadoop
+$ vi core-site.xml
+#Paste following between <configuration>
+
+
+   fs.default.name
+   hdfs://localhost:9000
+
+
+
+$ vi yarn-site.xml
+#Paste following between <configuration>
+
+
+   yarn.nodemanager.aux-services
+   mapreduce_shuffle
+
+
+   yarn.nodemanager.aux-services.mapreduce.shuffle.class
+   org.apache.hadoop.mapred.ShuffleHandler
+
+
+
+$ mv mapred-site.xml.template mapred-site.xml
+$ vi mapred-site.xml
+#Paste following between <configuration>
+
+
+   mapreduce.framework.name
+   yarn
+
+
+
+$ cd ~
+$ mkdir -p mydata/hdfs/namenode
+$ mkdir -p mydata/hdfs/datanode
+$ cd /usr/local/hadoop/etc/hadoop
+$ vi hdfs-site.xml
+Paste following between <configuration> tag
+
+
+   dfs.replication
+   1
+ 
+ 
+   dfs.namenode.name.dir
+   file:/home/hduser/mydata/hdfs/namenode
+ 
+ 
+   dfs.datanode.data.dir
+   file:/home/hduser/mydata/hdfs/datanode
+ 
+
+Format Namenode
+hduser@ubuntu40:~$ hdfs namenode -format
+Start Hadoop Service
+$ start-dfs.sh
+....
+$ start-yarn.sh
+....
+
+hduser@ubuntu40:~$ jps
+If everything is sucessful, you should see following services running
+2583 DataNode
+2970 ResourceManager
+3461 Jps
+3177 NodeManager
+2361 NameNode
+2840 SecondaryNameNode
+Run Hadoop Example
+hduser@ubuntu: cd /usr/local/hadoop
+hduser@ubuntu:/usr/local/hadoop$ hadoop jar ./share/hadoop/mapreduce/hadoop-mapreduce-examples-2.2.0.jar pi 2 5
+
+Number of Maps  = 2
+Samples per Map = 5
+13/10/21 18:41:03 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Wrote input for Map #0
+Wrote input for Map #1
+Starting Job
+13/10/21 18:41:04 INFO client.RMProxy: Connecting to ResourceManager at /0.0.0.0:8032
+13/10/21 18:41:04 INFO input.FileInputFormat: Total input paths to process : 2
+13/10/21 18:41:04 INFO mapreduce.JobSubmitter: number of splits:2
+13/10/21 18:41:04 INFO Configuration.deprecation: user.name is deprecated. Instead, use mapreduce.job.user.name
+...
+
+Note: ericduq has created a shell script (make-single-node.sh) for this setup and it is available at git repo at https://github.com/ericduq/hadoop-scripts.
+**** 
+
+*** use
+
+**** data list
+
+**** log
+** TFS
+http://tfs.taobao.org
+https://github.com/alibaba/tfs
+https://github.com/alibaba/tfs/blob/master/INSTALL.md
+https://github.com/alibaba/tfs/blob/master/DEPLOY.md
+*** rpm install
+**** alien -d tfs-1.3-1.x86_64.el5.rpm
+**** adduser admin
+**** export TFS_HOME=/home/sjm/nethd/local_soft/taobao/tfs
+cp -R /usr/local/tfs-1.3 /home/sjm/nethd/local_soft/taobao/tfs
+
+change scripts/tfs #TFS_HOME
+**** ln lib
+sudo ln -s /lib/x86_64-linux-gnu/libtinfo.so.5 /usr/lib/libtiff.so.3
+sudo ln -s /lib/x86_64-linux-gnu/libssl.so.1.0.0 /usr/lib/libssl.so.6
+sudo ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so.8 /usr/lib/libjpeg.so.62
+sudo ln -s /usr/lib/x86_64-linux-gnu/libcrypto.so /usr/lib/libcrypto.so.6
+
+**** 
+*** install
+sudo apt-get install automake libtool libreadline-dev zlib1g-dev uuid-dev libgoogle-perftools-dev
+
+http://blog.csdn.net/vsooda/article/details/9294293 gcc降级
+http://www.cnblogs.com/zhy113/archive/2013/03/20/2971267.html TFS编译-----------唉，淘宝的这个开源真是垃圾到极点了。这帮工程师都他妈在吃屎！
+**** gcc 4.1.2
+install tb-common-utils
+sh build.sh init
+./configure --prefix=/home/sjm/nethd/local_soft/taobao/tfs --with-release # --without-tcmalloc
+# src/tools/nameserver(transfer)/Makefile LIBS=... + -lz -luuid
+make
+make install
+# copy conf
+
+
+./script/tfs start_ns
+./script/tfs start_ds 1
+
+# ./bin/tfstool -s 10.232.36.201:8100 -i "put testfile"
+将本地testfile存入tfs， -s 指定nameserver的ip:port。 如果成功，会打印 put testfile => T1QEBXXDpXXXXXXXXX success. 类似的消息，其中T开头一串字符是TFS为这个文件生成的文件名，一共18个字符；要想从TFS取出该文件时，需要指定该文件名。
+
+# ./bin/tfstoo -s 10.232.36.201:8100 -i "get T1QEBXXDpXXXXXXXXX localfile"
+从TFS读取T1QEBXXDpXXXXXXXXX，存储到本地localfile中；如果成功，会打印fetch T1QEBXXDpXXXXXXXXX => localfile success.类似的消息。
+
+**** stftool
+http://code.taobao.org/p/tfs/wiki/tools/
+
+sjm@sjm-tj:~/nethd/local_soft/taobao/tfs$ bin/tfstool -s 192.168.3.34:8100 -i "put orgguide.pdf"
+[2014-02-21 15:16:34] DEBUG base_packet_factory.cpp:48 [140284900992896] pcode: 20, length: 28
+[2014-02-21 15:16:34] DEBUG socket.cpp:113 [140284900992896] ����, fd=4, addr=192.168.3.34:8100
+[2014-02-21 15:16:34] INFO  transport.cpp:394 [140284900992896] ADDIOC, SOCK: 4, 192.168.3.34:8100, RON: 1, WON: 1, IOCount:1, IOC:0x1ca26b0
+[2014-02-21 15:16:34] DEBUG channelpool.cpp:57 [140284900992896] ������Channel����:25 (48)
+[2014-02-21 15:16:34] INFO  tfs_session.cpp:812 [140284900992896] get cluster id from nameserver success. cluster id: 1
+[2014-02-21 15:16:34] INFO  tfs_client_impl.cpp:584 [140284900992896] set cache time: 1800
+[2014-02-21 15:16:34] INFO  tfs_client_impl.cpp:565 [140284900992896] set cache items: 1000
+[2014-02-21 15:16:34] DEBUG base_packet_factory.cpp:48 [140284900992896] pcode: 2, length: 12
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:118 [140284900992896] tfs open success: get block info success, blockid: 101, fileid: 0, mode: 2, ret: 0
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:818 [140284900992896] create file start, client: 0x1ca41b0, index: 0, blockid: 101, fileid: 0
+[2014-02-21 15:16:34] DEBUG base_packet_factory.cpp:48 [140284900992896] pcode: 21, length: 12
+[2014-02-21 15:16:34] DEBUG socket.cpp:113 [140284900992896] ����, fd=6, addr=192.168.3.34:8200
+[2014-02-21 15:16:34] INFO  transport.cpp:394 [140284900992896] ADDIOC, SOCK: 6, 192.168.3.34:8200, RON: 1, WON: 1, IOCount:2, IOC:0x1ca4450
+[2014-02-21 15:16:34] DEBUG channelpool.cpp:57 [140284900992896] ������Channel����:50 (48)
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:755 [140284900992896] do request success. client: 0x1ca41b0, index: 0, phase: 1, ret: 0, blockid: 101, fileid: 0, offset: 0, size: 0, crc: 0, inneroffset: 0, filenumber: 0, status: 1, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:588 [140284900992896] send packet. request size: 1, successful request size: 1
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:668 [140284900992896] get success response. client id: 0x1ca41b0, request size: 1, get response size: 1
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:883 [140284900992896] create file name rsp. blockid: 101, fileid: 3, filenumber: 2450987374532886529
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:803 [140284900992896] do response success. index: 0, phase: 1, ret: 0, blockid: 101, fileid: 3, offset: 0, size: 0, crc: 0, inneroffset: 0, filenumber: 2450987374532886529, status: 2, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:914 [140284900992896] tfs write data start, blockid: 101, fileid: 3, size: 399341, offset: 0
+[2014-02-21 15:16:34] DEBUG base_packet_factory.cpp:48 [140284900992896] pcode: 9, length: 36
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:755 [140284900992896] do request success. client: 0x1ca44d0, index: 0, phase: 2, ret: 0, blockid: 101, fileid: 3, offset: 0, size: 399341, crc: 0, inneroffset: 0, filenumber: 2450987374532886529, status: 2, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:588 [140284900992896] send packet. request size: 1, successful request size: 1
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:668 [140284900992896] get success response. client id: 0x1ca44d0, request size: 1, get response size: 1
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:964 [140284900992896] tfs write data success, crc: 4006393245, offset: 0, size: 399341
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:803 [140284900992896] do response success. index: 0, phase: 2, ret: 0, blockid: 101, fileid: 3, offset: 0, size: 399341, crc: -288574051, inneroffset: 0, filenumber: 2450987374532886529, status: 3, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:301 [140284900992896] write success, offset: 0, size: 399341, segment count: 1
+[2014-02-21 15:16:34] DEBUG base_packet_factory.cpp:48 [140284900992896] pcode: 10, length: 44
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:755 [140284900992896] do request success. client: 0x1ca44d0, index: 0, phase: 3, ret: 0, blockid: 101, fileid: 3, offset: 0, size: 0, crc: -288574051, inneroffset: 0, filenumber: 2450987374532886529, status: 3, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:588 [140284900992896] send packet. request size: 1, successful request size: 1
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:668 [140284900992896] get success response. client id: 0x1ca44d0, request size: 1, get response size: 1
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:1051 [140284900992896] tfs file close success, dsip: 192.168.3.34:8200
+[2014-02-21 15:16:34] DEBUG tfs_file.cpp:803 [140284900992896] do response success. index: 0, phase: 3, ret: 0, blockid: 101, fileid: 3, offset: 0, size: 0, crc: -288574051, inneroffset: 0, filenumber: 2450987374532886529, status: 4, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+put orgguide.pdf =>  success.
+[2014-02-21 15:16:35] INFO  transport.cpp:460 [140284900992896] DELIOC, IOCount:1, IOC:0x1ca26b0
+[2014-02-21 15:16:35] DEBUG socket.cpp:122 [140284900992896] �ر�, fd=4, addr=192.168.3.34:8100
+[2014-02-21 15:16:35] INFO  transport.cpp:460 [140284900992896] DELIOC, IOCount:0, IOC:0x1ca4450
+[2014-02-21 15:16:35] DEBUG socket.cpp:122 [140284900992896] �ر�, fd=6, addr=192.168.3.34:8200
+sjm@sjm-tj:~/nethd/local_soft/taobao/tfs$ bin/tfstool -s 192.168.3.34:8100 -i "get 140284900992896"
+[2014-02-21 15:18:05] DEBUG base_packet_factory.cpp:48 [140592540637056] pcode: 20, length: 28
+[2014-02-21 15:18:05] DEBUG socket.cpp:113 [140592540637056] ����, fd=4, addr=192.168.3.34:8100
+[2014-02-21 15:18:05] INFO  transport.cpp:394 [140592540637056] ADDIOC, SOCK: 4, 192.168.3.34:8100, RON: 1, WON: 1, IOCount:1, IOC:0x22de6b0
+[2014-02-21 15:18:05] DEBUG channelpool.cpp:57 [140592540637056] ������Channel����:25 (48)
+[2014-02-21 15:18:05] INFO  tfs_session.cpp:812 [140592540637056] get cluster id from nameserver success. cluster id: 1
+[2014-02-21 15:18:05] INFO  tfs_client_impl.cpp:584 [140592540637056] set cache time: 1800
+[2014-02-21 15:18:05] INFO  tfs_client_impl.cpp:565 [140592540637056] set cache items: 1000
+get tfsname localfile		get file from tfs
+
+[2014-02-21 15:18:06] INFO  transport.cpp:460 [140592540637056] DELIOC, IOCount:0, IOC:0x22de6b0
+[2014-02-21 15:18:06] DEBUG socket.cpp:122 [140592540637056] �ر�, fd=4, addr=192.168.3.34:8100
+sjm@sjm-tj:~/nethd/local_soft/taobao/tfs$ bin/tfstool -s 192.168.3.34:8100 -i "get 2450987374532886529"
+[2014-02-21 15:18:46] DEBUG base_packet_factory.cpp:48 [140459210536832] pcode: 20, length: 28
+[2014-02-21 15:18:46] DEBUG socket.cpp:113 [140459210536832] ����, fd=4, addr=192.168.3.34:8100
+[2014-02-21 15:18:46] INFO  transport.cpp:394 [140459210536832] ADDIOC, SOCK: 4, 192.168.3.34:8100, RON: 1, WON: 1, IOCount:1, IOC:0x21d36b0
+[2014-02-21 15:18:46] DEBUG channelpool.cpp:57 [140459210536832] ������Channel����:25 (48)
+[2014-02-21 15:18:46] INFO  tfs_session.cpp:812 [140459210536832] get cluster id from nameserver success. cluster id: 1
+[2014-02-21 15:18:46] INFO  tfs_client_impl.cpp:584 [140459210536832] set cache time: 1800
+[2014-02-21 15:18:46] INFO  tfs_client_impl.cpp:565 [140459210536832] set cache items: 1000
+get tfsname localfile		get file from tfs
+
+[2014-02-21 15:18:47] INFO  transport.cpp:460 [140459210536832] DELIOC, IOCount:0, IOC:0x21d36b0
+[2014-02-21 15:18:47] DEBUG socket.cpp:122 [140459210536832] �ر�, fd=4, addr=192.168.3.34:8100
+sjm@sjm-tj:~/nethd/local_soft/taobao/tfs$ ls
+bin  conf  dataserver_1  include  lib  logs  nameserver  orgguide.pdf  scripts  sql  sql.txt
+sjm@sjm-tj:~/nethd/local_soft/taobao/tfs$ bin/tfstool -s 192.168.3.34:8100 -i "get 2450987374532886529 a"
+[2014-02-21 15:19:23] DEBUG base_packet_factory.cpp:48 [139939323836288] pcode: 20, length: 28
+[2014-02-21 15:19:23] DEBUG socket.cpp:113 [139939323836288] ����, fd=4, addr=192.168.3.34:8100
+[2014-02-21 15:19:23] INFO  transport.cpp:394 [139939323836288] ADDIOC, SOCK: 4, 192.168.3.34:8100, RON: 1, WON: 1, IOCount:1, IOC:0xdcb6b0
+[2014-02-21 15:19:23] DEBUG channelpool.cpp:57 [139939323836288] ������Channel����:25 (48)
+[2014-02-21 15:19:23] INFO  tfs_session.cpp:812 [139939323836288] get cluster id from nameserver success. cluster id: 1
+[2014-02-21 15:19:23] INFO  tfs_client_impl.cpp:584 [139939323836288] set cache time: 1800
+[2014-02-21 15:19:23] INFO  tfs_client_impl.cpp:565 [139939323836288] set cache items: 1000
+[2014-02-21 15:19:23] ERROR fetch_file (tfs_client_impl.cpp:1320) [139939323836288] invalid tfs name: 2450987374532886529
+fetch 2450987374532886529 => 
+ fail.
+[2014-02-21 15:19:24] INFO  transport.cpp:460 [139939323836288] DELIOC, IOCount:0, IOC:0xdcb6b0
+[2014-02-21 15:19:24] DEBUG socket.cpp:122 [139939323836288] �ر�, fd=4, addr=192.168.3.34:8100
+sjm@sjm-tj:~/nethd/local_soft/taobao/tfs$ bin/tfstool -s 192.168.3.34:8100 -i "get 140284900992896 a"
+[2014-02-21 15:19:33] DEBUG base_packet_factory.cpp:48 [140679710873472] pcode: 20, length: 28
+[2014-02-21 15:19:33] DEBUG socket.cpp:113 [140679710873472] ����, fd=4, addr=192.168.3.34:8100
+[2014-02-21 15:19:33] INFO  transport.cpp:394 [140679710873472] ADDIOC, SOCK: 4, 192.168.3.34:8100, RON: 1, WON: 1, IOCount:1, IOC:0x237d6b0
+[2014-02-21 15:19:33] DEBUG channelpool.cpp:57 [140679710873472] ������Channel����:25 (48)
+[2014-02-21 15:19:33] INFO  tfs_session.cpp:812 [140679710873472] get cluster id from nameserver success. cluster id: 1
+[2014-02-21 15:19:33] INFO  tfs_client_impl.cpp:584 [140679710873472] set cache time: 1800
+[2014-02-21 15:19:33] INFO  tfs_client_impl.cpp:565 [140679710873472] set cache items: 1000
+[2014-02-21 15:19:33] ERROR fetch_file (tfs_client_impl.cpp:1320) [140679710873472] invalid tfs name: 140284900992896
+fetch 140284900992896 => 
+ fail.
+[2014-02-21 15:19:34] INFO  transport.cpp:460 [140679710873472] DELIOC, IOCount:0, IOC:0x237d6b0
+[2014-02-21 15:19:34] DEBUG socket.cpp:122 [140679710873472] �ر�, fd=4, addr=192.168.3.34:8100
+sjm@sjm-tj:~/nethd/local_soft/taobao/tfs$ 
+
+**** no file name for put
+版本：
+sjm@sjm-tj:~/nethd/prj/tfs$ svn info
+Path: .
+Working Copy Root Path: /home/sjm/nethd/prj/tfs
+URL: http://code.taobao.org/svn/tfs/branches/dev_for_outer_users
+Repository Root: http://code.taobao.org/svn/tfs
+Repository UUID: b722c2b5-6a69-4643-bcd1-1a75825fa998
+Revision: 2805
+Node Kind: directory
+Schedule: normal
+Last Changed Author: linqing
+Last Changed Rev: 2750
+Last Changed Date: 2014-01-04 22:54:28 +0800 (Sat, 04 Jan 2014)
+
+
+操作：
+TFS> lsf 101
+[2014-02-21 15:27:35] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 2, length: 12
+[2014-02-21 15:27:35] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 14, length: 12
+FileList Size = 3
+
+T19RETByhT1RCvBVdK
+T19RETByxT1RCvBVdK
+T19RETByZT1RCvBVdK
+Total : 3 files
+TFS> put orgguide.pdf
+[2014-02-21 15:33:22] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 2, length: 12
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:118 [139708583184256] tfs open success: get block info success, blockid: 101, fileid: 0, mode: 2, ret: 0
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:818 [139708583184256] create file start, client: 0xadd120, index: 0, blockid: 101, fileid: 0
+[2014-02-21 15:33:22] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 21, length: 12
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:755 [139708583184256] do request success. client: 0xadd120, index: 0, phase: 1, ret: 0, blockid: 101, fileid: 0, offset: 0, size: 0, crc: 0, inneroffset: 0, filenumber: 0, status: 1, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:588 [139708583184256] send packet. request size: 1, successful request size: 1
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:668 [139708583184256] get success response. client id: 0xadd120, request size: 1, get response size: 1
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:883 [139708583184256] create file name rsp. blockid: 101, fileid: 5, filenumber: 2450987374532886531
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:803 [139708583184256] do response success. index: 0, phase: 1, ret: 0, blockid: 101, fileid: 5, offset: 0, size: 0, crc: 0, inneroffset: 0, filenumber: 2450987374532886531, status: 2, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:914 [139708583184256] tfs write data start, blockid: 101, fileid: 5, size: 399341, offset: 0
+[2014-02-21 15:33:22] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 9, length: 36
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:755 [139708583184256] do request success. client: 0xadd120, index: 0, phase: 2, ret: 0, blockid: 101, fileid: 5, offset: 0, size: 399341, crc: 0, inneroffset: 0, filenumber: 2450987374532886531, status: 2, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:588 [139708583184256] send packet. request size: 1, successful request size: 1
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:668 [139708583184256] get success response. client id: 0xadd120, request size: 1, get response size: 1
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:964 [139708583184256] tfs write data success, crc: 4006393245, offset: 0, size: 399341
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:803 [139708583184256] do response success. index: 0, phase: 2, ret: 0, blockid: 101, fileid: 5, offset: 0, size: 399341, crc: -288574051, inneroffset: 0, filenumber: 2450987374532886531, status: 3, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:301 [139708583184256] write success, offset: 0, size: 399341, segment count: 1
+[2014-02-21 15:33:22] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 10, length: 44
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:755 [139708583184256] do request success. client: 0xadd120, index: 0, phase: 3, ret: 0, blockid: 101, fileid: 5, offset: 0, size: 0, crc: -288574051, inneroffset: 0, filenumber: 2450987374532886531, status: 3, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:588 [139708583184256] send packet. request size: 1, successful request size: 1
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:668 [139708583184256] get success response. client id: 0xadd120, request size: 1, get response size: 1
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:1051 [139708583184256] tfs file close success, dsip: 192.168.3.34:8200
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:803 [139708583184256] do response success. index: 0, phase: 3, ret: 0, blockid: 101, fileid: 5, offset: 0, size: 0, crc: -288574051, inneroffset: 0, filenumber: 2450987374532886531, status: 4, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+put orgguide.pdf =>  success.
+TFS> lsf 101
+[2014-02-21 15:33:25] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 2, length: 12
+[2014-02-21 15:33:25] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 14, length: 12
+FileList Size = 4
+
+T19RETByhT1RCvBVdK
+T19RETByxT1RCvBVdK
+T19RETByZT1RCvBVdK
+T19RETBydT1RCvBVdK
+Total : 4 files
+
+**** err1
+sjm@sjm-tj:~/nethd/prj/tfs/src/tools/nameserver$ /bin/bash ../../../libtool --tag=CXX   --mode=link g++  -O2 -finline-functions -fno-strict-aliasing -Wall -Wno-deprecated -fPIC -D__STDC_LIMIT_MACROS -D_NO_EXCEPTION -lz -lrt -lpthread -ldl -ltermcap -lreadline -luuid  -o tfstool tfstool.o ../../../src/tools/util/libtfstoolsutil.a ../../../src/dataserver/libdataserver.a ../../../src/new_client/.libs/libtfsclient.a ../../../src/message/libtfsmessage.a ../../../src/common/libtfscommon.a   /home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbnet.a /home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbsys.a -lrt -lpthread -lm -ldl -lc 
+
+libtool: link: g++ -O2 -finline-functions -fno-strict-aliasing -Wall -Wno-deprecated -fPIC -D__STDC_LIMIT_MACROS -D_NO_EXCEPTION -o tfstool tfstool.o  -lz -ltermcap -lreadline -luuid ../../../src/tools/util/libtfstoolsutil.a ../../../src/dataserver/libdataserver.a ../../../src/new_client/.libs/libtfsclient.a ../../../src/message/libtfsmessage.a ../../../src/common/libtfscommon.a /home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbnet.a /home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbsys.a -lrt -lpthread -lm -ldl -lc
+../../../src/new_client/.libs/libtfsclient.a(tfs_meta_helper.o): In function `tfs::client::NameMetaHelper::get_table(unsigned long, char*, unsigned long&, long&)':
+tfs_meta_helper.cpp:(.text+0x6da): undefined reference to `uncompress'
+../../../src/common/libtfscommon.a(session_util.o): In function `tfs::common::SessionUtil::gene_uuid_str()':
+session_util.cpp:(.text+0x1e): undefined reference to `uuid_generate'
+session_util.cpp:(.text+0x2d): undefined reference to `uuid_unparse'
+collect2: error: ld returned 1 exit status
+
+
+
+mv -f .deps/verify_file_same_cluster.Tpo .deps/verify_file_same_cluster.Po
+/bin/bash ../../../libtool --tag=CXX   --mode=link g++  -O2 -finline-functions -fno-strict-aliasing -Wall -Wno-deprecated -fPIC -D__STDC_LIMIT_MACROS -D_NO_EXCEPTION -lz -lrt -lpthread -ldl -luuid -lz  -o verify_file_same_cluster verify_file_same_cluster.o ../../../src/tools/util/libtfstoolsutil.a ../../../src/dataserver/libdataserver.a ../../../src/new_client/.libs/libtfsclient.a ../../../src/message/libtfsmessage.a ../../../src/common/libtfscommon.a   /home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbnet.a /home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbsys.a -lrt -lpthread -lm -ldl -lc 
+libtool: link: g++ -O2 -finline-functions -fno-strict-aliasing -Wall -Wno-deprecated -fPIC -D__STDC_LIMIT_MACROS -D_NO_EXCEPTION -o verify_file_same_cluster verify_file_same_cluster.o  -luuid -lz ../../../src/tools/util/libtfstoolsutil.a ../../../src/dataserver/libdataserver.a ../../../src/new_client/.libs/libtfsclient.a ../../../src/message/libtfsmessage.a ../../../src/common/libtfscommon.a /home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbnet.a /home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbsys.a -lrt -lpthread -lm -ldl -lc
+../../../src/new_client/.libs/libtfsclient.a(tfs_meta_helper.o): In function `tfs::client::NameMetaHelper::get_table(unsigned long, char*, unsigned long&, long&)':
+tfs_meta_helper.cpp:(.text+0x6da): undefined reference to `uncompress'
+../../../src/common/libtfscommon.a(session_util.o): In function `tfs::common::SessionUtil::gene_uuid_str()':
+session_util.cpp:(.text+0x1e): undefined reference to `uuid_generate'
+session_util.cpp:(.text+0x2d): undefined reference to `uuid_unparse'
+collect2: error: ld returned 1 exit status
+make[3]: *** [verify_file_same_cluster] Error 1
+make[3]: Leaving directory `/home/sjm/nethd/prj/tfs/src/tools/transfer'
+make[2]: *** [all-recursive] Error 1
+make[2]: Leaving directory `/home/sjm/nethd/prj/tfs/src/tools'
+make[1]: *** [all-recursive] Error 1
+make[1]: Leaving directory `/home/sjm/nethd/prj/tfs/src'
+make: *** [all-recursive] Error 1
+sjm@sjm-tj:~/nethd/prj/tfs$
+
+mv -f .deps/verify_file_same_cluster.Tpo .deps/verify_file_same_cluster.Po
+/bin/bash ../../../libtool --tag=CXX   --mode=link g++  -O2 -finline-functions -fno-strict-aliasing -Wall -Wno-deprecated -fPIC -D__STDC_LIMIT_MACROS -D_NO_EXCEPTION -lrt -lpthread -ldl -luuid -lz  -o verify_file_same_cluster verify_file_same_cluster.o ../../../src/tools/util/libtfstoolsutil.a ../../../src/dataserver/libdataserver.a ../../../src/new_client/.libs/libtfsclient.a ../../../src/message/libtfsmessage.a ../../../src/common/libtfscommon.a   /home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbnet.a /home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbsys.a -lrt -lpthread -lm -ldl -lc 
+libtool: link: g++ -O2 -finline-functions -fno-strict-aliasing -Wall -Wno-deprecated -fPIC -D__STDC_LIMIT_MACROS -D_NO_EXCEPTION -o verify_file_same_cluster verify_file_same_cluster.o  -luuid -lz ../../../src/tools/util/libtfstoolsutil.a ../../../src/dataserver/libdataserver.a ../../../src/new_client/.libs/libtfsclient.a ../../../src/message/libtfsmessage.a ../../../src/common/libtfscommon.a /home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbnet.a /home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbsys.a -lrt -lpthread -lm -ldl -lc
+../../../src/new_client/.libs/libtfsclient.a(tfs_meta_helper.o): In function `tfs::client::NameMetaHelper::get_table(unsigned long, char*, unsigned long&, long&)':
+tfs_meta_helper.cpp:(.text+0x6da): undefined reference to `uncompress'
+../../../src/common/libtfscommon.a(session_util.o): In function `tfs::common::SessionUtil::gene_uuid_str()':
+session_util.cpp:(.text+0x1e): undefined reference to `uuid_generate'
+session_util.cpp:(.text+0x2d): undefined reference to `uuid_unparse'
+collect2: error: ld returned 1 exit status
+make[3]: *** [verify_file_same_cluster] Error 1
+make[3]: Leaving directory `/home/sjm/nethd/prj/tfs/src/tools/transfer'
+make[2]: *** [all-recursive] Error 1
+make[2]: Leaving directory `/home/sjm/nethd/prj/tfs/src/tools'
+make[1]: *** [all-recursive] Error 1
+make[1]: Leaving directory `/home/sjm/nethd/prj/tfs/src'
+make: *** [all-recursive] Error 1
+sjm@sjm-tj:~/nethd/prj/tfs$ zlib
+
+
+
+
+/bin/bash ../../../libtool --tag=CXX   --mode=link g++  -O2 -finline-functions
+-fno-strict-aliasing -Wall -Wno-deprecated -fPIC -D__STDC_LIMIT_MACROS
+-D_NO_EXCEPTION -lz -lrt -lpthread -ldl -ltermcap -lreadline -luuid
+-o tfstool tfstool.o
+../../../src/tools/util/libtfstoolsutil.a ../../../src/dataserver/libdataserver.a
+../../../src/new_client/.libs/libtfsclient.a ../../../src/message/libtfsmessage.a
+../../../src/common/libtfscommon.a
+/home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbnet.a
+/home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbsys.a
+-lrt -lpthread -lm -ldl -lc 
+libtool: link: g++ -O2 -finline-functions -fno-strict-aliasing -Wall
+-Wno-deprecated -fPIC -D__STDC_LIMIT_MACROS -D_NO_EXCEPTION -o tfstool tfstool.o
+-lz -ltermcap -lreadline -luuid ../../../src/tools/util/libtfstoolsutil.a
+../../../src/dataserver/libdataserver.a ../../../src/new_client/.libs/libtfsclient.a
+../../../src/message/libtfsmessage.a ../../../src/common/libtfscommon.a
+/home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbnet.a
+/home/sjm/nethd/local_soft/taobao/tb-common-utils/lib/libtbsys.a
+-lrt -lpthread -lm -ldl -lc
+
+*** Q
+**** no file name for put
+版本：
+sjm@sjm-tj:~/nethd/prj/tfs$ svn info
+Path: .
+Working Copy Root Path: /home/sjm/nethd/prj/tfs
+URL: http://code.taobao.org/svn/tfs/branches/dev_for_outer_users
+Repository Root: http://code.taobao.org/svn/tfs
+Repository UUID: b722c2b5-6a69-4643-bcd1-1a75825fa998
+Revision: 2805
+Node Kind: directory
+Schedule: normal
+Last Changed Author: linqing
+Last Changed Rev: 2750
+Last Changed Date: 2014-01-04 22:54:28 +0800 (Sat, 04 Jan 2014)
+
+
+操作：
+TFS> lsf 101
+[2014-02-21 15:27:35] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 2, length: 12
+[2014-02-21 15:27:35] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 14, length: 12
+FileList Size = 3
+
+T19RETByhT1RCvBVdK
+T19RETByxT1RCvBVdK
+T19RETByZT1RCvBVdK
+Total : 3 files
+TFS> put orgguide.pdf
+[2014-02-21 15:33:22] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 2, length: 12
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:118 [139708583184256] tfs open success: get block info success, blockid: 101, fileid: 0, mode: 2, ret: 0
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:818 [139708583184256] create file start, client: 0xadd120, index: 0, blockid: 101, fileid: 0
+[2014-02-21 15:33:22] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 21, length: 12
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:755 [139708583184256] do request success. client: 0xadd120, index: 0, phase: 1, ret: 0, blockid: 101, fileid: 0, offset: 0, size: 0, crc: 0, inneroffset: 0, filenumber: 0, status: 1, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:588 [139708583184256] send packet. request size: 1, successful request size: 1
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:668 [139708583184256] get success response. client id: 0xadd120, request size: 1, get response size: 1
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:883 [139708583184256] create file name rsp. blockid: 101, fileid: 5, filenumber: 2450987374532886531
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:803 [139708583184256] do response success. index: 0, phase: 1, ret: 0, blockid: 101, fileid: 5, offset: 0, size: 0, crc: 0, inneroffset: 0, filenumber: 2450987374532886531, status: 2, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:914 [139708583184256] tfs write data start, blockid: 101, fileid: 5, size: 399341, offset: 0
+[2014-02-21 15:33:22] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 9, length: 36
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:755 [139708583184256] do request success. client: 0xadd120, index: 0, phase: 2, ret: 0, blockid: 101, fileid: 5, offset: 0, size: 399341, crc: 0, inneroffset: 0, filenumber: 2450987374532886531, status: 2, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:588 [139708583184256] send packet. request size: 1, successful request size: 1
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:668 [139708583184256] get success response. client id: 0xadd120, request size: 1, get response size: 1
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:964 [139708583184256] tfs write data success, crc: 4006393245, offset: 0, size: 399341
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:803 [139708583184256] do response success. index: 0, phase: 2, ret: 0, blockid: 101, fileid: 5, offset: 0, size: 399341, crc: -288574051, inneroffset: 0, filenumber: 2450987374532886531, status: 3, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:301 [139708583184256] write success, offset: 0, size: 399341, segment count: 1
+[2014-02-21 15:33:22] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 10, length: 44
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:755 [139708583184256] do request success. client: 0xadd120, index: 0, phase: 3, ret: 0, blockid: 101, fileid: 5, offset: 0, size: 0, crc: -288574051, inneroffset: 0, filenumber: 2450987374532886531, status: 3, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:588 [139708583184256] send packet. request size: 1, successful request size: 1
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:668 [139708583184256] get success response. client id: 0xadd120, request size: 1, get response size: 1
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:1051 [139708583184256] tfs file close success, dsip: 192.168.3.34:8200
+[2014-02-21 15:33:22] DEBUG tfs_file.cpp:803 [139708583184256] do response success. index: 0, phase: 3, ret: 0, blockid: 101, fileid: 5, offset: 0, size: 0, crc: -288574051, inneroffset: 0, filenumber: 2450987374532886531, status: 4, rserver: 192.168.3.34:8200, wserver: 192.168.3.34:8200.
+put orgguide.pdf =>  success.
+TFS> lsf 101
+[2014-02-21 15:33:25] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 2, length: 12
+[2014-02-21 15:33:25] DEBUG base_packet_factory.cpp:48 [139708583184256] pcode: 14, length: 12
+FileList Size = 4
+
+T19RETByhT1RCvBVdK
+T19RETByxT1RCvBVdK
+T19RETByZT1RCvBVdK
+T19RETBydT1RCvBVdK
+Total : 4 files
+**** how to get file and trans to ruby File

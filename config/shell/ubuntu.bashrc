@@ -1,3 +1,9 @@
+# if run .bashrc when ssh login for ubuntu, add follow to .bash_profile
+#  if [ -f ~/.bashrc ]; then
+#    . ~/.bashrc
+#  fi
+
+
 export JAVA_HOME=~/nethd/local_soft/jdk
 export JRE_HOME=${JAVA_HOME}/jre
 export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
@@ -11,7 +17,7 @@ PATH=$PATH:$HOME/.rvnm/bin # Add RVM to PATH for scripting
 # rvm set
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # This loads RVM into a shell session
 # ruby set
-# export RUBYOPT="-KU -E utf-8:utf-8"
+export RUBYOPT="-KU -E utf-8:utf-8"
 # emacs client
 alias et='emacsclient -t'
 alias ec='emacsclient -c &'
@@ -38,9 +44,9 @@ PATH=$PATH:$HOME/nethd/local_soft/android-sdk-linux/tools
 
 #Oracle
 #这个写刚刚创建的文件夹
-export ORACLE_BASE=/home/s/nethd/local_soft/oracle
+export ORACLE_BASE=/home/sjm/nethd/local_soft/oracle
 #这个后面可以随便填写
-export ORACLE_HOME=$ORACLE_BASE/product/12.1.0/dbhome
+export ORACLE_HOME=$ORACLE_BASE/product
 #数据库的sid
 export ORACLE_SID=orcl
 
@@ -50,8 +56,32 @@ export NLS_LANG=.ZHS16GBK #AL32UTF8
 #环境变量
 export PATH=${PATH}:${ORACLE_HOME}/bin/;
 
+alias dev_sqlplus='rlwrap sqlplus /nolog'
 alias dev_oracle_start='lsnrctl start'
 alias dev_sqldeveloper='sh ~/nethd/local_soft/oracle/sqldeveloper/sqldeveloper.sh &'
 alias dev_myeclipse='~/nethd/local_soft/myeclipse/myeclipse &'
-alias dev_eclipse='~/nethd/local_soft/jbpm/eclipse/eclipse &'
+alias dev_eclipse='~/nethd/local_soft/eclipse/eclipse &'
 alias env_java_oracle='dev_myeclipse && dev_sqldeveloper'
+
+
+# hadoop
+export HADOOP_DEV_HOME=/home/sjm/nethd/local_soft/hadoop-2.2.0
+export PATH=$PATH:$HADOOP_DEV_HOME/bin
+export PATH=$PATH:$HADOOP_DEV_HOME/sbin
+export HADOOP_MAPARED_HOME=${HADOOP_DEV_HOME}
+export HADOOP_COMMON_HOME=${HADOOP_DEV_HOME}
+export HADOOP_HDFS_HOME=${HADOOP_DEV_HOME}
+export YARN_HOME=${HADOOP_DEV_HOME}
+export HADOOP_CONF_DIR=${HADOOP_DEV_HOME}/etc/hadoop
+export HADOOP_YARN_HOME=${HADOOP_DEV_HOME}
+export YARN_CONF_DIR=${HADOOP_DEV_HOME}/etc/hadoop
+
+export HADOOP_COMMON_LIB_NATIVE_DIR=${HADOOP_DEV_HOME}/lib/native
+export HADOOP_OPTS="-Djava.library.path=$HADOOP_DEV_HOME/lib"
+
+export HADOOP_PREFIX=${HADOOP_DEV_HOME}
+
+
+export TBLIB_ROOT=/home/sjm/nethd/local_soft/taobao/tb-common-utils
+export TFS_HOME=/home/sjm/nethd/local_soft/taobao/tfs
+

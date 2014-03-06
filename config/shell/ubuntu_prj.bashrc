@@ -8,3 +8,4 @@ alias my_p_s_f='cd $UBUNTU_PRJ/project/sjm/app_frame'
 
 #tianji
 alias tj_mysql_qa='mysql -utianji -ptianji -h192.168.1.194 tianji'
+

@@ -43,6 +43,11 @@ gsettings set com.canonical.Unity.Panel systray-whitelist "['all']"
    sudo apt-get install libmysqlclient-dev libreadline-dev libsqlite3-dev libxml2-dev libxslt-dev libcurl4-gnutls-dev g++ libssl-dev libpq-dev libmagickwand-dev
    sudo apt-get install imagemagick # 图片工具
    sudo apt-get install exuberant-ctags # 增强的ctags ctags-exuberant -a -e -f TAGS --languages=Ruby --tag-relative -R app config lib vendor ~/.rvm/rubies/default/lib/ruby/gems/1.9/gems ~/.rvm/src/ruby-1.9.3-p194
+   # ctags -e -R --extra=+fq --exclude=db --exclude=doc --exclude=log --exclude=tmp --exclude=.git --exclude=public . $(rvm gemdir)/gems
+   # ctags -e -a --Ruby-kinds=fF -o TAGS app test lib config script bin
+   # ctags -e -R --extra=+fq --exclude=db --exclude=test --exclude=.git --exclude=public -f TAGS
+   # ripper-tags -R --exclude=vendor -e
+   # ripper-tags -R -e ./ /home/sjm/.rvm/gems/ruby-1.9.3-p392/gems
    gem install rtags # ruby tags, need >=0.89, using:  rtags `find ./app ./config ./db/ ./lib ./vendor ~/.rvm/gems/ruby-1.9.3-p392/gems/ ~/.rvm/src/ruby-1.9.3-p392/ -name *.rb | grep -v _darcs`
    sudo apt-get install global # gtags, need gtags.el for emacs, go to ror dir, and using: ln -s ~/.rvm/src/ruby-1.9.3-p194/ ./tmp/ruby  & ln -s ~/.rvm/gems/ruby-1.9.3-p194/gems/ ./tmp/gems & sleep 1 ; gtags -v --gtagslabel=rtags
 
@@ -780,6 +785,9 @@ none /proc/bus/usb usbfs devgid=1002,devmode=774 0 0
 方法：插入一个USB设备后，如U盘、鼠标，右键点击虚拟机里右下脚的USB图标，选择已经识别的U盘，就可以正常使用了。
 注意： 在客户机里使用USB设备前要先在主机里卸载。
 
+*** vdi compat
+sdelete -z
+VBoxManage modifyhd WinXP.vdi --compact
 ** rvm
    https://rvm.beginrescueend.com/
    http://xiang.lu/2010/12/%E5%9C%A8ubuntu10-10%E4%B8%AD%E5%AE%89%E8%A3%85-rvm/

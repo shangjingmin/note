@@ -51,6 +51,8 @@ ln  -s  /usr/lib/x86_64-linux-gnu/libstdc++.so.6  /lib64/
 ln  -s  /usr/lib/x86_64-linux-gnu/libstdc++.so.6  /usr/lib64/
 ln  -s  /usr/lib/x86_64-linux-gnu/libstdc++.so.5  /lib64/
 ln  -s  /usr/lib/x86_64-linux-gnu/libstdc++.so.5  /usr/lib64/
+ln  -s /home/sjm/nethd/local_soft/oracle/product/lib/libclntshcore.so.12.1 /usr/lib
+ln -s /home/sjm/nethd/local_soft/oracle/product/lib/libocrutl12.so /usr/lib
 
 echo ‘Red Hat Linux release 5’ > /etc/redhat-release
 
@@ -68,6 +70,14 @@ SQL> exec DBMS_XDB_CONFIG.SETHTTPSPORT('5501');
 ** backup
 exp c##test/test file=test.1.dmp directory=~/nethd
 imp fdais/fdais file=bakdb20100902.dmp directory=D:\baksql log=bakdb20100902.log
+*** charset
+http://95354050.blog.163.com/blog/static/1320959672009107113429595/
+**** server select userenv(‘language’) from dual;
+**** client echo $NLS_LANG
+**** dmp cat exp.dmp |od -x|head -1|awk '{print $2 $3}'|cut -c 3-6
+select nls_charset_name(to_number('0354','xxxx')) from dual;
+
+select to_char(nls_charset_id('ZHS16GBK'), 'xxxx') from dual;
 ** user and tablespace
 *** tablespace
     create tablespace test
@@ -97,6 +107,7 @@ show user;
 grant connect, resource, dba to c##test;
 ** charset
    select userenv('language') from dual;
+   select * from props$ where name='NLS_CHARACTERSET';
 *** change charset
     s@s-hasee:~/nethd/note/comp$ sqlplus /nolog
 
