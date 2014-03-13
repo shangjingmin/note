@@ -44,7 +44,7 @@ PATH=$PATH:$HOME/nethd/local_soft/android-sdk-linux/tools
 
 #Oracle
 #这个写刚刚创建的文件夹
-export ORACLE_BASE=/home/sjm/nethd/local_soft/oracle
+export ORACLE_BASE=~/nethd/local_soft/oracle
 #这个后面可以随便填写
 export ORACLE_HOME=$ORACLE_BASE/product
 #数据库的sid
@@ -65,7 +65,7 @@ alias env_java_oracle='dev_myeclipse && dev_sqldeveloper'
 
 
 # hadoop
-export HADOOP_DEV_HOME=/home/sjm/nethd/local_soft/hadoop-2.2.0
+export HADOOP_DEV_HOME=~/nethd/local_soft/hadoop-2.2.0
 export PATH=$PATH:$HADOOP_DEV_HOME/bin
 export PATH=$PATH:$HADOOP_DEV_HOME/sbin
 export HADOOP_MAPARED_HOME=${HADOOP_DEV_HOME}
@@ -82,6 +82,6 @@ export HADOOP_OPTS="-Djava.library.path=$HADOOP_DEV_HOME/lib"
 export HADOOP_PREFIX=${HADOOP_DEV_HOME}
 
 
-export TBLIB_ROOT=/home/sjm/nethd/local_soft/taobao/tb-common-utils
-export TFS_HOME=/home/sjm/nethd/local_soft/taobao/tfs
+export TBLIB_ROOT=~/nethd/local_soft/taobao/tb-common-utils
+export TFS_HOME=~/nethd/local_soft/taobao/tfs
 

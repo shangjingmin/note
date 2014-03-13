@@ -1,4 +1,4 @@
 export UBUNTU_BASHRC_SHELL=${HOME}/nethd/note/config/shell
 . "$UBUNTU_BASHRC_SHELL/ubuntu.bashrc"
-export UBUNTU_PRJ=${HOME}/nethd
+export UBUNTU_PRJ=${HOME}/nethd/prj
 . "$UBUNTU_BASHRC_SHELL/ubuntu_prj.bashrc"
