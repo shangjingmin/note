@@ -17,6 +17,9 @@ list: 只获取该学校发布的非外部来源下的记录
    新闻：分类id/推荐分类id
 
 **** 存id的字段如何对应？ 只设默认值
+*** frontpage
+**** login pop
+http://192.168.3.4/new_companies/schoolPage/schoolLayer.php
 *** API
 **** auth
 api-key

@@ -46,7 +46,7 @@ PATH=$PATH:$HOME/nethd/local_soft/android-sdk-linux/tools
 #这个写刚刚创建的文件夹
 export ORACLE_BASE=~/nethd/local_soft/oracle
 #这个后面可以随便填写
-export ORACLE_HOME=$ORACLE_BASE/product
+export ORACLE_HOME=$ORACLE_BASE/product/12.1.0/dbhome
 #数据库的sid
 export ORACLE_SID=orcl
 
