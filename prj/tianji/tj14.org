@@ -46,6 +46,264 @@ source: cupl
 **** 雇主反馈 employer_feedbacks
 ***** corp_id corp_name
 **** 职位
+***** 推荐职位 GET http://10.40.5.53/job-rest/user/39774645/pymk/2,2
+{
+  "items": [
+    {
+      "companyId": 40548,
+      "city": "北京",
+      "companyName": "翰林经纬科技(北京)有限公司",
+      "workYear": 3,
+      "salaryFrom": 2000,
+      "salaryTo": 2000,
+      "province": 11,
+      "positionEnum": 5,
+      "welfare": "",
+      "name": ".net软件工程师(Senior)",
+      "field": 104,
+      "id": 28244,
+      "country": "CN",
+      "description": "u  参与公司医疗系统的开发；\nu  负责现有系统的维护和功能需求的添加修改；\nu  负责公司其他日常开发任务。\n\ru  计算机相关专业专科以上学历，两年及其以上C#开发经验，有两个及其以上大型项目经验者  优先；\nu  精通c#，熟悉c# windows c/s模式程序开发；\nu  能使用DEVEXPRESS第三方控件者优先\nu  具备一定的面向对象分析设计能力；\nu  熟悉Sqlserver数据库开发；\nu  精通SQL语句，了解存储过程编写；\nu  熟练使用LINQ；熟练使用 VS2008 等开发工具；\nu  熟悉.NET 框架，有较强的逻辑思维能力，精通三层架构；\nu  具备规范化、标准化的代码编写习惯和良好的技术文档习惯；\nu  兴趣编程，沟通能力强。"
+    },
+    {
+      "companyId": 224105,
+      "city": "北京",
+      "companyName": "北京智慧盛达科技有限公司",
+      "workYear": 4,
+      "salaryFrom": 4000,
+      "salaryTo": 8000,
+      "province": 11,
+      "positionEnum": 5,
+      "welfare": "五险 补助",
+      "name": "软件工程师（LotusDomino/Notes）",
+      "field": 104,
+      "id": 29948,
+      "country": "CN",
+      "description": "职位描述：  \n\n1. 参与了解项目的需求分析. 需求设计以及系统设计； \n\n2. 按项目要求完成模块详细设计和编程实现；\n\r职位要求： \n\n1. 2年左右Lotus Notes开发经验； \n\n2. 精通Domino/Notes技术体系； \n\n3. 精通工作流系统原理，体系架构，有引擎系统开发经验； \n\n4. 熟练掌握Domino Web开发相关技术，如xpage，JavaScript，HTML，CSS等等； \n\n5. 熟悉Lotus系列软件产品的应用集成和开发，有大型OA系统开发管理经验者优先。"
+    }
+  ],
+  "itemAmount": 2
+}
+
+***** 职位详情 GET http://rest/job-rest/position/{id}
+GET http://10.40.5.53/job-rest/position/28244
+
+    {
+       "items":
+       [
+           {
+               "companyId": 40548,
+               "city": "北京",
+               "companyName": "翰林经纬科技(北京)有限公司",
+               "workYear": 3,
+               "salaryFrom": 2000,
+               "salaryTo": 2000,
+               "province": 11,
+               "positionEnum": 5,
+               "welfare": "",
+               "name": ".net软件工程师(Senior)",
+               "field": 104,
+               "id": 28244,
+               "country": "CN",
+               "description": "u 参与公司医疗系统的开发； u 负责现有系统的维护和功能需求的添加修改； u 负责公司其他日常开发任务。 u 计算机相关专业专科以上学历，两年及其以上C#开发经验，有两个及其以上大型项目经验者 优先； u 精通c#，熟悉c# windows c/s模式程序开发； u 能使用DEVEXPRESS第三方控件者优先 u 具备一定的面向对象分析设计能力； u 熟悉Sqlserver数据库开发； u 精通SQL语句，了解存储过程编写； u 熟练使用LINQ；熟练使用 VS2008 等开发工具； u 熟悉.NET 框架，有较强的逻辑思维能力，精通三层架构； u 具备规范化、标准化的代码编写习惯和良好的技术文档习惯； u 兴趣编程，沟通能力强。"
+           }
+       ],
+       "pageAmount": 1,
+       "itemAmount": 1,
+       "currentPage": 1
+    }
+
+***** 最新职位 GET http://rest/job-rest/positions/{page},{count}
+GET http://10.40.5.53/job-rest/positions/1,10
+
+{
+  "items": [
+    {
+      "city": "北京",
+      "companyName": "中矿澳亚(北京)矿业咨询有限公司",
+      "workYear": 6,
+      "salaryFrom": -1,
+      "province": 11,
+      "diploma": 1,
+      "positionEnum": 1,
+      "recruitNumber": 1,
+      "welfare": "",
+      "name": "高级财务经理",
+      "field": 1201,
+      "id": 41829,
+      "country": "CN",
+      "description": "工作职责： 1、此职位系高级管理职位，不参与财务日常核算工作。 2、完善财务部门组织架构，负责从会计基础工作规范、会计核算、财务信息系统、会计档案、授权、资金、结算、资产、税收、内部审计等方面建立系统、全面、完整的企业财务管理制度，涵盖财务核算体系和财务监控体系，完善财务实务操作规范。 3、负责凭证审核，财务报表以及纳税申报表的审核，向公司决策层提交财务管理工作报告。 4、负责组织开展投资确认工作，审核投资确认资料的真实性、完整性，保障股东利益。 5、负责公司资金管理，监督重大资金流向。 6、建立并完善财务报表体系，尤其是三大报表之外的单项子报表体系。 7、定期对财务账务进行内部审计，对于审计发现的问题提出建议或意见。 8、定期对财务各个岗位的工作进行检查和指导，确保企业财务管理制度切实贯彻到财务各个岗位的日常工作中。 9、负责财务人员的招聘、培训、考核等工作。 10、负责维护公司进出口资质、外管局资质等工作。 11、协调公司同银行、工商、税务、外管局等政府部门的关系，维护公司形象和公司利益。 任职资格： 1、会计、金融、经济等相关专业大专或以上学历，8年以上大型企业集团财务管理工作经验。 2、精通国家《会计基础工作规范》、《企业会计准则》、《企业会计制度》、《税收法规》、《外贸法规》、《外汇管理政策》等相关法律法规规定。 3、以往有系统、全面、完整建立企业财务管理制度的工作经历和成功经验。 4、具有丰富的财务管理工作经验。 5、具有良好的口头表达能力和文字表达能力。 6、具有较强的判断和决策能力、人际沟通和协调能力、计划与执行能力。 7、工作态度细致、严谨。 8、具有较高的工作热情和责任感。"
+    },
+    {
+      "city": "北京",
+      "companyName": "品今(北京)资产管理有限公司",
+      "workYear": 5,
+      "salaryFrom": -1,
+      "province": 11,
+      "diploma": 1,
+      "positionEnum": 3,
+      "recruitNumber": 1,
+      "welfare": "",
+      "name": "产品总监（资产管理）",
+      "field": 0,
+      "id": 41828,
+      "country": "CN",
+      "description": "招聘条件： 1、工商财经类、金融工程、数学相关专业本科以上学历优先考虑 2、有信托公司、三方理财公、券商资管、私人银行产品部门相关经验者优先 3、对市场、各类金融产品有独到的个人见解 职位职能： 1、统筹负责公司产品部门事务 2、负责制定公司产品结构、策略、风控体系 3、负责统筹产品研发、包装、发行、培训事宜 4、负责开拓产品渠道、销售渠道等 公司介绍： 专注于为中国高净值人士、富有家族、以及机构投资人量身打造全方位的财富管理及资产管理服务。通过严格的风险控制体系、产品设计、及产品筛选体系，为客户进行全方位的资产配置，根据客户的需求，从独立、客观、专业的角度，为高净值人群提供横跨信托、公募基金、私募基金、一级市场、二级市场、境外主要市场、地产基金、PE私募股权基金、艺术品投资基金等资本市场的理财配置方案。助力高端客户实现资产保值增值的目标。       不远的将来，品今资管将成为中国高端财富管理、资产管理的第一选择"
+    }
+  ],
+  "pageAmount": 1416,
+  "itemAmount": 2832,
+  "currentPage": 1,
+  "hasNext": true
+}
+
+***** message
+
+推荐职位接口
+
+URL:http://rest/job-rest/user/{userId}/pymk/{page},{count}
+
+METHOD:GET
+
+职位详情主要是用在政法大学。
+在 2014年3月12日，上午10:05，fengzhenxing <fengzhenxing@tianji.com> 写道：
+
+> Hi 国栋：
+>
+> 1、最新职位接口
+>
+> method:GET
+> URL:http://rest/job-rest/positions/{page},{count}
+>
+> 2、职位详情接口
+>
+> method:GET
+> URL:http://rest/job-rest/position/{id}
+>
+> 40-5已部署最新。
+>
+
+**** login
+/schools/ajax/login
+跨域调用  只需知道execA.html的链接
+http://blog.csdn.net/fdipzone/article/details/17619673
+iframe:
+  // exec main function  
+  function exec_main(){  
+    if(typeof(exec_obj)=='undefined'){  
+        exec_obj = document.createElement('iframe');  
+        exec_obj.name = 'tmp_frame';  
+        exec_obj.src = 'http://localhost/execA.html';  
+        exec_obj.style.display = 'none';  
+        document.body.appendChild(exec_obj);  
+    }else{  
+        exec_obj.src = 'http://localhost/execA.html?' + Math.random();  
+    }  
+  }  
+execA.html:
+    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">  
+    <html>  
+     <head>  
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">  
+      <title> exec main function </title>  
+     </head>  
+      
+     <body>  
+        <script type="text/javascript">  
+            parent.parent.fMain(); // execute main function  
+        </script>  
+     </body>  
+    </html>  
+
+*** call api
+接口地址：
+1、职场心得
+http://localhost/api/experience.json
+参数为array('title' => '标题', 'info' => '正文')
+
+2、活动
+http://localhost/api/event.json
+参数array('title' => '标题', 'info' => '正文', 'starttime' => '开始时间', 'endtime' => '结束时间', 'location' => 活动地点
+
+3、新闻
+http://localhost/api/news.json
+参数为array('title' => '标题', 'info' => '正文')
+*** tmp
+**** TODO 1 推荐职位 修改原来的推荐方案。按照月薪1w 以上（通过传递参数来调用，并按照薪水倒序） 来推荐职位。 James  在周二给提供出API
+
+NOTE： ？？这个是对应原来的哪个接口的修改：最新职位还是个人职位推荐
+
+查询开始月薪以上的职位，并且按照开始月薪排序到排序的接口已经提供。并且部署上去了。
+
+method:get
+URL:http://rest/job-rest/positions/{salaryFrom}/1,10
+
+**** TODO    2 和政法大学用户绑定信息在今晚给我们产品方案（Liz）。 @xingxing 会在周三上午提供好接口。
+Note：?? account form 结构，新建用户密码的传出，以发送密码邮件
+
+今天xingxing提出那边会提供用户绑定接口，但页面还需要B端自行完成；
+            前端页面已切完：http://192.168.3.4 /new_companies/schoolPage/schoolLayer.php；
+            不确定这个弹窗应该加在哪个页面中。
+      BD branch: zf_api@BD
+      
+登录
+params[:account][:email_or_mobile] --手机或邮箱
+params[:account][:password] --密码.
+
+params=> {"account"=>{"email_or_mobile"=>"sdsdf@diei.com",
+"password"=>"123123"},}
+
+注册
+
+params=>
+{ "company"=>
+{"position"=>"程序员",----职位名称
+"name"=>"天际网",----所在公司},
+"account"=>
+{"name_native_display"=>"dsiei ddfie",----姓名
+"email_or_mobile"=>"dsiei@sdiei.com"，------邮箱
+"gender"=>"m",----性别（m=男，f=女）
+}
+"zf"=>
+{ "id"=>"1"---政法大学传过来的ID
+ （其他政法传过来需要存的东西都可以写在这里）
+}
+}
+
+
+          commit cec70410d5eacc9581f670b1fa8283e4776d6125
+Merge: f45fc19 83e961d
+Author:     sjm <shangjingmin@tianji.com>
+AuthorDate: Tue Mar 18 14:45:04 2014 +0800
+Commit:     sjm <shangjingmin@tianji.com>
+CommitDate: Tue Mar 18 14:45:04 2014 +0800
+
+    Merge branch 'zf_api@BD' into school_certify
+
+ app/controllers/account/ajax_controller.rb  |   55 +++++++++++++++++++++++++++
+ app/models/account.rb                       |    1 +
+ app/models/background.rb                    |    2 +-
+ app/models/zf_info.rb                       |    5 +++
+ config/routes/account.rb                    |    3 ++
+ db/migrate/20140317062058_create_zf_info.rb |   12 ++++++
+ 6 files changed, 77 insertions(+), 1 deletion(-)
+
+**** TODO   3 邀请好友,@MingLI 会在周二调试好。
+**** TODO   4 MBA 认证图 显示在profile 等。等待C端产品确定。
+**** DONE 5 老师邀请：需要设计三个TAB，周一给我们相关设计。 RE： 产品说暂时不做了？？我让徐前回复那封邮件了，单我尚未收到回复邮件。
+CLOSED: [2014-03-18 Tue 15:13]
+- State "DONE"       from "TODO"       [2014-03-18 Tue 15:13]
+
+**** TODO  6  邀请弹出框落地。一 潜在学员完成报名 弹出， 二 邀请函点击关注时候 弹出。
+**** DONE 7  绑定政法大学用户 密码邮件模板 @Liz  周一上午给设计出
+CLOSED: [2014-03-18 Tue 15:14]
+- State "DONE"       from "TODO"       [2014-03-18 Tue 15:14]
+Note: html代码已切，？？图片不确定放在前端的哪个目录下
+**** DONE 8  MBA 职业发展频道右侧有文档需要下载。（产品待确定报告文档，我们先做成下载方式）
+CLOSED: [2014-03-18 Tue 15:15]
+- State "DONE"       from "TODO"       [2014-03-18 Tue 15:15]
+Note: 现在不用放入口。是以后学员数据进来了，再给老师做数据分析报告的文档。（已安排书祥删除入口）
+
 ** oAuth
 http://blog.csdn.net/seccloud/article/details/8192707
 http://zhuyonghui116.blog.hexun.com.tw/67962330_d.html
@@ -66,7 +324,6 @@ p1= {client_id: '3so49oyi8vkdiru4ygogl6kz6rg9dyb', client_secret: "hhkju7a2ra3xm
 p2 = {grant_type: "authorization_code"}
 {code: params[:code]}.merge(p1.merge(p2))
 a = RestClient.post("http://localhost:9292/oauth/authorize", {code: params[:code]}.merge(p1.merge(p2)))
-
 
 ** tfs/hadoop
 *** Q
