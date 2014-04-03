@@ -1,0 +1,6 @@
+* 8089d
+** errors
+*** Asking for cache data faile
+suudo rmmod ums_realtek # unuse card
+
+sudo modprobe ums_realtek # use card
